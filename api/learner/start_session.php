@@ -19,7 +19,7 @@ try {
 
     $pdo->beginTransaction();
 
-    at_expire_stale_sessions($pdo, $userId, 10);
+    at_expire_stale_sessions($pdo, $userId, 60);
 
     $activeStmt = $pdo->prepare("
         SELECT id, COALESCE(last_ping_at, login_at, UTC_TIMESTAMP()) AS close_time

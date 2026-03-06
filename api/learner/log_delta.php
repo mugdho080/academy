@@ -38,7 +38,7 @@ try {
     at_ensure_tracking_schema($pdo);
     $pdo->beginTransaction();
 
-    at_expire_stale_sessions($pdo, $userId, 10);
+    at_expire_stale_sessions($pdo, $userId, 60);
 
     $sessionStmt = $pdo->prepare("
         SELECT

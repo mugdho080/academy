@@ -38,14 +38,26 @@ const LessonView = () => {
                 if (res.data.error) throw new Error(res.data.error);
 
                 const data = res.data;
-                const processedLessons = (data.lessons || []).map(l => ({
-                    ...l,
-                    structured_content: typeof l.structured_content === 'string' ? JSON.parse(l.structured_content || '{}') : l.structured_content,
-                    quizzes: (l.quizzes || []).map(q => ({
-                        ...q,
-                        options: typeof q.options === 'string' ? JSON.parse(q.options || '[]') : q.options
-                    }))
-                }));
+                const processedLessons = (data.lessons || []).map(l => {
+                    let structured = l.structured_content;
+                    if (typeof structured === 'string' && structured.trim().startsWith('{')) {
+                        try { structured = JSON.parse(structured); } catch (e) { structured = {}; }
+                    } else if (typeof structured === 'string') {
+                        structured = { paragraphs: [structured] };
+                    }
+
+                    return {
+                        ...l,
+                        structured_content: structured || {},
+                        quizzes: (l.quizzes || []).map(q => {
+                            let opts = q.options;
+                            if (typeof opts === 'string' && opts.trim().startsWith('[')) {
+                                try { opts = JSON.parse(opts); } catch (e) { opts = []; }
+                            }
+                            return { ...q, options: Array.isArray(opts) ? opts : [] };
+                        })
+                    };
+                });
 
                 setLevelData({ ...data, lessons: processedLessons });
                 setCompletedLessons(data.completed_lessons || []);
@@ -101,6 +113,18 @@ const LessonView = () => {
         }
     };
 
+    const lesson = levelData?.lessons?.[currentLessonIndex];
+
+    useEffect(() => {
+        if (!lesson?.id) {
+            setCurrentLessonId(null);
+            return undefined;
+        }
+
+        setCurrentLessonId(lesson.id);
+        return () => setCurrentLessonId(null);
+    }, [lesson?.id, setCurrentLessonId]);
+
     if (loading) return (
         <div className="min-h-screen w-full bg-[#00695C] flex items-center justify-center text-white">
             <h1 className="text-2xl font-bold animate-pulse">Loading amazing things...</h1>
@@ -113,18 +137,6 @@ const LessonView = () => {
             <button onClick={() => navigate(-1)} className="bg-white text-[#00695C] px-6 py-3 rounded-xl font-bold">Go Back</button>
         </div>
     );
-
-    const lesson = levelData.lessons[currentLessonIndex];
-
-    useEffect(() => {
-        if (!lesson?.id) {
-            setCurrentLessonId(null);
-            return undefined;
-        }
-
-        setCurrentLessonId(lesson.id);
-        return () => setCurrentLessonId(null);
-    }, [lesson?.id, setCurrentLessonId]);
 
     if (!lesson) return null;
 

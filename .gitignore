@@ -1,1 +1,28 @@
-node_modules
+# Dependencies
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files from development
+dump_tables.php
+test_db.php
+test_curl_login.php
+api/add_time_tracking.php
+
+# Env files
+.env
+.env.*
