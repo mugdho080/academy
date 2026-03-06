@@ -1,0 +1,127 @@
+# Goodwill Academy - Project Documentation
+
+## 1. Project Overview
+Goodwill Academy is a specialized Learning Management System (LMS) designed for NDIS (National Disability Insurance Scheme) participants. It offers an engaging, accessible, and motivating platform for learners to improve their skills across various life domains. The system includes two primary user roles: **Learners** and **Admins**. 
+
+The platform strongly emphasizes a highly interactive, TikTok-style learning experience, complete with AI voice features (Gemini 2.5), sensory-regulating visual animations, gamification (points, unlocked levels), and a seamless NDIS service agreement integration.
+
+---
+
+## 2. Technical Stack
+- **Frontend Framework**: React.js (via Vite)
+- **Routing**: React Router (HashRouter)
+- **Styling**: Tailwind CSS / Vanilla CSS for custom sensory animations
+- **Backend Framework**: Core PHP
+- **Database**: MySQL (via phpMyAdmin)
+- **AI Integrations**: Google AI Studio (Gemini 2.5 voice and chat)
+- **Hosting Strategy**: GoDaddy (shared/cPanel hosting environment)
+
+---
+
+## 3. Core Features
+
+### Learner Features
+- **Authentication**: Sign up (Name, Email, NDIS Number, Password) and Sign in. Password recovery functionality.
+- **Dynamic Dashboard**: A welcoming, accessible dashboard featuring animated motivational quotes.
+- **Curriculum Navigation**: Categorized into structured chapters:
+  - 🤖 AI & Digital Skills
+  - 🔢 Math & Numbers
+  - 🧭 Self Choice & Control
+  - 🏡 Life Skills & Independence
+  - 💛 Psychology & Behaviour
+- **Level Progression**: Minimum 10 levels per chapter, 5 lessons per level, 3 quizzes per lesson.
+- **Content Delivery**: 
+  - TikTok-style swiping interface for lessons to keep users hooked.
+  - An embedded YouTube video available for each level.
+- **AI Integration**: A cute animated AI character powered by Gemini 2.5 voice to teach and answer questions within lessons.
+- **Gamification**: 
+  - Real-time progress bars indicating chapter progression.
+  - Points awarded for completing lessons.
+  - Motivational animations upon correct quiz answers.
+  - Custom AI Avatars unlocked via progress.
+- **Accessibility & UI**: Sensory-regulating background animations (e.g., smooth flowing water/lava lamp style, symmetrical movements, color transitions, looping geometric patterns). Light-colored, highly friendly, and motivational UI.
+- **NDIS Integration**: 
+  - Level 1 of all chapters is unlocked by default.
+  - Levels 2+ are locked.
+  - "Unlock with your NDIS Plan" button prompts a Service Agreement pop-up with terms and a digital signature option.
+  - Upon signing, the status changes to "Account under review".
+- **Time Tracking**: Active session time tracking to log how long the student actively learns on the webpage.
+
+### Admin Features (Super Admin: admin@admin.com)
+- **Authentication**: Secure login restricted to admin credentials.
+- **Content Management (CRUD)**:
+  - Add/Edit/Delete Chapters, Levels, Lessons, and Quizzes.
+  - Ability to embed YouTube video links for levels.
+  - Bulk import via JSON functionality for Levels/Classes.
+- **User CRM & NDIS Approvals**:
+  - Separate tabs for users who "Only Signed Up" and those who "Signed the Service Agreement".
+  - View detailed Participant Information, including the signed agreement and digital signatures (JPG).
+  - Ability to assess information and click to manually **Unlock All Levels** for approved users across chapters.
+- **Time Analytics**: View active learning durations/logs for each student.
+
+---
+
+## 4. Database Schema Structure
+The underlying database `ndis_lms` contains the following pivotal tables:
+
+- **`users`**: Stores user credentials, roles (`learner`, `admin`), NDIS number, account status (`locked`, `pending`, `active`), and gamification points.
+- **`chapters`**: Top-level categorization with emojis and ordering.
+- **`levels`**: Sub-categories containing `video_url`, linking back to chapters.
+- **`lessons`**: Actual sliding chunks of content (Markdown/HTML), associated with a level.
+- **`quizzes`**: Multiple-choice questions mapped to lessons with a JSON array of options.
+- **`progress`**: Tracks which user completed which lesson and completion timestamps.
+- **`activity_log`**: Logs daily active seconds for learners using the site.
+- **`service_agreements`**: Robust storage for NDIS details, plan manager info, signatures (Base64), and fixed pricing line items.
+
+---
+
+## 5. Page Directory & Routing Navigation
+
+### Learner Pages (Wrapped in `SidebarLayout`)
+1. **`/login` (Login)**: Entry point for returning learners and admins.
+2. **`/signup` (Signup)**: Registration form capturing NDIS details.
+3. **`/dashboard` (Dashboard)**: The motivational hub, showing chapters, active quotes, and overall progress.
+4. **`/chapter/:chapterId` (Level Map)**: Visual map displaying all levels in a chapter. Shows lock/unlock states based on NDIS approval.
+5. **`/level/:levelId` (Level Dashboard)**: Details of a specific level, displays the embedded YouTube video and the list of lessons.
+6. **`/lesson/:levelId` (Lesson View)**: The immersive, TikTok-style swiping interface where the AI Voice Avatar operates, and quizzes are taken.
+7. **`/ai-friend` (AI Friend Page)**: Dedicated section to interact with the personalized AI companion and view custom avatars.
+8. **`/profile` (Profile)**: Displays user details, accumulated points, and saved Service Agreement status/signature.
+
+### Admin Pages
+1. **`/admin`** (Admin Login / Redirection)
+2. **`/admin/dashboard` (Admin Dashboard)**: Centralized CRM and Content Management hub. Contains tabs for user management (pending vs approved), content structure editing, and JSON imports.
+3. **`/admin/participant/:id` (Participant Detail)**: Deep dive into a specific learner's NDIS service agreement, active time logs, and progress. The page where the admin officially "Unlocks" the account.
+
+---
+
+## 6. Functional Architecture & API Endpoints
+The backend relies on modular PHP scripts typically returning JSON to the React frontend. 
+
+**Authentication APIs (`api/auth/`)**:
+- `signup.php`: Validates NDIS number and email uniqueness, hashes password, creates a learner.
+- `login.php`: Validates credentials, sets up secure sessions, differentiates admin vs learner routing.
+
+**Learner APIs (`api/learner/`)**:
+- `get_dashboard.php`: Fetches chapters and user progress.
+- `get_level_data.php`: Retrieves swipable lessons and quizzes for a specific level.
+- `submit_quiz.php`: Validates answers, awards points, records progress.
+- `submit_agreement.php`: Processes NDIS form data and saves Base64/JPG signatures.
+- `fetch_agreement.php`: Retrieves saved agreement data for the profile page.
+- `log_time.php`: Repeatedly pinged from the frontend to securely accumulate `seconds_active`.
+
+**Admin APIs (`api/admin/`)**:
+- `get_users.php`: Retrieves separated lists of signed-up users and pending-agreement users.
+- `unlock_user.php`: Updates user status to `active`, granting access to levels 2+.
+- `get_time_logs.php`: Aggregates activity logs per user.
+- Level/Chapter CRUD: Various endpoints heavily relying on parameterized queries to prevent SQL injections while managing curriculum content.
+- `import_level.php`: Specialized endpoint to parse and insert JSON curriculum structures.
+
+**AI APIs (`api/ai/`)**:
+- `chat.php`: Forwards context and customized prompts to the Google Gemini 2.5 API, returning responses specifically tailored to the active lesson and learner's queries. Ensures the AI avatar behaves according to the defined persona.
+
+---
+
+## 7. Future & Extensibility Considerations
+- **Flexible UI Modifications**: Being built with React and Tailwind, swapping out the sensory animations or adjusting the light theme colors is isolated to standard CSS/Component files (e.g., `SensoryBackground.jsx`).
+- **Scalability**: The database is structured cleanly with Foreign Keys and `ON DELETE CASCADE`, ensuring data integrity if older chapters are removed.
+- **AI Upgrades**: The isolated `api/ai/` directory makes exchanging AI models (Google AI Studio upgrades) completely seamless without affecting the core LMS logic.

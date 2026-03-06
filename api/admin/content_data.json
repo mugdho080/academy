@@ -1,0 +1,605 @@
+[
+  {
+    "chapter_title": "AI & Digital Skills –",
+    "level_number": 1,
+    "lessons": [
+      {
+        "number": 1,
+        "title": "What is AI?",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 2,
+        "title": "Using Computers & Phones Safely",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 3,
+        "title": "AI in Everyday Life",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 4,
+        "title": "Talking to AI & Being Kind Online",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 5,
+        "title": "Making a Strong Password",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 6,
+        "title": "Safe Searching on Internet",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 7,
+        "title": "Using Email Safely",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 8,
+        "title": "Social Media Safety",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 9,
+        "title": "Using AI in everyday Life",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 10,
+        "title": "Staying Calm during Technical Difficulties",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 1,
+        "title": "What is AI?",
+        "content": "🤖 Imagine AI as a friendly helper robot inside your phone!\nIt watches what you like (videos, music, routes) and says:“Hey! I think you might like this too!”\nAI can:🧭 Help you find places📸 Make your photos look better🎵 Suggest songs🗣 Turn speech into text\nAI cannot:💔 Have feelings😡 Get angry🧠 Think like a human\n⭐ Mini-Activity: “Robot or Human?”\nSay these out loud and let participants guess!\n“I love pizza!” → Human\n“Calculating best route…” → Robot\n“Let’s go to the beach!” → Human\n“Opening Google Maps…” → Robot\n💬 Fun Reminder\nAI is your helper — not your boss and not your parent.You’re in charge!\n",
+        "quizzes": [
+          {
+            "question": "AI is like:🤔 A person with feelings🤖 A helpful robot in your device ✔🎈 A balloon",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Can AI get sad or angry?😭 Yes😎 No ✔",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Which one uses AI?📱 Google Maps ✔🍔 A cheeseburger🧹 A broom",
+            "options": [],
+            "correct": 0
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "title": "Using Computers & Phones Safely",
+        "content": "😎 Be a Tech Superhero!\nYour mission: Keep your device safe from bad guys online.\n🛡️ Strong Password Power\nA strong password is like a superhero shield:\nMix letters + numbers + symbols\nNot your name or birthday\nKeep it SECRET\nExample: RedLion#34\n🕵️‍♂️ Spy Mode: Spot the Fake Link\nFake messages say things like:\n“CLICK NOW!”\n“You won $1,000!”\n“Urgent!!!”\nSpelling mistakes everywhere\n👋 If unsure, DON’T click\nAsk a trusted person:Support worker, teacher, family, coordinator.\n⭐ Mini-Activity: “Safe or Not Safe?”\nSay “SAFE” 👍 or “NOPE!” 🚫\n“Your package is ready, click here NOW!” → 🚫\n“Hi, here are your photos from yesterday.” → 👍\n“You won a free holiday!” → 🚫\n😊 Fun Reminder\nIf it feels weird…STOP, don’t click, ask someone!\n",
+        "quizzes": [
+          {
+            "question": "Which one is a strong password?🐶 Dog123🦁 RedLion#34 ✔🎂 1998",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Someone sends you a weird link. What do you do?👉 Click it fast👉 Send it to everyone👉❌ Ask for help or delete ✔",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "“You won a prize! Click!” is usually:🎉 Real🔥 Fake ✔⛄ A snowman",
+            "options": [],
+            "correct": 0
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "title": "AI in Everyday Life",
+        "content": "🤯 Guess what? You use AI every day without knowing!\nAI helps with:📍 Finding places on maps🎧 Recommending songs you enjoy📺 Picking shows you might like📸 Cleaning up blurry photos💬 Turning speech → text\nAI is like a tiny wizard inside your apps.🧙‍♂️✨ “Here’s the best route for you!”\n⭐ Mini-Activity: “Where’s the AI?”\nShow participants objects or pictures and ask:Does this use AI? Yes or No?\nExamples:\nGoogle Maps → YES\nMicrowave → NO\nNetflix → YES\nToothbrush → NO\nSmartphone camera → YES\nParticipants can raise hands, use cards, or say “Yes/No.”\n😊 Fun Reminder\nAI is everywhere — it just stays quiet and helpful!\n",
+        "quizzes": [
+          {
+            "question": "Which one uses AI?🧭 Google Maps ✔🍇 Grapes🧢 A hat",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "AI helps with:🎧 Recommending music ✔🌲 Growing trees💰 Finding treasure",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Is your camera’s auto-brighten AI?✔ Yes○ No",
+            "options": [],
+            "correct": 0
+          }
+        ]
+      },
+      {
+        "number": 4,
+        "title": "Talking to AI & Being Kind Online",
+        "content": "🗣️ Talking to AI is like talking to a friendly robot\nAI chat tools can help you:\nFind answers\nWrite messages\nMake to-do lists\nExplain things simply\n💡 How to ask good questions\nTry these:“Explain it in easy words.”“Give me three ideas.”“What does this mean?”\n😇 Be kind — even online\nBeing polite online helps everyone feel safe.\nUse:😊 “Please help me with this.”🙏 “Thank you!”👍 “Great job!”\n⭐ Mini-Activity: “Ask the Robot!”\nEach participant asks an AI tool a simple question like:\n“What’s a fun fact?”\n“What’s the weather?”\n“Tell me a joke.”Everyone shares their favourite answer.\n😊 Fun Reminder\nAI is helpful — but double-check important things with a real person.\n",
+        "quizzes": [
+          {
+            "question": "How should you talk to AI?😡 Angry😐 Confused😊 Kindly ✔",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Which question is clear?“What is stuff?”“Explain this in easy words.” ✔“???”",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Should you check important info with a real person?✔ Yes○ No",
+            "options": [],
+            "correct": 0
+          }
+        ]
+      },
+      {
+        "number": 5,
+        "title": "Making a Strong Password",
+        "content": "🔐 Your password = your secret superhero identity\nA strong password protects your accounts from sneaky internet villains.\nWhat makes a strong password?\n✔ At least 8 characters✔ Mix of letters (A-Z), numbers (0-9), symbols (!#$%)✔ NOT your name or birthday✔ DO NOT share with anyone except a trusted support person\nExamples:\n❌ Weak: 123456❌ Weak: Hasan2000✨ Strong: RedFox!82✨ Strong: MoonLight#55\n⭐ Mini-Activity: “Strong or Weak?”\nSay each out loud — participants call out STRONG 💪 or WEAK 🪁\nBanana123\nSkyBlue!44\n000000\nDog#99\n😊 Fun Reminder\nYour password should be a secret power, not a public sign.\n",
+        "quizzes": [
+          {
+            "question": "Which is a strong password?🍕 Pizza123💪 StarLion#21 ✔🎂 2001",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Should you share your password?○ Yes✔ No",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Why mix letters, numbers & symbols?✔ Makes it harder to guess○ Makes it look pretty○ Makes your phone faster",
+            "options": [
+              "🧭 Be an Internet Explorer — but stay safe!",
+              "The internet = a giant world.Some places are helpful and safe…Some are confusing or dangerous.",
+              "Safe websites are usually:",
+              "Easy to read From trusted companies “.gov” , “.edu”, “.org” or official brands",
+              "Unsafe websites might:",
+              "🚫 Have LOTS of pop-up ads🚫 Flash “YOU WON A PRIZE!!!”🚫 Have spelling mistakes🚫 Ask for your details quickly",
+              "⭐ Mini-Activity: “Safe or Suspicious?”",
+              "Participants vote:👍 SAFE or 🚫 SUSPICIOUS",
+              "“gov.au” website",
+              "“OMG FREE iPhone!!! CLICK!”",
+              "“education.edu”",
+              "“Hurry! Only 10 seconds left!”",
+              "😊 Fun Reminder",
+              "If a site feels weird…Close the tab → Ask for help."
+            ],
+            "correct": 3
+          }
+        ]
+      },
+      {
+        "number": 6,
+        "title": "Safe Searching on the Internet",
+        "content": "🌐 What is “searching online”?\nSearching online means typing words into Google, YouTube, or Safari to find information, videos, maps, or answers.\nExamples of safe searches:\n“Weather today in Sydney”\n“Easy chicken recipes”\n“How to get to Kmart”\n“Cute dog videos”\n🔍 What makes a website SAFE?\nSafe websites usually:✔ Look clean and easy to read✔ Have correct spelling✔ Don’t have too many pop-ups✔ Belong to real companies, schools, or government✔ Do NOT ask you for private information\nExamples of safe endings:\n.gov (government)\n.edu (education)\n.org (organisations)\n.com.au (Australia websites)\n⚠️ What makes a website UNSAFE?\nUnsafe websites often:🚫 Have lots of flashing pop-ups🚫 Say “Click now!” or “You won a prize!!”🚫 Have strange spelling or weird pictures🚫 Ask for your address, bank details, or passwords🚫 Feel confusing or uncomfortable\nIf something feels “off”…\n👉 Close the tab immediately👉 Tell a trusted person\nYou don’t need to explain — just say:“This website looks weird.”\n⭐ Mini Activity — “Safe or Suspicious?”\nSay SAFE or SUS (suspicious) for each example:\n1️⃣ “education.gov.au” → SAFE2️⃣ “CLAIM YOUR FREE IPHONE!!! CLICK!!!” → SUS3️⃣ “kmart.com.au” → SAFE4️⃣ “YOU HAVE 10 SECONDS TO WIN $1,000!” → SUS\nMake it fun by having participants use thumbs up (👍) or thumbs down (👎).\n💬 Helpful reminder\nYou’re not supposed to know what every website is.If you’re unsure… STOP → CLOSE → ASK.That’s smart and safe.\n",
+        "quizzes": [
+          {
+            "question": "A safe website usually has:A. Lots of flashing pop-upsB. Correct spelling and clear layout ✔C. A big “CLICK FAST!” message",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Which website ending is safe?A. .gov ✔B. .susC. .winfree",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "If a website feels strange, you should:A. Keep clickingB. Close it and ask for help ✔C. Type your details in",
+            "options": [],
+            "correct": 0
+          }
+        ]
+      },
+      {
+        "number": 7,
+        "title": "Using Email Safely",
+        "content": "📧 Emails are helpful — but some are TRICKS!\nFake emails try to get your info.\nSafe emails are from:\n✔ People you know✔ Companies you trust✔ Messages you expect to receive\nWarning signs of fake emails:\n🚫 Bad spelling🚫 “URGENT!” or “ACT NOW!”🚫 Asking for bank info🚫 Strange sender name\n⭐ Mini-Activity: “Spot the Scam”\nRead these aloud.Participants say REAL 👍 or SCAM 🚫\n“Your bill is ready from your phone company.”\n“CLICK FAST! Claim your free holiday!”\n“Hi, here is the photo you asked for.”\n😊 Fun Reminder\nReal companies never ask for your password in an email.\n",
+        "quizzes": [
+          {
+            "question": "What is a sign of a fake email?✔ Spelling mistakes○ Cute emojis○ Your favourite colour",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Should you give your bank info by email?○ Yes✔ No",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Who should you open emails from?✔ People you know○ Random strangers○ Robots",
+            "options": [],
+            "correct": 0
+          }
+        ]
+      },
+      {
+        "number": 8,
+        "title": "Social Media Safety",
+        "content": "📱 Social media is fun — but think before you post!\nStay safe by:\n✔ Keeping your account private✔ Only adding people you know✔ Using kind words✔ Posting photos that don’t show private details\nDo NOT share:\n🚫 Home address🚫 School/work details🚫 Bank info🚫 Personal routines\n⭐ Mini-Activity: “Would You Post This?”\nParticipants say POST 👍 or NOPE 🚫\nA selfie with your address behind you\nA photo of your lunch\nYour bank card\nA funny picture of your pet\n😊 Fun Reminder\nThink: Would I show this to a stranger?If no → Don’t post it.\n",
+        "quizzes": [
+          {
+            "question": "Should you add strangers online?○ Yes✔ No",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Which is safe to post?✔ A photo of your lunch○ Your bank card○ Your house address",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "What type of account is safest?✔ Private○ Public",
+            "options": [],
+            "correct": 0
+          }
+        ]
+      },
+      {
+        "number": 9,
+        "title": "Using AI to Help Your Everyday Life",
+        "content": "🤖 AI can make life easier — like a friendly assistant!\nAI can help you:✔ Plan your day✔ Make shopping lists✔ Explain things simply✔ Write polite messages✔ Find new ideas\n⭐ Try This!\nAsk AI:“Give me 3 easy dinner ideas.”“Explain this in simple words.”“Make me a 3-step morning routine.”\n⭐ Mini-Activity: “AI Challenge!”\nParticipants ask AI a question.Everyone votes on the best answer using:🏆 Useful😂 Funny🤔 Interesting\n😊 Fun Reminder\nAI can help — but YOU choose what to follow.\n",
+        "quizzes": [
+          {
+            "question": "AI can help you:✔ Make a list○ Brush your teeth○ Walk your dog",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Which question is good to ask AI?✔ “Explain this simply.”○ “Tell me my bank password.”○ “What’s 1000 pizzas?”",
+            "options": [],
+            "correct": 0
+          },
+          {
+            "question": "Should you double-check important info?✔ Yes○ No",
+            "options": [],
+            "correct": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "chapter_title": "Maths & Numbers",
+    "level_number": 1,
+    "lessons": [
+      {
+        "number": 1,
+        "title": "Counting Money (Notes & Coins)Lesson 2 Comparing PricesLesson 3 Adding in Real-Life SituationsLesson 4 Subtracting in Real-Life SituationsLesson 5 Understanding Time (AM & PM)Lesson 6 Reading Bus & Train TimetablesLesson 7 Measurements in Daily LifeLesson 8 Using a Calculator (Level 2)Lesson 9 Making a Small BudgetLesson 10 Daily Maths for Independence",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 1,
+        "title": "Counting Money (Notes & Coins)",
+        "content": "Money helps you buy things, save for goals, and make smart choices.\n🪙 Coins\n5c, 10c, 20c, 50c, $1, $2They feel small, round, and metallic.\n💵 Notes\n$5, $10, $20, $50, $100They are colourful and lightweight.\nWhy this is important:\n✔ Helps with shopping✔ Helps you count change✔ Builds independence\n⭐ Interactive Activity\n“Make the Amount”Ask participants to build amounts using pretend coins:\nShow me $4 → $2 + $2\nShow me $7 → $5 + $2\nThey can pick from a table or touch cards on the app.\nWhich is a coin?A. $20 noteB. $2 ✔C. $100 note\n$5 + $5 =A. $10 ✔B. $2C. $12\nWhich is the smallest coin?A. $1B. 5c ✔C. 20c\n",
+        "quizzes": []
+      },
+      {
+        "number": 2,
+        "title": "Comparing Prices",
+        "content": "When shopping, choosing the cheaper price helps save money.\n💸 Cheaper = lower number\n$3 is cheaper than $6$12 is more than $7\nWhy this matters:\n✔ Helps you stay within your budget✔ Helps you choose the best deal✔ Useful in supermarkets, online shopping, and cafes\n⭐ Interactive Activity\nShow two items:🍎 Apples: $4🍌 Bananas: $2Ask: “Which should we pick if we want to save money?”\nWhich is cheaper?A. $9B. $3 ✔C. $14\n$6 is ______ than $9A. MoreB. Less ✔C. The same\nIf two things cost the same, they are:A. Equal ✔B. MoreC. Cheaper\n",
+        "quizzes": []
+      },
+      {
+        "number": 3,
+        "title": "Adding in Real-Life Situations",
+        "content": "Adding helps you see how much everything costs together.\nExamples you see daily:\n🍿 Snack $3 + Drink $2 = $5🚌 Bus $4 + Lunch $6 = $10🏪 Bread $2 + Eggs $4 = $6\n⭐ Interactive Activity\nMini Shop Game:Participants “buy” two items and add the prices.\n$2 + $3 =A. $5 ✔B. $8C. $4\n$5 + $5 =A. $10 ✔B. $6C. $15\nAdding helps you find:A. Total cost ✔B. ChangeC. Time\n",
+        "quizzes": []
+      },
+      {
+        "number": 4,
+        "title": "Subtracting in Real-Life Situations",
+        "content": "Subtracting helps you understand how much money you have left.\nReal-life examples:\nYou have $10.You spend $4.Left: $6\nIf you have $20 and spend $7, you have $13 left.\n⭐ Interactive Activity\nGive participants $10 pretend money.Ask: “If we buy chips for $3, how much do we have left?”\n$10 – $2 =A. $8 ✔B. $12C. $6\n$7 – $7 =A. $0 ✔B. $3C. $14\nSubtraction tells you:A. TotalB. How much is left ✔C. How much someone owes\n",
+        "quizzes": []
+      },
+      {
+        "number": 5,
+        "title": "Understanding Time (AM & PM)",
+        "content": "Time helps you plan your day and stay on schedule.\n🕗 AM = Morning\nWake up, breakfast, school/work\n🌇 PM = Afternoon/Evening\nLunch, dinner, relaxing, bedtime\n⭐ Interactive Activity\nSort cards:🛏 7:00 AM → AM🍽 6:00 PM → PM\n9:00 AM is:A. Morning ✔B. NightC. Midnight\n7:30 PM is:A. Evening ✔B. MorningC. Afternoon\nTime helps you:A. Plan your day ✔B. TeleportC. Sleep more\n",
+        "quizzes": []
+      },
+      {
+        "number": 6,
+        "title": "Reading Bus & Train Timetables",
+        "content": "Timetables show you when transport comes and goes.\nWhat a timetable includes:\n✔ Arrival time✔ Departure time✔ Day of week✔ Platform number\n⭐ Interactive Activity\nBus arrives at 4:15 PM.Ask: “When should we be ready?”→ 4:10 PM\nTimetables show:A. FoodB. Times ✔C. Movie ratings\nIf the bus leaves at 4:00, arrive at:A. 3:55 ✔B. 4:30C. 5:00\nTimetables help you:A. Catch transport ✔B. Cook foodC. Swim\n",
+        "quizzes": []
+      },
+      {
+        "number": 7,
+        "title": "Measurements in Daily Life",
+        "content": "Measurement helps you cook, clean, shop, and plan.\n📏 Length\ncm, mExample: Your table might be 120cm.\n⚖ Weight\nkgExample: A bag of rice might be 2kg.\n🥤 Liquids\nmL, LExample: A bottle might be 600mL.\n⭐ Interactive Activity\nAsk: “Is a TV 50cm or 5m?”Ask: “Is a water bottle 500mL or 50L?”\nkg measures:A. Weight ✔B. TimeC. Speed\n1L is bigger than:A. 1000LB. 500mL ✔C. 1km\nmL measures:A. Water ✔B. DistanceC. Light\n",
+        "quizzes": []
+      },
+      {
+        "number": 8,
+        "title": "Using a Calculator (Level 2)",
+        "content": "Calculators help when numbers feel tricky.\nButtons you will use:\nadd– subtract× multiply÷ divide= equals\n⭐ Interactive Activity\nSolve using calculator:12 – 4 =6 + 9 =20 ÷ 2 =\nParticipants press the buttons physically or on-screen.\n“+” means:A. MultiplyB. Add ✔C. Cook\n20 ÷ 2 =A. 10 ✔B. 8C. 30\nCalculators help you:A. Solve maths ✔B. SleepC. Run\n",
+        "quizzes": []
+      },
+      {
+        "number": 9,
+        "title": "Making a Small Budget",
+        "content": "A budget is a plan for your money.\nExample\nYou have $20.Snacks $5Drink $3Total: $8Left: $12\n⭐ Interactive Activity\nGive each participant pretend money ($15).Let them “buy” 2 items from a mini list.\nThey calculate:✔ Total✔ How much is left\nA budget is a:A. Money plan ✔B. GameC. Joke\nIf you have $10 and spend $6, left is:A. $4 ✔B. $9C. $1\nBudgeting helps you:A. Save money ✔B. Lose moneyC. Yell\n",
+        "quizzes": []
+      }
+    ]
+  },
+  {
+    "chapter_title": "Life Skills & Independence",
+    "level_number": 1,
+    "lessons": [
+      {
+        "number": 1,
+        "title": "Building a Strong Daily Routine",
+        "content": "Why routines help you\nA routine makes your day easier by helping you:✔ Know what to do next✔ Feel calm and organised✔ Build independence✔ Reduce stress\nExample routines\nMorning:\nWake up\nBrush teeth\nShower\nBreakfast\nCheck your plan for the day\nEvening:\nDinner\nShower\nPack bag\nRelax\nSleep\n⭐ Interactive Activity\nParticipants drag items to create their own morning or night routine.\n",
+        "quizzes": []
+      },
+      {
+        "number": 2,
+        "title": "Safe Food Handling & Simple Meal Prep",
+        "content": "Safe food habits\n✔ Wash hands before touching food✔ Use clean plates and tools✔ Keep raw and cooked foods separate✔ Put food in the fridge after eating\nSimple food prep examples\n🥣 Making cereal🥪 Making a sandwich🍎 Washing fruit🥤 Pouring drinks\n⭐ Interactive Activity\nShow pictures → participants choose “SAFE” or “NOT SAFE”.\n",
+        "quizzes": []
+      },
+      {
+        "number": 3,
+        "title": "Cooking Easy Meals with Support",
+        "content": "Easy meals to start with\n✔ Toast✔ Scrambled eggs✔ Instant noodles✔ Microwaving leftovers✔ Simple salads\nSafety tips\n✔ Use oven mitts✔ Keep handles turned inward✔ Ask for support for knives or hot pans\n⭐ Interactive Activity\nParticipants choose the safest option in a cooking scenario.\n",
+        "quizzes": []
+      },
+      {
+        "number": 4,
+        "title": "Keeping Your Home Clean & Organised",
+        "content": "Why cleaning helps\n✔ Keeps you healthy✔ Reduces stress✔ Stops bugs✔ Makes it easier to find things\nSimple cleaning tasks\n🛏 Make your bed🧹 Sweep or vacuum🧽 Wipe surfaces🧺 Do laundry🗑 Empty bins\n⭐ Interactive Activity\nParticipants match tasks to the room they belong in.\n",
+        "quizzes": []
+      },
+      {
+        "number": 5,
+        "title": "Safe Shopping & Reading Labels",
+        "content": "Safe shopping skills\n✔ Make a list✔ Check prices✔ Watch for cars✔ Stay with your support✔ Ask staff if unsure\nReading labels\nLook for:✔ Price✔ Ingredients✔ Expiry date✔ Allergens (nuts, dairy, gluten)\n⭐ Interactive Activity\nParticipants choose which label item they should check first.\n",
+        "quizzes": []
+      },
+      {
+        "number": 6,
+        "title": "Moving Around the Community Safely",
+        "content": "Community safety rules\n✔ Look both ways✔ Don’t walk alone at night✔ Stay aware of your surroundings✔ Follow your support plan✔ Keep valuables safe\n⭐ Interactive Activity\nParticipants choose SAFE or UNSAFE for scenarios.\n",
+        "quizzes": []
+      },
+      {
+        "number": 7,
+        "title": "Paying Bills & Basic Money Management",
+        "content": "Bills you may need to pay\n✔ Phone✔ Internet✔ Rent✔ Electricity✔ Subscriptions\nWhat bills include\n✔ Amount✔ Due date✔ Service type\n⭐ Interactive Activity\nParticipants find the amount and due date on a sample bill.\n",
+        "quizzes": []
+      },
+      {
+        "number": 8,
+        "title": "Staying Safe in Emergencies",
+        "content": "Emergencies include:\n🔥 Fire🚑 Injury🚨 Feeling unsafe⚠ Flood or danger\nSteps to stay safe\nStay calm\nCall 000\nSay your name\nSay what happened\nGive your location\n⭐ Interactive Activity\nRole-play: “Call 000 for a fire.”\n",
+        "quizzes": []
+      },
+      {
+        "number": 9,
+        "title": "Managing Appointments & Responsibilities",
+        "content": "Appointments include:\n✔ Doctor✔ NDIS meetings✔ Support sessions✔ Centrelink✔ Therapy\nSkills needed\n✔ Write the date✔ Set reminders✔ Arrive on time✔ Bring documents\n⭐ Interactive Activity\nParticipants drag appointments onto a weekly schedule.\n",
+        "quizzes": []
+      }
+    ]
+  },
+  {
+    "chapter_title": "Psychology & Behaviour",
+    "level_number": 1,
+    "lessons": [
+      {
+        "number": 1,
+        "title": "Understanding Different EmotionsLesson 2 Calming My Body in Stressful MomentsLesson 3 Identifying Triggers & Warning SignsLesson 4 Healthy Ways to Cope With StressLesson 5 Understanding Other People’s FeelingsLesson 6 Communicating Clearly & KindlyLesson 7 Managing Big Feelings SafelyLesson 8 Solving Conflicts With Calm ChoicesLesson 9 Building Confidence & Positive Self-TalkLesson 10 Creating Healthy Boundaries & Safe Relationships",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 1,
+        "title": "Understanding Different Emotions",
+        "content": "What are emotions?\nEmotions are signals from your body that tell you how you feel.\nCommon emotions\n😊 Happy😢 Sad😡 Angry😰 Worried😴 Tired😃 Excited😤 Frustrated🙃 Confused\nWhy emotions matter\n✔ Help you understand your needs✔ Help you communicate✔ Help you stay safe\n⭐ Interactive Activity:\nShow emotion faces → participants choose the matching word.\n",
+        "quizzes": []
+      },
+      {
+        "number": 2,
+        "title": "Calming My Body in Stressful Moments",
+        "content": "When your body feels upset, stressed, or overwhelmed, you can calm it down.\nCalming tools\n🫁 Deep breathing🧘 Stretching🧩 Fidget toys🕯 Quiet space🎧 Calm music☕ Warm drink🚶 Light walk\nWhy calming helps\n✔ Makes your brain think clearer✔ Helps avoid meltdowns✔ Helps you make safer choices\n⭐ Interactive Activity:\nParticipants choose their “Top 3 calming tools.”\n",
+        "quizzes": []
+      },
+      {
+        "number": 3,
+        "title": "Identifying Triggers & Warning Signs",
+        "content": "What is a trigger?\nSomething that makes your feelings get bigger or stronger.\nCommon triggers\n🔊 Loud noise👥 Crowds🎭 Big changes⏳ Waiting too long😡 Being yelled at😕 Confusing instructions\nWarning signs your body gives\n🔥 Fast heartbeat🌡 Tight chest🥵 Hot face🌀 Wanting to run😤 Getting angry fast\n⭐ Interactive Activity:\nParticipants label their own “warning signs.”\n",
+        "quizzes": []
+      },
+      {
+        "number": 4,
+        "title": "Healthy Ways to Cope With Stress",
+        "content": "Healthy coping skills\n✔ Talking to someone✔ Drinking water✔ Deep breathing✔ Taking a break✔ Using fidgets✔ Listening to music\nWhat are unhealthy coping skills?\n❌ Yelling❌ Breaking things❌ Hurting yourself❌ Ignoring problems\n⭐ Interactive Activity:\nParticipants sort coping tools → HEALTHY or UNHEALTHY.\n",
+        "quizzes": []
+      },
+      {
+        "number": 5,
+        "title": "Understanding Other People’s Feelings",
+        "content": "How people show feelings\n✔ Face expressions✔ Tone of voice✔ Body posture✔ Words\nWhy it’s important\n✔ Helps communication✔ Avoids misunderstandings✔ Helps build friendships\n⭐ Interactive Activity:\nGuess the emotion from voice & face examples.\n",
+        "quizzes": []
+      },
+      {
+        "number": 6,
+        "title": "Communicating Clearly & Kindly",
+        "content": "How to communicate kindly\n✔ Use calm voice✔ Listen✔ Take turns✔ Use simple words✔ Say how you feel\nHelpful phrases\n“I feel upset when…”“I need some space.”“Can you help me understand this?”\n⭐ Interactive Activity:\nParticipants change rude phrases into kind ones.\n",
+        "quizzes": []
+      },
+      {
+        "number": 7,
+        "title": "Managing Big Feelings Safely",
+        "content": "Big feelings include\n😡 Anger😰 Anxiety😭 Sadness😤 Frustration😵 Overwhelm\nSafe ways to handle big feelings\n✔ Step away✔ Deep breaths✔ Ask for help✔ Go to a quiet space✔ Use calming tools\n⭐ Interactive Activity:\nParticipants choose which tool they’d use for big feelings.\n",
+        "quizzes": []
+      },
+      {
+        "number": 8,
+        "title": "Solving Conflicts With Calm Choices",
+        "content": "Conflict = disagreement\nEveryone has conflicts sometimes.\nCalm ways to solve conflicts\n✔ Listen✔ Talk clearly✔ Take turns✔ Step away if needed✔ Ask for help\n⭐ Interactive Activity:\n“Which is the calm solution?” game.\n",
+        "quizzes": []
+      },
+      {
+        "number": 9,
+        "title": "Building Confidence & Positive Self-Talk",
+        "content": "Confidence means\n✔ Trusting yourself✔ Believing you can do things✔ Trying again even if mistakes happen\nPositive self-talk\n“I can do this.”“I’m trying my best.”“I’m learning.”\n⭐ Interactive Activity:\nParticipants create their own positive self-talk sentence.\n",
+        "quizzes": []
+      },
+      {
+        "number": 10,
+        "title": "Creating Healthy Boundaries & Safe Relationships",
+        "content": "Healthy relationships include:\n✔ Respect✔ Kindness✔ Personal space✔ Listening✔ Safety\nBoundaries you can set\n✔ “Don’t touch me.”✔ “I need space.”✔ “Please speak softly.”✔ “I don’t like that.”\n⭐ Interactive Activity:\nParticipants choose which behaviours are healthy vs unhealthy.\n",
+        "quizzes": []
+      }
+    ]
+  },
+  {
+    "chapter_title": "AI & DIGITAL SKILLS",
+    "level_number": 1,
+    "lessons": [
+      {
+        "number": 1,
+        "title": "Keeping Your Information Safe Online",
+        "content": "What is personal information?\nPersonal info = private details about you:\nYour full name\nYour address\nYour phone number\nYour passwords\nYour bank details\nNever share these online\n✔ Not with strangers✔ Not with random websites✔ Not on social media✔ Not in comments or messages\nKeep accounts safe by:\nUsing strong passwords\nKeeping your account private\nLogging out on shared devices\n⭐ Mini Activity: “Safe or Not Safe?”\nSay SAFE or NOT SAFE:\nPosting your birthday 🎂\nPosting your lunch 🍔\nPosting your address 📍\n",
+        "quizzes": []
+      },
+      {
+        "number": 2,
+        "title": "Spotting Fake Messages & Scams",
+        "content": "Scams try to trick you.\nScam messages often:🚫 Say “CLICK NOW!”🚫 Offer free prizes🚫 Ask for money🚫 Pretend to be a company🚫 Have spelling mistakes\nSafe messages come from:\n✔ People you know✔ Real companies✔ Messages you expected\n⭐ Mini Activity: “Real or Fake?”\nShow examples like:\n“You won a free phone!”\n“Your bill is ready from Optus.”Participants choose REAL or FAKE.\n",
+        "quizzes": []
+      },
+      {
+        "number": 3,
+        "title": "Safe Online Shopping",
+        "content": "Online shopping is safe when:\n✔ Website is real (Kmart, Target, Amazon)✔ Website ends in .com.au✔ Payment page has a lock symbol 🔒✔ You check the total cost first\nNever shop on:\n🚫 Random pop-up websites🚫 Social media ads that look suspicious🚫 Pages with spelling mistakes\n⭐ Mini Activity: “Safe or Unsafe Shop?”\nParticipants vote SAFE or UNSAFE for websites you show.\n",
+        "quizzes": []
+      },
+      {
+        "number": 4,
+        "title": "Using Maps & GPS",
+        "content": "Maps help you:\nFind places\nGet directions\nSee travel time\nChoose walking or bus routes\nGPS can tell you:\n✔ “Turn left”✔ “Go straight”✔ “Arrive at your destination”\n⭐ Mini Activity: “Find the Place!”\nParticipants search for:\nNearest supermarket\nNearest hospital\nNearest train station\n",
+        "quizzes": []
+      },
+      {
+        "number": 5,
+        "title": "Using Voice Assistants (Siri & Google)",
+        "content": "Voice assistants help with:\n✔ Alarms✔ Timers✔ Weather✔ Calling people✔ Finding information\nGood questions to ask:\n“What’s the weather today?”\n“Set a 10-minute timer.”\n“Call Mum.”\n⭐ Mini Activity: “Ask the Bot!”\nParticipants ask the assistant 2 simple questions.\n",
+        "quizzes": []
+      },
+      {
+        "number": 6,
+        "title": "Emailing With Attachments",
+        "content": "Attaching files means adding:\n📎 Photos📎 Documents📎 Screenshots\nBefore sending an attachment:\n✔ Check it’s the right file✔ Check you’re sending it to the right person✔ Add a short message\n⭐ Mini Activity: “Find the Attachment Icon”\nParticipants locate the 📎 (paperclip icon) in email apps.\n",
+        "quizzes": []
+      },
+      {
+        "number": 7,
+        "title": "Using Your Camera & Photos Safely",
+        "content": "Safe photo rules:\n✔ No home address✔ No private info✔ No bank cards✔ No strangers’ faces\nGood photo uses:\n📸 Taking pictures of pets📸 Taking pictures of nature📸 Saving memories📸 Scanning documents\n⭐ Mini Activity: “Safe or Not?”\nParticipants decide if each example photo is safe.\n",
+        "quizzes": []
+      },
+      {
+        "number": 8,
+        "title": "Understanding App Permissions",
+        "content": "Apps sometimes ask to:\nUse your camera\nUse your microphone\nAccess your location\nSend notifications\nOnly allow permissions you trust.\n⭐ Mini Activity: “Allow or Don’t Allow?”\nShow examples like:📍 “Allow location?”🎤 “Allow microphone?”Participants choose YES or NO.\n",
+        "quizzes": []
+      },
+      {
+        "number": 9,
+        "title": "Fixing Simple Tech Problems",
+        "content": "Common problems:\n❌ Screen frozen❌ No sound❌ Wi-Fi not working❌ App won’t open\nSimple fixes:\n✔ Restart device✔ Check volume✔ Check Wi-Fi✔ Close the app\n⭐ Mini Activity: “What Would You Do?”\nParticipants match the problem to the fix.\n",
+        "quizzes": []
+      }
+    ]
+  },
+  {
+    "chapter_title": "Self Choice & Control",
+    "level_number": 1,
+    "lessons": [
+      {
+        "number": 1,
+        "title": "Understanding My Needs & WantsLesson 2 Knowing My Rights (NDIS & Daily Life)Lesson 3 Making Safe & Smart ChoicesLesson 4 Communicating My DecisionsLesson 5 Setting Boundaries With OthersLesson 6 Asking for Help the Right WayLesson 7 Understanding Others’ FeelingsLesson 8 Solving Problems CalmlyLesson 9 Speaking Up for Myself (Self-Advocacy)Lesson 10 Being Confident in My Choices",
+        "content": "",
+        "quizzes": []
+      },
+      {
+        "number": 1,
+        "title": "Understanding My Needs & Wants",
+        "content": "🌟 What are “needs”?\nNeeds are things that help you stay healthy and safe:✔ Food✔ Water✔ Sleep✔ Medication✔ Support\n🌟 What are “wants”?\nWants are things you enjoy but don’t need to survive:✔ Snacks✔ Games✔ Clothes✔ Toys✔ Eating out\nWhy this matters:\nUnderstanding needs vs wants helps you:✔ Make better choices✔ Spend money wisely✔ Communicate what’s important\n⭐ Interactive Activity:\nShow pictures — participants sort into NEED or WANT:🍎 Food → NEED🎮 Game → WANT🏠 Shelter → NEED🍫 Chocolate → WANT\n",
+        "quizzes": []
+      },
+      {
+        "number": 2,
+        "title": "Knowing My Rights (NDIS & Daily Life)",
+        "content": "You have the right to:\n✔ Be safe✔ Make your own choices✔ Say “no”✔ Have support✔ Be treated with respect✔ Be listened to✔ Speak up if something feels wrong\n⭐ Real-life examples:\nYou can say:“No, I don’t want that support worker.”“I prefer a male/female worker.”“I’m not comfortable with that.”\n⭐ Interactive Activity:\nChoose the correct right:A support worker tells you what to eat → You can say NO and choose.\n",
+        "quizzes": []
+      },
+      {
+        "number": 3,
+        "title": "Making Safe & Smart Choices",
+        "content": "Safe & smart choices mean:\n✔ Thinking before acting✔ Choosing what helps you✔ Avoiding danger✔ Asking for help if unsure\nExamples:\n❌ Walking in the road → unsafe✔ Using crossings → safe❌ Meeting strangers alone → unsafe✔ Bringing a support worker → safe\n⭐ Interactive Activity:\nSay SAFE or UNSAFE to scenarios shown on screen.\n",
+        "quizzes": []
+      },
+      {
+        "number": 4,
+        "title": "Communicating My Decisions",
+        "content": "Ways to express your choices:\n✔ Using words✔ Pointing✔ Showing pictures✔ Using apps✔ Using body language\nHelpful phrases:\n“I choose this.”“I don’t want that.”“This makes me feel uncomfortable.”“I prefer something else.”\n⭐ Interactive Activity:\nParticipants practice saying:→ “I choose…”→ “I don’t want…”\n",
+        "quizzes": []
+      },
+      {
+        "number": 5,
+        "title": "Setting Boundaries With Others",
+        "content": "Boundaries are rules that protect your space and feelings.\nYou can say:\n✔ “Please don’t stand too close.”✔ “I need space.”✔ “Don’t touch me.”✔ “Stop. I don’t like that.”\nHealthy boundaries keep you:\n✔ Safe✔ Comfortable✔ Respected\n⭐ Interactive Activity:\nParticipants choose which phrases are boundary-setting.\n",
+        "quizzes": []
+      },
+      {
+        "number": 6,
+        "title": "Asking for Help the Right Way",
+        "content": "Asking for help is strong, not weak.\nYou can ask for help when:\n✔ You’re unsure✔ Something scares you✔ A task feels too hard✔ You need support or clarity\nPeople you can ask:\n✔ Support worker✔ Family✔ Trusted friend✔ Teacher✔ Coordinator\n⭐ Interactive Activity:\nParticipants match situations with “Who can help?”\n",
+        "quizzes": []
+      },
+      {
+        "number": 7,
+        "title": "Understanding Others’ Feelings",
+        "content": "People show feelings using:\n😊 Faces📢 Voices🧍 Body language\nWhy this matters:\n✔ Helps avoid conflict✔ Helps build relationships✔ Helps you understand situations\n⭐ Interactive Activity:\nParticipants choose the emotion from faces shown.\n",
+        "quizzes": []
+      },
+      {
+        "number": 8,
+        "title": "Solving Problems Calmly",
+        "content": "Problem-solving steps:\nStop\nBreathe\nThink\nChoose a safe option\nAsk for help if needed\nExample problems:\n“Someone took my seat.”“I missed the bus.”“I can’t find my phone.”\n⭐ Interactive Activity:\nPick the calm response vs angry response.\n",
+        "quizzes": []
+      },
+      {
+        "number": 9,
+        "title": "Speaking Up for Myself (Self-Advocacy)",
+        "content": "Self-advocacy means:\n✔ Saying what you need✔ Asking questions✔ Saying “no”✔ Telling people your preferences\nHelpful phrases:\n“I need help understanding this.”“This doesn’t feel safe.”“I want something different.”\n⭐ Interactive Activity:\nParticipants role-play asking for what they need.\n",
+        "quizzes": []
+      }
+    ]
+  }
+]

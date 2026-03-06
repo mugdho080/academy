@@ -1,0 +1,46 @@
+# Time Logging & Analytics - Implementation Walkthrough
+
+The User Activity Logging & Learning Time Analytics system has been fully implemented across the MySQL database, PHP backend, and React frontend. Support has been added for granular tracking, idle timeout logic, and comprehensive visualization.
+
+## 1. Schema & Database 
+Run automatically via [api/add_time_tracking.php](file:///c:/Users/user/Downloads/academy/api/add_time_tracking.php), we added:
+- **`sessions` table**: Maps to a single learner login session. Tracks `login_at`, `logout_at`, `status`, and aggressively maintains the `total_seconds_active`.
+- **`time_entries` table**: Granular breakdown mapping seconds to either `dashboard`, `chapter`, `level`, or `lesson`.
+
+## 2. Server-Authoritative Backend (PHP)
+The new API endpoints are highly secure and operate relative to the current session (to prevent tampering):
+- [api/learner/start_session.php](file:///c:/Users/user/Downloads/academy/api/learner/start_session.php) & [end_session.php](file:///c:/Users/user/Downloads/academy/api/learner/end_session.php): Manage the lifecycle of a student's login session.
+- [api/learner/ping_active.php](file:///c:/Users/user/Downloads/academy/api/learner/ping_active.php): Reconciles time every 15 seconds. Rejects heavily skewed client deltas to guarantee fairness and accuracy.
+- [api/learner/switch_context.php](file:///c:/Users/user/Downloads/academy/api/learner/switch_context.php): Triggered dynamically across route changes to isolate where time is spent.
+- [api/learner/get_time_summary.php](file:///c:/Users/user/Downloads/academy/api/learner/get_time_summary.php) & [api/admin/get_time_summary.php](file:///c:/Users/user/Downloads/academy/api/admin/get_time_summary.php): Aggregates the raw seconds based on a [start](file:///c:/Users/user/Downloads/academy/src/pages/LevelDashboard.jsx#31-34) and [end](file:///c:/Users/user/Downloads/academy/src/context/ActivityTimerProvider.jsx#113-136) date input, compiling data cleanly into JSON arrays.
+
+## 3. Advanced Frontend Tracking (React)
+- **[ActivityTimerProvider.jsx](file:///c:/Users/user/Downloads/academy/src/context/ActivityTimerProvider.jsx)**: Wraps the React Router configuration. Automatically determines if a user is actively looking at the page:
+  - Validates `document.visibilityState` (pauses tracking if the tab is hidden).
+  - Validates `window.hasFocus` (pauses if looking at another window).
+  - Idle timeout of **60 seconds** checking `mousemove`, `keydown`, `touchstart`, etc.
+  - Subscribes to route changes (`useLocation`) to fire context logs to the database automatically.
+- **[TimerWidget.jsx](file:///c:/Users/user/Downloads/academy/src/components/TimerWidget.jsx)**: Affixed to the [SidebarLayout](file:///c:/Users/user/Downloads/academy/src/components/SidebarLayout.jsx#5-16). Shows parents, carers, and learners exactly how much time has been accredited in their current session [(MM:SS)](file:///c:/Users/user/Downloads/academy/test_login_flow.js#3-13). 
+- **Auto-Logout Integration**: Send beacon utilized in `beforeunload` to quickly gracefully close sessions.
+
+## 4. UI Deliverables
+- **[TimeLogsViewer.jsx](file:///c:/Users/user/Downloads/academy/src/components/TimeLogsViewer.jsx)**: Rebuilt from the ground up to support the new JSON structure:
+  - Selectable Date range filtering via calendar inputs.
+  - A prominent overarching Total Active Time calculation card.
+  - **Tabs System**:
+    1. **Login Sessions**: Displays individual login ranges, status limits, and exact session durations.
+    2. **Context Breakdown**: Breaks time strictly down to 'Main Dashboard', 'Chapter Maps', 'Level Previews', and 'Active Lessons'.
+- Profile & Admin Components natively render the new Analytics UI component out-of-the-box.
+
+> [!TIP]
+> **What to test:** Log in as a learner -> Watch the top-right timer tick up -> Open another tab -> Return to Goodwill Academy -> Notice the timer automatically paused while you were away!
+
+---
+
+### Phase 4: Bug Fixes & Refinements
+- **Refined [ActivityTimerProvider.jsx](file:///c:/Users/user/Downloads/academy/src/context/ActivityTimerProvider.jsx):** Adjusted the client-side `document.hasFocus()` listener to default to `true`. This prevents local development servers and certain browser profiles from falsely freezing the optimistic UI timer immediately upon login.
+- **Patched [Sidebar.jsx](file:///c:/Users/user/Downloads/academy/src/components/Sidebar.jsx) (Logout):** The Logout action now strictly removes stale global authentication keys (`localStorage.clear()`) rather than just redirecting. This guarantees a clean state purge, letting tracking sessions reset properly across account switches without leaking context.
+- **XAMPP & Vite Proxy Alignment:** Discovered a massive mismatch where the development Vite server (`Downloads/academy`) was proxying API calls to the live XAMPP deployment (`htdocs/academy`), causing the browser to interact with a stale backend missing all tracking endpoints. 
+  - Synchronized the full `api/` directory from the development environment to the live XAMPP document root.
+  - Initialized missing MySQL tables (`sessions`, `time_entries`) directly through the `php.exe` CLI matching the live DB configuration.
+  - Rewrote relative `require_once` paths against [index.php](file:///C:/xampp/htdocs/academy/api/index.php) routing constraints using native `__DIR__` resolution, preventing fatal 500 crashes on context start.

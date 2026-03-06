@@ -1,0 +1,17 @@
+{
+    "user_id": 1,
+    "signature_data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+    "full_name": "Test User",
+    "dob": "",
+    "address": "123 Test St",
+    "phone": "1234567890",
+    "emergency_contact": "Jane Doe",
+    "ndis_number": "NDIS123",
+    "nominee": "",
+    "plan_type": "NDIA",
+    "who_pays": "NDIA",
+    "plan_manager_name": "",
+    "plan_manager_contact": "",
+    "plan_start_date": "",
+    "plan_end_date": ""
+}

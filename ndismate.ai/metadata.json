@@ -1,0 +1,7 @@
+{
+  "name": "NDISmate.ai",
+  "description": "An AI-powered NDIS support coordinator assistant. Connect your plan, chat with Matey, and visualize your budgets.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

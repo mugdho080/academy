@@ -1,0 +1,1855 @@
+{
+  "source_document_name": "Module Level 1 Contet.docx",
+  "chapters": [
+    {
+      "module_number": 1,
+      "chapter_key": "module_1",
+      "chapter_title": "AI & Digital Skills",
+      "chapter_icon": "📚",
+      "levels": [
+        {
+          "level_number": 1,
+          "level_title": "AI & Digital Skills - Level 1",
+          "youtube_url": null,
+          "lessons": [
+            {
+              "lesson_number": 1,
+              "lesson_title": "What is AI? (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🤖 Imagine AI as a friendly helper robot inside your phone!",
+                  "It watches what you like (videos, music, routes) and says:\"Hey! I think you might like this too!\"",
+                  "AI can:🧭 Help you find places📸 Make your photos look better🎵 Suggest songs🗣 Turn speech into text",
+                  "AI cannot:💔 Have feelings😡 Get angry🧠 Think like a human",
+                  "Pick the fun emojis!"
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Robot or Human?\" Say these out loud and let participants guess! \"I love pizza!\" → Human \"Calculating best route…\" → Robot \"Let's go to the beach!\" → Human \"Opening Google Maps…\" → Robot",
+              "fun_reminder": "💬 Fun Reminder AI is your helper - not your boss and not your parent.You're in charge!",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "AI is like:",
+                      "options": [
+                        "🤔 A person with feelings",
+                        "🤖 A helpful robot in your device",
+                        "🎈 A balloon"
+                      ],
+                      "correct_index": 1,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Can AI get sad or angry?",
+                      "options": [
+                        "😭 Yes",
+                        "😎 No"
+                      ],
+                      "correct_index": 1,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Which one uses AI?",
+                      "options": [
+                        "📱 Google Maps",
+                        "🍔 A cheeseburger",
+                        "🧹 A broom"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 2,
+              "lesson_title": "Using Computers & Phones Safely (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "😎 Be a Tech Superhero!",
+                  "Your mission: Keep your device safe from bad guys online.",
+                  "🛡️ Strong Password Power",
+                  "A strong password is like a superhero shield:",
+                  "Mix letters + numbers + symbols",
+                  "Not your name or birthday",
+                  "Keep it SECRET",
+                  "Example: RedLion#34",
+                  "🕵️‍♂️ Spy Mode: Spot the Fake Link",
+                  "Fake messages say things like:",
+                  "\"CLICK NOW!\"",
+                  "\"You won $1,000!\"",
+                  "\"Urgent!!!\"",
+                  "Spelling mistakes everywhere",
+                  "👋 If unsure, DON'T click",
+                  "Ask a trusted person:Support worker, teacher, family, coordinator."
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Safe or Not Safe?\" Say \"SAFE\" 👍 or \"NOPE!\" 🚫 \"Your package is ready, click here NOW!\" → 🚫 \"Hi, here are your photos from yesterday.\" → 👍 \"You won a free holiday!\" → 🚫",
+              "fun_reminder": "😊 Fun Reminder If it feels weird…STOP, don't click, ask someone!",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Which one is a strong password?",
+                      "options": [
+                        "🐶 Dog123",
+                        "🦁 RedLion#34",
+                        "🎂 1998"
+                      ],
+                      "correct_index": 1,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Someone sends you a weird link. What do you do?",
+                      "options": [
+                        "👉 Click it fast",
+                        "👉 Send it to everyone",
+                        "👉",
+                        "❌ Ask for help or delete"
+                      ],
+                      "correct_index": 3,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "\"You won a prize! Click!\" is usually:",
+                      "options": [
+                        "🎉 Real",
+                        "🔥 Fake",
+                        "⛄ A snowman"
+                      ],
+                      "correct_index": 1,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 3,
+              "lesson_title": "AI in Everyday Life (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🤯 Guess what? You use AI every day without knowing!",
+                  "AI helps with:📍 Finding places on maps🎧 Recommending songs you enjoy📺 Picking shows you might like📸 Cleaning up blurry photos💬 Turning speech → text",
+                  "AI is like a tiny wizard inside your apps.🧙‍♂️✨ \"Here's the best route for you!\""
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Where's the AI?\" Show participants objects or pictures and ask:Does this use AI? Yes or No? Examples: Google Maps → YES Microwave → NO Netflix → YES Toothbrush → NO Smartphone camera → YES Participants can raise hands, use cards, or say \"Yes/No.\"",
+              "fun_reminder": "😊 Fun Reminder AI is everywhere - it just stays quiet and helpful!",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Which one uses AI?",
+                      "options": [
+                        "🧭 Google Maps",
+                        "🍇 Grapes",
+                        "🧢 A hat"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "AI helps with:",
+                      "options": [
+                        "🎧 Recommending music",
+                        "🌲 Growing trees",
+                        "💰 Finding treasure"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Is your camera's auto-brighten AI?",
+                      "options": [
+                        "Yes",
+                        "○ No"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 4,
+              "lesson_title": "Talking to AI & Being Kind Online (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🗣️ Talking to AI is like talking to a friendly robot",
+                  "AI chat tools can help you:",
+                  "Find answers",
+                  "Write messages",
+                  "Make to-do lists",
+                  "Explain things simply",
+                  "💡 How to ask good questions",
+                  "Try these:\"Explain it in easy words.\"\"Give me three ideas.\"\"What does this mean?\"",
+                  "😇 Be kind - even online",
+                  "Being polite online helps everyone feel safe.",
+                  "Use:😊 \"Please help me with this.\"🙏 \"Thank you!\"👍 \"Great job!\""
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Ask the Robot!\" Each participant asks an AI tool a simple question like: \"What's a fun fact?\" \"What's the weather?\" \"Tell me a joke.\"Everyone shares their favourite answer.",
+              "fun_reminder": "😊 Fun Reminder AI is helpful - but double-check important things with a real person.",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "How should you talk to AI?",
+                      "options": [
+                        "😡 Angry",
+                        "😐 Confused",
+                        "😊 Kindly"
+                      ],
+                      "correct_index": 2,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Which question is clear?",
+                      "options": [
+                        "\"What is stuff",
+                        "?\"\"Explain this in easy words.\" \"",
+                        "?",
+                        "?",
+                        "?\""
+                      ],
+                      "correct_index": 1,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Should you check important info with a real person?",
+                      "options": [
+                        "Yes",
+                        "○ No"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 5,
+              "lesson_title": "Making a Strong Password (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🔐 Your password = your secret superhero identity",
+                  "A strong password protects your accounts from sneaky internet villains.",
+                  "What makes a strong password?",
+                  "Examples:",
+                  "❌ Weak: 123456❌ Weak: Hasan2000✨ Strong: RedFox!82✨ Strong: MoonLight#55",
+                  "🧭 Be an Internet Explorer - but stay safe!",
+                  "The internet = a giant world.Some places are helpful and safe…Some are confusing or dangerous.",
+                  "Safe websites are usually:",
+                  "Unsafe websites might:",
+                  "🚫 Have LOTS of pop-up ads🚫 Flash \"YOU WON A PRIZE!!!\"🚫 Have spelling mistakes🚫 Ask for your details quickly"
+                ],
+                "bullets": [
+                  "✔ At least 8 characters✔ Mix of letters (A-Z), numbers (0-9), symbols (!#$%)✔ NOT your name or birthday✔ DO NOT share with anyone except a trusted support person",
+                  "✔ Easy to read✔ From trusted companies✔ \".gov\" , \".edu\", \".org\" or official brands"
+                ]
+              },
+              "mini_activity": "\"Safe or Suspicious?\" Participants vote:👍 SAFE or 🚫 SUSPICIOUS \"gov.au\" website \"OMG FREE iPhone!!! CLICK!\" \"education.edu\" \"Hurry! Only 10 seconds left!\"",
+              "fun_reminder": "😊 Fun Reminder If a site feels weird…Close the tab → Ask for help.",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Which is a strong password?",
+                      "options": [
+                        "🍕 Pizza123",
+                        "💪 StarLion#21",
+                        "🎂 2001"
+                      ],
+                      "correct_index": 1,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Should you share your password?",
+                      "options": [
+                        "○ Yes No"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Why mix letters, numbers & symbols?",
+                      "options": [
+                        "Makes it harder to guess",
+                        "○ Makes it look pretty",
+                        "○ Makes your phone faster"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 6,
+              "lesson_title": "Safe Searching on Internet",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🌐 What is \"searching online\"?",
+                  "Searching online means typing words into Google, YouTube, or Safari to find information, videos, maps, or answers.",
+                  "Examples of safe searches:",
+                  "\"Weather today in Sydney\"",
+                  "\"Easy chicken recipes\"",
+                  "\"How to get to Kmart\"",
+                  "\"Cute dog videos\"",
+                  "🔍 What makes a website SAFE?",
+                  "Safe websites usually:✔ Look clean and easy to read✔ Have correct spelling✔ Don't have too many pop-ups✔ Belong to real companies, schools, or government✔ Do NOT ask you for private information",
+                  "Examples of safe endings:",
+                  ".gov (government)",
+                  ".edu (education)",
+                  ".org (organisations)",
+                  ".com.au (Australia websites)",
+                  "⚠️ What makes a website UNSAFE?",
+                  "Unsafe websites often:🚫 Have lots of flashing pop-ups🚫 Say \"Click now!\" or \"You won a prize!!\"🚫 Have strange spelling or weird pictures🚫 Ask for your address, bank details, or passwords🚫 Feel confusing or uncomfortable",
+                  "If something feels \"off\"…",
+                  "👉 Close the tab immediately👉 Tell a trusted person",
+                  "You don't need to explain - just say:\"This website looks weird.\"",
+                  "⭐ Mini Activity - \"Safe or Suspicious?\"",
+                  "Say SAFE or SUS (suspicious) for each example:",
+                  "1️⃣ \"education.gov.au\" → SAFE2️⃣ \"CLAIM YOUR FREE IPHONE!!! CLICK!!!\" → SUS3️⃣ \"kmart.com.au\" → SAFE4️⃣ \"YOU HAVE 10 SECONDS TO WIN $1,000!\" → SUS",
+                  "Make it fun by having participants use thumbs up (👍) or thumbs down (👎).",
+                  "💬 Helpful reminder",
+                  "You're not supposed to know what every website is.If you're unsure… STOP → CLOSE → ASK.That's smart and safe."
+                ],
+                "bullets": []
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "A safe website usually has:",
+                      "options": [
+                        "A. Lots of flashing pop-upsB. Correct spelling and clear layout C. A big \"CLICK FAST",
+                        "!\" message"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Which website ending is safe?",
+                      "options": [
+                        "A. .gov B. .susC. .winfree"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "If a website feels strange, you should:",
+                      "options": [
+                        "A. Keep clickingB. Close it and ask for help C. Type your details in"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 7,
+              "lesson_title": "Using Email Safely (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "📧 Emails are helpful - but some are TRICKS!",
+                  "Fake emails try to get your info.",
+                  "Safe emails are from:",
+                  "Warning signs of fake emails:",
+                  "🚫 Bad spelling🚫 \"URGENT!\" or \"ACT NOW!\"🚫 Asking for bank info🚫 Strange sender name"
+                ],
+                "bullets": [
+                  "✔ People you know✔ Companies you trust✔ Messages you expect to receive"
+                ]
+              },
+              "mini_activity": "\"Spot the Scam\" Read these aloud.Participants say REAL 👍 or SCAM 🚫 \"Your bill is ready from your phone company.\" \"CLICK FAST! Claim your free holiday!\" \"Hi, here is the photo you asked for.\"",
+              "fun_reminder": "😊 Fun Reminder Real companies never ask for your password in an email.",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "What is a sign of a fake email?",
+                      "options": [
+                        "Spelling mistakes",
+                        "○ Cute emojis",
+                        "○ Your favourite colour"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Should you give your bank info by email?",
+                      "options": [
+                        "○ Yes No"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Who should you open emails from?",
+                      "options": [
+                        "People you know",
+                        "○ Random strangers",
+                        "○ Robots"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 8,
+              "lesson_title": "Social Media Safety (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "📱 Social media is fun - but think before you post!",
+                  "Stay safe by:",
+                  "Do NOT share:",
+                  "🚫 Home address🚫 School/work details🚫 Bank info🚫 Personal routines"
+                ],
+                "bullets": [
+                  "✔ Keeping your account private✔ Only adding people you know✔ Using kind words✔ Posting photos that don't show private details"
+                ]
+              },
+              "mini_activity": "\"Would You Post This?\" Participants say POST 👍 or NOPE 🚫 A selfie with your address behind you A photo of your lunch Your bank card A funny picture of your pet",
+              "fun_reminder": "😊 Fun Reminder Think: Would I show this to a stranger?If no → Don't post it.",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Should you add strangers online?",
+                      "options": [
+                        "○ Yes No"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Which is safe to post?",
+                      "options": [
+                        "A photo of your lunch",
+                        "○ Your bank card",
+                        "○ Your house address"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "What type of account is safest?",
+                      "options": [
+                        "Private",
+                        "○ Public"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 9,
+              "lesson_title": "Using AI to Help Your Everyday Life (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🤖 AI can make life easier - like a friendly assistant!",
+                  "AI can help you:✔ Plan your day✔ Make shopping lists✔ Explain things simply✔ Write polite messages✔ Find new ideas",
+                  "⭐ Try This!",
+                  "Ask AI:\"Give me 3 easy dinner ideas.\"\"Explain this in simple words.\"\"Make me a 3-step morning routine.\""
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"AI Challenge!\" Participants ask AI a question.Everyone votes on the best answer using:🏆 Useful😂 Funny🤔 Interesting",
+              "fun_reminder": "😊 Fun Reminder AI can help - but YOU choose what to follow.",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "AI can help you:",
+                      "options": [
+                        "Make a list",
+                        "○ Brush your teeth",
+                        "○ Walk your dog"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Which question is good to ask AI?",
+                      "options": [
+                        "\"Explain this simply.\"",
+                        "○ \"Tell me my bank password.\"",
+                        "○ \"What's 1000 pizzas",
+                        "?\""
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Should you double-check important info?",
+                      "options": [
+                        "Yes",
+                        "○ No"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 10,
+              "lesson_title": "Staying Calm during technical difficulties (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "😤 Technology sometimes breaks… and that's OK!",
+                  "Screens freeze…Wi-Fi stops…Apps crash…This happens to EVERYONE.",
+                  "Stay calm using the \"Take 3 Rule\":",
+                  "Breathe in",
+                  "Breathe out",
+                  "Try again",
+                  "Steps to fix simple problems:"
+                ],
+                "bullets": [
+                  "✔ Check Wi-Fi✔ Close the app✔ Restart the device✔ Ask for help"
+                ]
+              },
+              "mini_activity": "\"What Would You Do?\" Match the problem to the solution: 🟥 Phone frozen → Restart🟥 Video won't load → Check Wi-Fi🟥 Can't hear sound → Check volume🟥 Website weird → Close tab",
+              "fun_reminder": "😊 Fun Reminder It's not your fault - tech gets moody sometimes.",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "If your phone freezes, what should you try?",
+                      "options": [
+                        "Restart it",
+                        "○ Throw it",
+                        "○ Shake it"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "If a website looks strange, what do you do?",
+                      "options": [
+                        "Close it",
+                        "○ Give your details",
+                        "○ Take a selfie"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Is it normal for tech to break sometimes?",
+                      "options": [
+                        "Yes",
+                        "○ No"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "module_number": 2,
+      "chapter_key": "module_2",
+      "chapter_title": "Maths & Numbers",
+      "chapter_icon": "📚",
+      "levels": [
+        {
+          "level_number": 1,
+          "level_title": "Maths & Numbers Level 1",
+          "youtube_url": null,
+          "lessons": [
+            {
+              "lesson_number": 1,
+              "lesson_title": "Number Basics & CountingMoney Skills for Daily LifeSimple Adding & SubtractingTime Skills & Reading ClocksShopping & Budgeting BasicsEveryday Problem SolvingUnderstanding MeasurementsUsing a Calculator & AppsReal-Life Money ManagementIndependent Numeracy Skills",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  ". Module 3"
+                ],
+                "bullets": []
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": []
+            }
+          ]
+        },
+        {
+          "level_number": 1,
+          "level_title": "SELF CHOICE & CONTROL Level 1",
+          "youtube_url": null,
+          "lessons": [
+            {
+              "lesson_number": 1,
+              "lesson_title": "Knowing Myself & My Needs (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "⭐ \"What makes YOU, YOU?\"",
+                  "Everyone is different.Everyone has needs, preferences, likes, dislikes.",
+                  "Understanding yourself helps you make good choices.",
+                  "❤️ What are YOUR:",
+                  "Favourite foods?",
+                  "Favourite activities?",
+                  "Things that make you feel calm?",
+                  "Things that stress you?",
+                  "🎯 Why is this important?",
+                  "Because when you understand yourself, you can:✔ Make better choices✔ Ask for the support you need✔ Explain things more clearly✔ Feel more in control"
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"This Is Me!\" Participants fill in or say: I like: ______I don't like: ______I need: ______I feel calm when: ______I feel stressed when: ______ They can draw, talk, or choose picture cards.",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Knowing yourself helps you:",
+                      "options": [
+                        "Make good choices",
+                        "○ Be perfect",
+                        "○ Win prizes"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Which is a personal need?",
+                      "options": [
+                        "\"I need quiet time sometimes.\"",
+                        "○ \"Everyone must like pizza.\"",
+                        "○ \"My phone needs charging.\""
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Understanding yourself makes life:",
+                      "options": [
+                        "Easier",
+                        "○ Harder",
+                        "○ Impossible"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 2,
+              "lesson_title": "Understanding My Rights (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🛡️ You have rights - no matter what.",
+                  "You deserve:✔ Safety✔ Respect✔ Privacy✔ Choice✔ To be listened to✔ To say \"NO\"",
+                  "🔥 Your rights cannot be taken away.",
+                  "Rights mean:",
+                  "People should treat you kindly",
+                  "No one can force you into something",
+                  "You get to choose your life",
+                  "You can ask for help anytime"
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Right or Not a Right?\" Say RIGHT 👍 or NOPE 🚫 \"I can say no.\" \"People can yell at me.\" \"I deserve support.\" \"I have to agree with everyone.\" \"I should be safe.\"",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "One of your rights is:",
+                      "options": [
+                        "To feel safe",
+                        "○ To be perfect",
+                        "○ To never ask questions"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "You can say \"no\" when you feel:",
+                      "options": [
+                        "Uncomfortable",
+                        "○ Hungry",
+                        "○ Bored"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Your rights are:",
+                      "options": [
+                        "Always yours",
+                        "○ Temporary",
+                        "○ Only for some people"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 3,
+              "lesson_title": "Making Simple Choices (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🍎 Choices are everywhere.",
+                  "Even small ones matter.",
+                  "Examples of simple choices:",
+                  "What to wear",
+                  "What to eat",
+                  "What game to play",
+                  "When you want quiet time",
+                  "Why choice matters:",
+                  "🧠 Big Tip:",
+                  "There is no \"wrong\" choice when it comes to your personal preference."
+                ],
+                "bullets": [
+                  "✔ Makes you feel independent✔ Builds confidence✔ Helps you understand what you like"
+                ]
+              },
+              "mini_activity": "\"Choose 1!\" Ask participants: Which do you pick?🍎 Apple or 🍌 Banana🎵 Music or 🎬 Movies🚶 Walk or 🚌 Bus🙂 Quiet time or 👥 Friends time Everyone's choice is OK.",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Making choices helps you feel:",
+                      "options": [
+                        "Independent",
+                        "○ Forced",
+                        "○ Confused"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Choosing pizza instead of pasta is:",
+                      "options": [
+                        "Your personal choice",
+                        "○ Wrong",
+                        "○ Not allowed"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Which is a simple choice?",
+                      "options": [
+                        "What to wear",
+                        "○ What time the sun rises",
+                        "○ The weather"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 4,
+              "lesson_title": "Communicating What I Want (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "📢 You are allowed to say what you want.",
+                  "Speaking up is important.",
+                  "Ways to communicate:",
+                  "🗣 Talking✍️ Writing📱 Texting😊 Using pictures✋ Pointing💬 Using a support worker",
+                  "Use clear and simple phrases:",
+                  "\"I would like…\"",
+                  "\"I need…\"",
+                  "\"I don't feel comfortable with that.\"",
+                  "\"Can we do this instead?\"",
+                  "⭐ Big Truth",
+                  "Your voice matters - even if it's quiet."
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Say It Your Way!\" Give participants these prompts to complete: \"I want…\"\"I need…\"\"I prefer…\"\"I don't like…\" They can speak, point, or use apps.",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "You can communicate using:",
+                      "options": [
+                        "Talking or pictures",
+                        "○ Only long speeches",
+                        "○ Only the internet"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Saying \"I need help\" is:",
+                      "options": [
+                        "Good communication",
+                        "○ Wrong",
+                        "○ Rude"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Your voice is:",
+                      "options": [
+                        "Important",
+                        "○ Unnecessary",
+                        "○ Only for emergencies"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 5,
+              "lesson_title": "Boundaries & Personal Safety (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🛑 Boundaries = Your Personal \"Stop Sign\"",
+                  "Boundaries protect your feelings, body, space, and comfort.",
+                  "You are allowed to say:✔ \"Stop.\"✔ \"No.\"✔ \"I don't like that.\"✔ \"I need space.\"",
+                  "You control:",
+                  "Who you talk to",
+                  "Who you spend time with",
+                  "Who can touch you",
+                  "What makes you comfortable",
+                  "🚫 Boundaries are NOT rude",
+                  "They're healthy and important."
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Yes or No?\" Participants answer with YES 👍 or NO 🚫 \"Can I hug you?\" \"Can I read your messages?\" \"Can I sit next to you?\" \"Give me your password!\" They learn to recognise safe vs unsafe behaviour.",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Boundaries help keep you:",
+                      "options": [
+                        "Safe",
+                        "○ Confused",
+                        "○ Quiet"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "You are allowed to say:",
+                      "options": [
+                        "\"No\"",
+                        "○ \"Yes to everything\"",
+                        "○ Nothing"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Someone asking for your password is:",
+                      "options": [
+                        "Not OK",
+                        "○ Always OK",
+                        "○ Funny"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 6,
+              "lesson_title": "Asking for Help & Support (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "❤️ Everyone needs help sometimes - even adults.",
+                  "Asking for help shows strength, not weakness.",
+                  "You can ask for help when:",
+                  "You feel confused",
+                  "Something feels unsafe",
+                  "You don't understand",
+                  "You feel stressed",
+                  "You want guidance",
+                  "Trusted people include:",
+                  "👩‍⚕️ Support workers👨‍👩‍👧 Family👩‍🏫 Teachers👨‍💼 Coordinators👮 Police (if danger)",
+                  "Use these phrases:",
+                  "\"Can you help me with this?\"",
+                  "\"I don't understand.\"",
+                  "\"I feel uncomfortable.\""
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Who Would You Ask?\" Give scenarios: 📘 \"You don't understand a form.\" → Ask who?📱 \"Stranger messages you online.\" → Ask who?💊 \"You feel unwell.\" → Ask who? Participants choose the helper.",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Asking for help is:",
+                      "options": [
+                        "OK",
+                        "○ Bad",
+                        "○ Embarrassing"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "You should ask for help when you feel:",
+                      "options": [
+                        "Unsafe",
+                        "○ Bored",
+                        "○ Hungry"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "A trusted person is:",
+                      "options": [
+                        "Someone who cares about your safety",
+                        "○ A random stranger",
+                        "○ Anyone online"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 7,
+              "lesson_title": "Understanding People & Feelings (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "😌 Everyone has feelings",
+                  "You do.Other people do.",
+                  "Feelings can be:",
+                  "😊 Happy😡 Angry😢 Sad😰 Worried😴 Tired😃 Excited",
+                  "Good choices come from understanding emotions.",
+                  "If someone looks sad - they may need space.If someone is angry - they may need calm.",
+                  "🔍 Reading body language:",
+                  "Smile → friendly",
+                  "Crossed arms → upset",
+                  "Crying → sad",
+                  "Turning away → wants space"
+                ],
+                "bullets": []
+              },
+              "mini_activity": "\"Guess the Feeling!\" Show emoji cards or do facial expressions.Participants guess the emotion.",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "If someone is crying, they might feel:",
+                      "options": [
+                        "Sad",
+                        "○ Hungry",
+                        "○ Sleepy"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "If someone turns away, they might need:",
+                      "options": [
+                        "Space",
+                        "○ Noise",
+                        "○ A selfie"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Emotions help us:",
+                      "options": [
+                        "Understand people",
+                        "○ Confuse people",
+                        "○ Ignore people"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 8,
+              "lesson_title": "Problem Solving & Decision Skills (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🧠 Good choices = good outcomes",
+                  "Life gives us problems.We find solutions.",
+                  "Steps to solve a problem:",
+                  "1️⃣ What is the problem?2️⃣ What are my options?3️⃣ What is the safest choice?4️⃣ How do I feel about the choice?5️⃣ Try it out.6️⃣ Ask for help if unsure.",
+                  "🛑 Good decision-making avoids:",
+                  "Rushing",
+                  "Feeling pressured",
+                  "Saying \"yes\" when you mean \"no\"",
+                  "3. It's OK to ask for help when making decisions.✔ True○ False"
+                ],
+                "bullets": [
+                  "✔ Ask a staff member○ Run around○ Go outside alone"
+                ]
+              },
+              "mini_activity": "\"Pick the Best Choice!\" Scenario:You're lost in the shopping centre.Which is the best solution?",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "First step to solve a problem is:",
+                      "options": [
+                        "Identify the problem",
+                        "○ Panic",
+                        "○ Guess"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Good choices are usually:",
+                      "options": [
+                        "Calm and safe",
+                        "○ Rushed",
+                        "○ Random"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 9,
+              "lesson_title": "Self-Advocacy: Speaking Up For Yourself (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🗣️ Self-advocacy = standing up for YOUR needs",
+                  "You can say:",
+                  "\"I don't feel comfortable.\"",
+                  "\"I would like something different.\"",
+                  "\"That doesn't work for me.\"",
+                  "\"This is my choice.\"",
+                  "Self-advocacy helps you:",
+                  "❗ Your voice is important - even if someone disagrees."
+                ],
+                "bullets": [
+                  "✔ Get the support you need✔ Make decisions✔ Feel confident✔ Stay safe"
+                ]
+              },
+              "mini_activity": "\"My Strong Sentence!\" Participants practice saying one strong statement: \"I prefer ___.\" \"I don't want that.\" \"I need help with this.\" \"I feel unsafe.\"",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Self-advocacy means:",
+                      "options": [
+                        "Speaking up for your needs",
+                        "○ Staying silent",
+                        "○ Doing what everyone else wants"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "A good strong statement is:",
+                      "options": [
+                        "\"I don't feel comfortable.\"",
+                        "○ \"Whatever",
+                        "…\"",
+                        "○ \"I'll just be quiet.\""
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Your voice matters:",
+                      "options": [
+                        "Always",
+                        "○ Sometimes",
+                        "○ Never"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 10,
+              "lesson_title": "Being Confident & In Control of My Life (Fun & Interactive)",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🌟 Confidence = believing you can do it.",
+                  "Even when things are hard.",
+                  "How to build confidence:",
+                  "You are in charge of your life.",
+                  "Your choices, your goals, your future."
+                ],
+                "bullets": [
+                  "✔ Try new things✔ Practice choices✔ Celebrate small wins✔ Use your voice✔ Ask for help✔ Learn from mistakes"
+                ]
+              },
+              "mini_activity": "\"My Power List!\" Participants list (or say):💪 Something they are good at🎯 A goal they want🙂 Something they are proud of🌟 Something they want to try This builds self-esteem.",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Confidence means:",
+                      "options": [
+                        "Believing in yourself",
+                        "○ Being perfect",
+                        "○ Never asking for help"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "You can build confidence by:",
+                      "options": [
+                        "Trying new things",
+                        "○ Never choosing",
+                        "○ Staying silent"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Who is in control of your life?",
+                      "options": [
+                        "YOU",
+                        "○ Your phone",
+                        "○ Random people"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "module_number": 4,
+      "chapter_key": "module_4",
+      "chapter_title": "Life Skills & Independence",
+      "chapter_icon": "📚",
+      "levels": [
+        {
+          "level_number": 1,
+          "level_title": "Life Skills & Independence Level 1",
+          "youtube_url": null,
+          "lessons": [
+            {
+              "lesson_number": 1,
+              "lesson_title": "Personal Hygiene & Self-Care BasicsSimple Kitchen & Food Safety SkillsEasy Cooking for BeginnersCleaning & Home RoutinesShopping & Community SafetyTravel & Getting Around SafelyMoney & Bills for Everyday LifeHealth, Safety & EmergenciesSocial Independence & AppointmentsLiving Independently With Confidence",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "⭐ LEVEL 1 - Personal Hygiene & Self-Care Basics",
+                  "🎉 Lesson Content",
+                  "Good hygiene keeps your body healthy and makes you feel confident.",
+                  "Daily hygiene includes:",
+                  "Brushing teeth",
+                  "Showering and washing your body",
+                  "Wearing clean clothes",
+                  "Using deodorant",
+                  "Brushing hair",
+                  "Why it matters:",
+                  "⭐ Mini Activity: \"Self-Care Checklist\"",
+                  "Participants tick off what they have done today."
+                ],
+                "bullets": [
+                  "✔ Keeps you healthy✔ Helps you smell fresh✔ Makes social situations easier✔ Boosts confidence"
+                ]
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": []
+            }
+          ]
+        },
+        {
+          "level_number": 1,
+          "level_title": "🧠 QUIZ - Level 1",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 2,
+          "level_title": "🧠 QUIZ - Level 2",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 3,
+          "level_title": "🧠 QUIZ - Level 3",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 4,
+          "level_title": "🧠 QUIZ - Level 4",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 5,
+          "level_title": "🧠 QUIZ - Level 5",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 6,
+          "level_title": "🧠 QUIZ - Level 6",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 7,
+          "level_title": "🧠 QUIZ - Level 7",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 8,
+          "level_title": "🧠 QUIZ - Level 8",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 9,
+          "level_title": "🧠 QUIZ - Level 9",
+          "youtube_url": null,
+          "lessons": []
+        },
+        {
+          "level_number": 10,
+          "level_title": "🧠 QUIZ - Level 10",
+          "youtube_url": null,
+          "lessons": []
+        }
+      ]
+    },
+    {
+      "module_number": 5,
+      "chapter_key": "module_5",
+      "chapter_title": "Psychology & Behaviour",
+      "chapter_icon": "📚",
+      "levels": [
+        {
+          "level_number": 1,
+          "level_title": "Psychology & Behaviour  Level 1",
+          "youtube_url": null,
+          "lessons": [
+            {
+              "lesson_number": 1,
+              "lesson_title": "Understanding My FeelingsCalming My Body & MindRecognising My TriggersHealthy Coping SkillsUnderstanding Other PeopleCommunication & RelationshipsPositive Behaviour StrategiesHandling Conflict & ProblemsBuilding Confidence & Emotional StrengthHealthy Relationships & Safe Boundaries",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Everyone has feelings. Feelings are normal and healthy.",
+                  "Common feelings:",
+                  "😊 Happy😢 Sad😡 Angry😰 Worried😴 Tired😃 Excited",
+                  "Why feelings matter:",
+                  "⭐ Mini Activity: \"Pick Your Feeling\"",
+                  "Show emoji cards - participants choose the one that matches how they feel."
+                ],
+                "bullets": [
+                  "✔ They help us understand what we need✔ They help us make safe choices✔ They help us communicate with others"
+                ]
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Everyone has:",
+                      "options": [
+                        "A. Feelings B. SuperpowersC. No emotions"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "A sad emoji looks like:",
+                      "options": [
+                        "A.",
+                        "🙂B.",
+                        "😢 C.",
+                        "😎"
+                      ],
+                      "correct_index": 2,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Feelings help you:",
+                      "options": [
+                        "A. Stay confusedB. Understand yourself C. Ignore people"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 2,
+              "lesson_title": "⭐ Calming My Body & Mind",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Being calm helps you make better choices.",
+                  "Ways to calm yourself:",
+                  "🫁 Deep breathing🧘 Stretching🧩 Fidget toys🔟 Counting to 10🤫 Quiet space",
+                  "⭐ Activity: \"5 Calm Breaths Together\"",
+                  "Everyone takes 5 slow breaths."
+                ],
+                "bullets": []
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Deep breaths help you:",
+                      "options": [
+                        "A. Get angryB. Calm down C. Shout louder"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Counting to 10 is a:",
+                      "options": [
+                        "A. Calming tool B. Dance moveC. Joke"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "A quiet space can help you feel:",
+                      "options": [
+                        "A. Calm B. LoudC. Confused"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 3,
+              "lesson_title": "⭐ Recognising Triggers",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "A trigger is something that makes you feel upset, stressed, or overwhelmed.",
+                  "Triggers could be:",
+                  "🔊 Loud noise👥 Too many people😡 Being yelled at⏳ Long waiting times♻ Big changes",
+                  "⭐ Activity: \"My Triggers List\"",
+                  "Participants choose 3 things that make them stressed."
+                ],
+                "bullets": []
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "A trigger is something that:",
+                      "options": [
+                        "A. Makes you happyB. Upsets or stresses you C. Makes you sleepy"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Loud noise can be a:",
+                      "options": [
+                        "A. Trigger B. SnackC. Hobby"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Triggers are:",
+                      "options": [
+                        "A. The same for everyoneB. Different for each person C. Fake"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 4,
+              "lesson_title": "⭐ Healthy Coping Skills",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Coping skills help you feel better when you're stressed.",
+                  "Healthy coping tools include:",
+                  "Deep breaths",
+                  "Asking for help",
+                  "Drinking water",
+                  "Listening to music",
+                  "Taking a break",
+                  "Going for a walk",
+                  "Talking to someone safe",
+                  "⭐ Activity: \"Coping Menu\"",
+                  "Participants build their own \"menu\" of 5 coping tools."
+                ],
+                "bullets": []
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "A coping skill helps you:",
+                      "options": [
+                        "A. Feel better B. Get more stressedC. Stay upset"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Which is a healthy coping tool?",
+                      "options": [
+                        "A. YellingB. Taking deep breaths C. Breaking things"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Asking for help is:",
+                      "options": [
+                        "A. WeakB. WrongC. A coping skill"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 5,
+              "lesson_title": "⭐ Understanding Other People",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Understanding people helps you build good relationships.",
+                  "How to understand others:",
+                  "Look at their face",
+                  "Listen to their voice",
+                  "Notice their body language",
+                  "Ask how they feel",
+                  "⭐ Activity: \"Guess the Emotion\"",
+                  "Show facial expressions - participants guess the feeling."
+                ],
+                "bullets": []
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Body language helps you see:",
+                      "options": [
+                        "A. What someone is feeling B. What they ateC. Their age"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Smiling usually means:",
+                      "options": [
+                        "A. AngryB. Happy C. Sleepy"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Good relationships need:",
+                      "options": [
+                        "A. YellingB. Understanding C. Ignoring people"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 6,
+              "lesson_title": "⭐ Communication & Relationships",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Good communication makes relationships stronger.",
+                  "Good communication means:",
+                  "⭐ Activity: \"Say It Nicely\"",
+                  "Participants transform rude sentences into kind ones."
+                ],
+                "bullets": [
+                  "✔ Listening✔ Taking turns✔ Being honest✔ Using kind words✔ Respecting boundaries"
+                ]
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Good communication includes:",
+                      "options": [
+                        "A. YellingB. Listening C. Talking over people"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Using kind words helps:",
+                      "options": [
+                        "A. Start argumentsB. Build good relationships C. Confuse people"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Respect means:",
+                      "options": [
+                        "A. Being rudeB. Treating others kindly C. Ignoring someone"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 7,
+              "lesson_title": "⭐ Positive Behaviour Strategies",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Positive behaviour helps you feel safe and in control.",
+                  "Strategies include:",
+                  "Following routines",
+                  "Rewarding good behaviour",
+                  "Using coping tools",
+                  "Practicing patience",
+                  "Staying calm",
+                  "⭐ Activity: \"Behaviour Rewards\"",
+                  "Participants create their own positive reward:(Example: \"If I finish my tasks, I get 10 minutes of music time.\")"
+                ],
+                "bullets": []
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Positive behaviour helps you:",
+                      "options": [
+                        "A. Lose controlB. Stay calm C. Start fights"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Rewards can:",
+                      "options": [
+                        "A. Motivate you B. Hurt youC. Make things harder"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Patience means:",
+                      "options": [
+                        "A. Waiting calmly B. YellingC. Rushing"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 8,
+              "lesson_title": "⭐ Handling Conflict & Problems",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Conflict means a disagreement or argument.",
+                  "How to handle conflict safely:",
+                  "⭐ Activity: \"Fix the Problem!\"",
+                  "Give a scenario → participants choose the best safe response."
+                ],
+                "bullets": [
+                  "✔ Stay calm✔ Listen✔ Use \"I feel…\" statements✔ Walk away if needed✔ Ask for help"
+                ]
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Conflict is:",
+                      "options": [
+                        "A. A disagreement B. A sportC. A fruit"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "A safe way to handle conflict is:",
+                      "options": [
+                        "A. YellingB. Staying calm C. Throwing things"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "You can say:",
+                      "options": [
+                        "A. \"I feel upset.\" B. \"You're terrible",
+                        "!\"C. \"I don't care",
+                        "!\""
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 9,
+              "lesson_title": "⭐ Building Confidence & Emotional Strength",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Confidence is believing in yourself.",
+                  "Confidence grows when you:",
+                  "⭐ Activity: \"Confidence Cards\"",
+                  "Participants finish: \"I am good at ____.\""
+                ],
+                "bullets": [
+                  "✔ Try new things✔ Celebrate small wins✔ Practice skills✔ Use positive self-talk✔ Don't give up"
+                ]
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Confidence means:",
+                      "options": [
+                        "A. Believing in yourself B. Being perfectC. Never trying"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Positive self-talk is:",
+                      "options": [
+                        "A. \"I can do this.\" B. \"I'm a failure.\"C. \"I give up.\""
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Confidence grows when you:",
+                      "options": [
+                        "A. Stop tryingB. Practice C. Hide"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "lesson_number": 10,
+              "lesson_title": "⭐ Healthy Relationships & Safe Boundaries",
+              "lesson_format": "standard",
+              "lesson_body": {
+                "paragraphs": [
+                  "🎉 Lesson Content",
+                  "Healthy relationships are safe, respectful, and kind.",
+                  "Signs of a healthy relationship:",
+                  "Boundaries help protect your feelings and safety.",
+                  "⭐ Activity: \"Healthy or Not?\"",
+                  "Participants choose which behaviours are healthy or unhealthy.",
+                  "🎉 PSYCHOLOGY & BEHAVIOUR MODULE COMPLETE!",
+                  "Prime, you now have:",
+                  "🔥 AI & Digital Skills (10 lessons)🔥 Self Choice & Control (10 lessons)🔥 Math & Numbers (10 lessons)🔥 Life Skills & Independence (10 lessons)🔥 Psychology & Behaviour (10 lessons)",
+                  "All fun, interactive, NDIS-ready."
+                ],
+                "bullets": [
+                  "✔ Respect✔ Kindness✔ Honesty✔ Listening✔ Personal space"
+                ]
+              },
+              "mini_activity": "",
+              "fun_reminder": "",
+              "quizzes": [
+                {
+                  "quiz_title": "Quiz",
+                  "questions": [
+                    {
+                      "prompt": "Respect means:",
+                      "options": [
+                        "A. Being rudeB. Treating people kindly C. Ignoring feelings"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "Boundaries help you:",
+                      "options": [
+                        "A. Stay safe B. Get pressuredC. Feel scared"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    },
+                    {
+                      "prompt": "A healthy relationship includes:",
+                      "options": [
+                        "A. YellingB. LyingC. Kindness"
+                      ],
+                      "correct_index": 0,
+                      "explanation": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}

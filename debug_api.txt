@@ -1,0 +1,1 @@
+{"error":"Endpoint not found","endpoint":"\/admin\/add_level_json","clean_endpoint":"\/admin\/add_level_json","script_name":"\/academy\/api","uri":"\/academy\/api\/admin\/add_level_json","method":"POST"}

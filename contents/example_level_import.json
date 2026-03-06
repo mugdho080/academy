@@ -1,0 +1,39 @@
+{
+    "level_number": 2,
+    "level_title": "Example Level Title",
+    "youtube_url": "https://www.youtube.com/embed/your_video_id",
+    "lessons": [
+        {
+            "lesson_title": "Lesson 1: Introduction to the Topic",
+            "lesson_format": "standard",
+            "lesson_body": {
+                "paragraphs": [
+                    "This is the first sentence. It will appear on the first swipeable card.",
+                    "This is the second sentence. It will appear on the next swipeable card."
+                ],
+                "bullets": [
+                    "Important point 1.",
+                    "Important point 2."
+                ]
+            },
+            "mini_activity": "Try giving a thumbs up in the mirror!",
+            "fun_reminder": "You are doing great! Keep going.",
+            "quizzes": [
+                {
+                    "questions": [
+                        {
+                            "prompt": "What is the main topic of this lesson?",
+                            "options": [
+                                "Wrong Option 1",
+                                "Correct Option",
+                                "Wrong Option 2"
+                            ],
+                            "correct_index": 1,
+                            "explanation": "This is the correct answer because of reasons explained in the lesson."
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

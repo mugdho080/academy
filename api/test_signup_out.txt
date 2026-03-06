@@ -1,0 +1,7 @@
+<br />
+<b>Warning</b>:  Undefined variable $pdo in <b>C:\xampp\htdocs\academy\api\auth\signup.php</b> on line <b>17</b><br />
+<br />
+<b>Fatal error</b>:  Uncaught Error: Call to a member function prepare() on null in C:\xampp\htdocs\academy\api\auth\signup.php:17
+Stack trace:
+#0 {main}
+  thrown in <b>C:\xampp\htdocs\academy\api\auth\signup.php</b> on line <b>17</b><br />

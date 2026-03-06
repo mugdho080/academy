@@ -1,0 +1,57 @@
+﻿{
+    "quizzes": [
+        {
+            "id": 1,
+            "question": "AI is like:\ud83e\udd14 A person with feelings\ud83e\udd16 A helpful robot in your device \u2714\ud83c\udf88 A balloon",
+            "correct_answer": 0
+        },
+        {
+            "id": 2,
+            "question": "Can AI get sad or angry?\ud83d\ude2d Yes\ud83d\ude0e No \u2714",
+            "correct_answer": 0
+        },
+        {
+            "id": 3,
+            "question": "Which one uses AI?\ud83d\udcf1 Google Maps \u2714\ud83c\udf54 A cheeseburger\ud83e\uddf9 A broom",
+            "correct_answer": 0
+        },
+        {
+            "id": 4,
+            "question": "Which one is a strong password?\ud83d\udc36 Dog123\ud83e\udd81 RedLion#34 \u2714\ud83c\udf82 1998",
+            "correct_answer": 0
+        },
+        {
+            "id": 5,
+            "question": "Someone sends you a weird link. What do you do?\ud83d\udc49 Click it fast\ud83d\udc49 Send it to everyone\ud83d\udc49\u274c Ask for help or delete \u2714",
+            "correct_answer": 0
+        }
+    ],
+    "lessons": [
+        {
+            "id": 1,
+            "title": "What is AI?",
+            "content_len": 674
+        },
+        {
+            "id": 2,
+            "title": "Using Computers & Phones Safely",
+            "content_len": 815
+        },
+        {
+            "id": 3,
+            "title": "AI in Everyday Life",
+            "content_len": 678
+        },
+        {
+            "id": 4,
+            "title": "Talking to AI & Being Kind Online",
+            "content_len": 739
+        },
+        {
+            "id": 5,
+            "title": "Making a Strong Password",
+            "content_len": 637
+        }
+    ],
+    "status": "success"
+}
