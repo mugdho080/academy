@@ -10,6 +10,11 @@ export default defineConfig({
         target: 'http://localhost/academy/api',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/uploads': {
+        target: 'http://localhost/academy/uploads',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/uploads/, '')
       }
     }
   }

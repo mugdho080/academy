@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGeminiLive } from '../hooks/useGeminiLive';
 import { Mic, MicOff, Volume2, VolumeX, ArrowLeft, MessageCircle } from 'lucide-react';
@@ -8,9 +8,13 @@ import SensoryBackground from '../components/SensoryBackground';
 
 const AIFriendPage = () => {
     const navigate = useNavigate();
-    const { connect, disconnect, toggleMute, isConnected, isSpeaking, isMuted, mood, error, logs } = useGeminiLive();
-    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
-
+    const { connect, disconnect, toggleMute, isConnected, isSpeaking, isMuted, mood, error, logs } = useGeminiLive({
+        coachMode: 'encouragement',
+        intent: 'navigation_help',
+        sensoryMode: 'calm',
+        ageBand: 'age_20_40',
+        maxWords: 60
+    });
     const toggleConnection = () => {
         if (isConnected) disconnect();
         else connect();
@@ -106,7 +110,7 @@ const AIFriendPage = () => {
             {/* Mute/Settings Fab */}
             <div className="fixed top-6 right-6 z-50">
                 <button
-                    onClick={() => setIsMuted(!isMuted)}
+                    onClick={toggleMute}
                     className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg border-2 transition-all ${isMuted ? 'bg-red-100 text-red-500 border-red-200' : 'bg-white text-[#00695C] border-[#00695C]/20 hover:bg-gray-50'}`}
                 >
                     {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}

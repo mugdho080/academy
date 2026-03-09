@@ -11,28 +11,34 @@ import SidebarLayout from './components/SidebarLayout';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ParticipantDetail from './pages/admin/ParticipantDetail';
+import Invoicing from './pages/admin/Invoicing';
 import { ActivityTimerProvider } from './context/ActivityTimerProvider';
+import { CoachProvider } from './context/CoachContext';
 function App() {
     return (
         <Router>
             <ActivityTimerProvider>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/admin" element={<AdminPanel />} />
-                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                    <Route path="/admin/participant/:id" element={<ParticipantDetail />} />
+                <CoachProvider>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<Signup />} />
+                        <Route path="/admin" element={<AdminPanel />} />
+                        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                        <Route path="/admin/participant/:id" element={<ParticipantDetail />} />
+                        <Route path="/admin/invoicing" element={<Invoicing />} />
+                        <Route path="/admin/company-settings" element={<Invoicing />} />
 
-                    {/* Learner Routes wrapped in SidebarLayout */}
-                    <Route path="/dashboard" element={<SidebarLayout><Dashboard /></SidebarLayout>} />
-                    <Route path="/chapter/:chapterId" element={<SidebarLayout><LevelMap /></SidebarLayout>} />
-                    <Route path="/level/:levelId" element={<SidebarLayout><LevelDashboard /></SidebarLayout>} />
-                    <Route path="/ai-friend" element={<SidebarLayout><AIFriendPage /></SidebarLayout>} />
-                    <Route path="/profile" element={<SidebarLayout><Profile /></SidebarLayout>} />
-                    <Route path="/lesson/:levelId" element={<SidebarLayout><LessonView /></SidebarLayout>} />
+                        {/* Learner Routes wrapped in SidebarLayout */}
+                        <Route path="/dashboard" element={<SidebarLayout><Dashboard /></SidebarLayout>} />
+                        <Route path="/chapter/:chapterId" element={<SidebarLayout><LevelMap /></SidebarLayout>} />
+                        <Route path="/level/:levelId" element={<SidebarLayout><LevelDashboard /></SidebarLayout>} />
+                        <Route path="/ai-friend" element={<SidebarLayout><AIFriendPage /></SidebarLayout>} />
+                        <Route path="/profile" element={<SidebarLayout><Profile /></SidebarLayout>} />
+                        <Route path="/lesson/:levelId" element={<SidebarLayout><LessonView /></SidebarLayout>} />
 
-                    <Route path="/" element={<Navigate to="/login" replace />} />
-                </Routes>
+                        <Route path="/" element={<Navigate to="/login" replace />} />
+                    </Routes>
+                </CoachProvider>
             </ActivityTimerProvider>
         </Router>
     );

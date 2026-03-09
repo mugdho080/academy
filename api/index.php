@@ -70,6 +70,9 @@ switch ($clean_endpoint) {
     case '/learner/get_time_summary':
         require 'learner/get_time_summary.php';
         break;
+    case '/learner/get_my_invoices':
+        require 'learner/get_my_invoices.php';
+        break;
     case '/learner/submit_agreement':
         require 'learner/submit_agreement.php';
         break;
@@ -91,6 +94,42 @@ switch ($clean_endpoint) {
     case '/admin/get_time_summary':
         require 'admin/get_time_summary.php';
         break;
+    case '/admin/company_settings':
+        require 'admin/company_settings.php';
+        break;
+    case '/admin/upload_company_logo':
+        require 'admin/upload_company_logo.php';
+        break;
+    case '/admin/invoice_eligible_users':
+        require 'admin/invoice_eligible_users.php';
+        break;
+    case '/admin/generate_draft_invoices':
+        require 'admin/generate_draft_invoices.php';
+        break;
+    case '/admin/get_invoices':
+        require 'admin/get_invoices.php';
+        break;
+    case '/admin/get_invoice_detail':
+        require 'admin/get_invoice_detail.php';
+        break;
+    case '/admin/update_invoice':
+        require 'admin/update_invoice.php';
+        break;
+    case '/admin/change_invoice_status':
+        require 'admin/change_invoice_status.php';
+        break;
+    case '/admin/generate_invoice_pdf':
+        require 'admin/generate_invoice_pdf.php';
+        break;
+    case '/admin/download_invoice':
+        require 'admin/download_invoice.php';
+        break;
+    case '/admin/get_user_invoices':
+        require 'admin/get_user_invoices.php';
+        break;
+    case '/admin/get_coach_events':
+        require 'admin/get_coach_events.php';
+        break;
     case '/admin/fetch_content':
         require 'admin/fetch_content.php';
         break;
@@ -108,6 +147,21 @@ switch ($clean_endpoint) {
         break;
     case '/ai/chat':
         require 'ai/chat.php';
+        break;
+    case '/ai/coach_chat':
+        require 'ai/coach_chat.php';
+        break;
+    case '/ai/get_coach_recommendation':
+        require 'ai/get_coach_recommendation.php';
+        break;
+    case '/ai/log_coach_event':
+        require 'ai/log_coach_event.php';
+        break;
+    case '/ai/get_coach_state':
+        require 'ai/get_coach_state.php';
+        break;
+    case '/ai/update_coach_state':
+        require 'ai/update_coach_state.php';
         break;
     case '/test':
         echo json_encode(['success' => true, 'message' => 'API is working!']);

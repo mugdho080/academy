@@ -1,18 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import { ShieldCheck, AlertCircle, Activity } from 'lucide-react';
+import { ShieldCheck, AlertCircle, Activity, Download } from 'lucide-react';
 import TimeLogsViewer from '../../components/TimeLogsViewer';
 
 export default function ParticipantDetail() {
     const { id } = useParams();
     const [data, setData] = useState(null);
+    const [invoices, setInvoices] = useState([]);
+    const [coachAnalytics, setCoachAnalytics] = useState(null);
 
     useEffect(() => {
         // Since we didn't build a massive aggregate profile endpoint, we make a few specific calls
         // For demonstration of the UI requirement, we fetch stage and blockers:
         axios.get(`/api/admin/participant_stage.php?id=${id || 1}`)
             .then(res => setData(res.data))
+            .catch(err => console.error(err));
+
+        axios.get('/api/admin/get_user_invoices.php', {
+            params: { user_id: id || 1, status: 'all' }
+        })
+            .then(res => setInvoices(res.data?.invoices || []))
+            .catch(err => console.error(err));
+
+        axios.get('/api/admin/get_coach_events.php', {
+            params: { user_id: id || 1, limit: 30 }
+        })
+            .then(res => setCoachAnalytics(res.data || null))
             .catch(err => console.error(err));
     }, [id]);
 
@@ -60,6 +74,70 @@ export default function ParticipantDetail() {
 
             {/* Time Tracking Section */}
             <TimeLogsViewer userId={id} isAdminView={true} />
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 className="font-bold text-gray-800 mb-4">Invoices</h3>
+                {invoices.length === 0 ? (
+                    <p className="text-sm text-gray-500">No invoices for this participant yet.</p>
+                ) : (
+                    <div className="space-y-3">
+                        {invoices.map((inv) => (
+                            <div key={inv.id} className="p-4 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <p className="font-bold text-gray-800">{inv.invoice_number}</p>
+                                    <p className="text-xs text-gray-500">{inv.invoice_date} • Status {inv.status}</p>
+                                    <p className="text-sm font-bold text-[#00695C]">${Number(inv.total || 0).toFixed(2)}</p>
+                                </div>
+                                <button
+                                    onClick={() => window.open(`/api/admin/download_invoice.php?id=${inv.id}`, '_blank')}
+                                    className="inline-flex items-center gap-2 bg-[#00695C] text-white px-3 py-2 rounded-lg text-sm font-bold"
+                                >
+                                    <Download size={14} /> PDF
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 className="font-bold text-gray-800 mb-4">Panda Coach Analytics</h3>
+                {!coachAnalytics ? (
+                    <p className="text-sm text-gray-500">Loading coach analytics...</p>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                <p className="text-xs uppercase tracking-widest text-gray-400 font-black">Frustration</p>
+                                <p className="text-xl font-black text-gray-700">{coachAnalytics?.state?.frustration_score ?? 0}</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                <p className="text-xs uppercase tracking-widest text-gray-400 font-black">Engagement</p>
+                                <p className="text-xl font-black text-gray-700">{coachAnalytics?.state?.engagement_score ?? 0}</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                <p className="text-xs uppercase tracking-widest text-gray-400 font-black">Last Route</p>
+                                <p className="text-sm font-black text-gray-700">{coachAnalytics?.state?.last_route || '-'}</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="text-xs uppercase tracking-widest text-gray-400 font-black mb-2">Recent Coach Events</p>
+                            <div className="space-y-2 max-h-64 overflow-auto">
+                                {(coachAnalytics?.events || []).slice(0, 10).map((evt) => (
+                                    <div key={evt.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                                        <p className="font-bold text-gray-700">{evt.event_type}</p>
+                                        <p className="text-xs text-gray-500">{evt.route || '-'} • {new Date(evt.created_at).toLocaleString()}</p>
+                                    </div>
+                                ))}
+                                {(coachAnalytics?.events || []).length === 0 && (
+                                    <p className="text-sm text-gray-500">No coach events yet.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             {/* Traffic Light Session Rules (Mock representation) */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">

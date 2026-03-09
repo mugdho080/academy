@@ -114,3 +114,161 @@ This file is a running handover log for any agent working on this project.
 - SQL checks confirm recent rows increasing:
   - `sessions.total_seconds_active`
   - `time_entries.seconds_active`
+
+## 2026-03-07
+
+### Full Admin Invoicing System (Goodwill Care Academy)
+- Added backend invoice service:
+  - `api/services/InvoiceService.php`
+  - includes schema bootstrap, admin/user auth guards, invoice sequencing, time-to-hours aggregation, totals recalculation, and PDF generation helper.
+- Added DB migration SQL:
+  - `db/invoicing_schema.sql`
+  - tables: `company_settings`, `invoice_sequences`, `invoices`, `invoice_items`, `invoice_log_sources`.
+- Added admin APIs:
+  - `api/admin/company_settings.php`
+  - `api/admin/upload_company_logo.php`
+  - `api/admin/invoice_eligible_users.php`
+  - `api/admin/generate_draft_invoices.php` (supports `preview_only`)
+  - `api/admin/get_invoices.php`
+  - `api/admin/get_invoice_detail.php`
+  - `api/admin/update_invoice.php`
+  - `api/admin/change_invoice_status.php`
+  - `api/admin/generate_invoice_pdf.php`
+  - `api/admin/download_invoice.php`
+  - `api/admin/get_user_invoices.php`
+- Added learner invoice API:
+  - `api/learner/get_my_invoices.php`
+- Routed all new endpoints in:
+  - `api/index.php`
+
+### Frontend Invoicing UI
+- Added dedicated admin invoicing page:
+  - `src/pages/admin/Invoicing.jsx`
+  - tabs: create, draft, unpaid, paid, company settings
+  - draft generation from selected signed participants + date range
+  - invoice detail edit form + save/status/PDF actions
+  - company settings edit + logo upload.
+- Added routes:
+  - `src/App.jsx` routes `/admin/invoicing` and `/admin/company-settings`.
+- Added admin navigation entry:
+  - `src/pages/AdminPanel.jsx` sidebar now includes `Invoicing`.
+
+### Paid Invoice Visibility in Profiles
+- Learner profile now shows paid invoices with PDF download:
+  - `src/pages/Profile.jsx`
+- Admin participant view now shows participant invoices with PDF download:
+  - `src/pages/admin/ParticipantDetail.jsx`
+
+### Runtime Integration / Verification
+- Synced all new API files to XAMPP runtime:
+  - `C:\\xampp\\htdocs\\academy\\api\\...`
+- Applied `db/invoicing_schema.sql` to local `ndis_lms` DB.
+- Verified workflow with live API calls:
+  - admin login
+  - fetch eligible users
+  - preview/generate draft invoice
+  - move draft -> unpaid -> paid
+  - generate invoice PDF
+  - fetch user invoices (admin endpoint)
+- Frontend build check passes: `npm run build`.
+
+### Panda Coach System (Production-Grade Layer on Existing Panda)
+- Added coach backend service:
+  - `api/services/CoachService.php`
+  - includes schema bootstrap, profile/state upserts, deterministic frustration scoring, recommendation engine, bounded/safe message generation, and intervention logging.
+- Added coach AI endpoints:
+  - `api/ai/coach_chat.php`
+  - `api/ai/get_coach_recommendation.php`
+  - `api/ai/log_coach_event.php`
+  - `api/ai/get_coach_state.php`
+  - `api/ai/update_coach_state.php`
+- Added admin coach analytics endpoint:
+  - `api/admin/get_coach_events.php`
+- Routed new endpoints in:
+  - `api/index.php`
+- Replaced insecure generic AI endpoint behavior:
+  - `api/ai/chat.php` now delegates to coach-safe generation path.
+
+### Coach Database Migration
+- Added coach migration SQL:
+  - `db/coach_schema.sql`
+  - tables: `learner_profiles`, `coach_state`, `coach_events`, `coach_recommendations`, `coach_interventions`.
+- Applied coach migration to local DB (`ndis_lms`) using XAMPP PHP:
+  - `C:\xampp\php\php.exe` execution confirmed.
+- Verified table existence:
+  - all five coach tables present.
+
+### Frontend Coach Runtime
+- Added global coach context + deterministic rule engine:
+  - `src/context/CoachContext.jsx`
+  - `src/hooks/useCoachState.js`
+  - `src/hooks/useCoachEvents.js`
+  - `src/utils/coachRules.js`
+- Added coach UI components:
+  - `src/components/PandaCoachBubble.jsx`
+  - `src/components/PandaCoachPanel.jsx`
+  - `src/components/PandaCoachNavigator.jsx`
+- Mounted coach globally in app:
+  - `src/App.jsx` now wraps routes with `CoachProvider`.
+  - `src/components/SidebarLayout.jsx` now renders coach bubble/panel on learner routes.
+
+### Panda Integration Updates (Reuse Existing Components)
+- Extended existing panda components (not rebuilt):
+  - `src/components/AnimatedPanda.jsx` now supports mood + animation state.
+  - `src/components/AICharacter.jsx` now maps mood to visual glow and passes animation state.
+  - `src/components/AIFriend.jsx` now consumes coach context (message/recommendation), opens panel, and uses structured live options.
+  - `src/hooks/useGeminiLive.js` refactored for bounded coach voice prompts and env-based key (`VITE_GEMINI_API_KEY`), removed hard-coded API key.
+  - `src/pages/AIFriendPage.jsx` fixed mute bug (`toggleMute`), and uses structured live options.
+
+### Route/Event Integrations
+- Dashboard coaching card + resume prompt:
+  - `src/pages/Dashboard.jsx`
+- Lesson-level frustration-aware events:
+  - `src/pages/LessonView.jsx`
+  - emits quiz correct/incorrect/select, lesson_opened/completed, swipe next/prev.
+- Chapter/level event hooks:
+  - `src/pages/LevelMap.jsx`
+  - `src/pages/LevelDashboard.jsx`
+- Profile event hook + fixed missing icon import:
+  - `src/pages/Profile.jsx`
+- Admin participant now displays coach analytics summary/events:
+  - `src/pages/admin/ParticipantDetail.jsx`
+
+### Security / Config
+- Removed exposed Gemini keys from source.
+- Added config documentation:
+  - `.env.example`
+  - `coach_configuration.md`
+
+### Verification
+- PHP syntax checks passed for all new/changed coach backend files.
+- Frontend production build passes:
+  - `npm run build`
+- Synced coach backend files to XAMPP runtime:
+  - `C:\xampp\htdocs\academy\api\...`
+  - `C:\xampp\htdocs\academy\db\coach_schema.sql`
+
+### Coach Request-Storm Hotfix (`ERR_INSUFFICIENT_RESOURCES`)
+- Root cause:
+  - `CoachContext` effects depended on the full `coach` object, causing repeated reruns and API call storms.
+  - This flooded `log_coach_event.php`, `coach_chat.php`, and `get_coach_recommendation.php`.
+- Fixes applied:
+  - `src/context/CoachContext.jsx` now uses stable destructured dependencies instead of whole-object effect dependencies.
+  - Added one-time guards:
+    - route key guard (`lastRouteKeyRef`)
+    - session start guard (`sessionStartedRef`)
+  - `src/hooks/useCoachEvents.js` now keeps `emitCoachEvent` stable by dispatching through a ref (`dispatchRef`).
+- Result:
+  - coach network calls are throttled to actual events/routes instead of rerender loops.
+
+### Coach Storm Follow-up Fix (Persistent Loop)
+- Additional root causes found:
+  - `Dashboard` welcome effect retriggered when `requestCoachMessage` identity changed.
+  - `LessonView` lesson-open effect retriggered by coach state/recommendation dependency churn.
+- Additional fixes:
+  - Added one-time welcome guard in `src/pages/Dashboard.jsx` (`welcomedRef`).
+  - Added per-lesson coach-open guard in `src/pages/LessonView.jsx` (`lessonCoachLoadedRef`).
+  - Added global message-rate throttle in `src/context/CoachContext.jsx` (`lastMessageRequestAtRef`, 2.5s window unless forced).
+- Expected result:
+  - coach bubble text no longer spins rapidly.
+  - `coach_chat.php` and `log_coach_event.php` request volume drops to normal event-driven levels.

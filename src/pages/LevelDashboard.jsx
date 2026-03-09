@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ChevronLeft, ChevronRight, Play, Star, CheckCircle } from 'lucide-react';
 import SensoryBackground from '../components/SensoryBackground';
 import { motion } from 'framer-motion';
+import { useCoach } from '../context/CoachContext';
 
 const LevelDashboard = () => {
     const { levelId } = useParams();
@@ -11,6 +12,7 @@ const LevelDashboard = () => {
     const [levelData, setLevelData] = useState(null);
     const [loading, setLoading] = useState(true);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const { emitCoachEvent } = useCoach();
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -29,8 +31,23 @@ const LevelDashboard = () => {
     }, [levelId, user.id]);
 
     const startLesson = (lessonIndex) => {
+        const lesson = levelData?.lessons?.[lessonIndex];
+        emitCoachEvent('lesson_opened', {
+            route: `/lesson/${levelId}`,
+            chapter_id: levelData?.level?.chapter_id || null,
+            level_id: Number(levelId),
+            lesson_id: lesson?.id || null
+        }, { immediate: true });
         navigate(`/lesson/${levelId}`, { state: { startLessonIndex: lessonIndex } });
     };
+
+    useEffect(() => {
+        emitCoachEvent('level_opened', {
+            route: `/level/${levelId}`,
+            chapter_id: levelData?.level?.chapter_id || null,
+            level_id: Number(levelId)
+        }, { immediate: true });
+    }, [emitCoachEvent, levelData?.level?.chapter_id, levelId]);
 
     if (loading) return (
         <div className="h-screen w-full bg-[#00A5C4] flex items-center justify-center text-white">
@@ -84,7 +101,7 @@ const LevelDashboard = () => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: idx * 0.1 }}
-                                    onClick={() => navigate(`/lesson/${levelId}`, { state: { startLessonIndex: idx } })}
+                                    onClick={() => startLesson(idx)}
                                     className="bg-white rounded-[2rem] p-4 shadow-lg border-[3px] border-[#00695C]/20 hover:border-[#00695C] hover:scale-105 transition-all cursor-pointer group relative"
                                 >
                                     {isCompleted && (

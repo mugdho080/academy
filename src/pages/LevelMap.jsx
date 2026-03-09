@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Lock, Search, ChevronLeft } from 'lucide-react';
 import axios from 'axios';
 import ServiceAgreementModal from '../components/ServiceAgreementModal';
+import { useCoach } from '../context/CoachContext';
 
 const LevelMap = () => {
     const { chapterId } = useParams();
@@ -13,12 +14,20 @@ const LevelMap = () => {
     const [loading, setLoading] = useState(true);
     const [isAgreementOpen, setIsAgreementOpen] = useState(false);
     const [chapterTitle, setChapterTitle] = useState("World");
+    const { emitCoachEvent, requestCoachMessage } = useCoach();
 
     const mapContainerRef = React.useRef(null);
 
     useEffect(() => {
         fetchLevels();
     }, [chapterId]);
+
+    useEffect(() => {
+        emitCoachEvent('chapter_opened', {
+            route: `/chapter/${chapterId}`,
+            chapter_id: Number(chapterId)
+        }, { immediate: true });
+    }, [chapterId, emitCoachEvent]);
 
     // Scroll to the bottom ("Start Here") on load
     useEffect(() => {
@@ -191,7 +200,17 @@ const LevelMap = () => {
                                 className="absolute z-40 group"
                             >
                                 <button
-                                    onClick={() => unlocked ? navigate(`/level/${level.id}`) : setIsAgreementOpen(true)}
+                                    onClick={() => {
+                                        if (unlocked) {
+                                            navigate(`/level/${level.id}`);
+                                        } else {
+                                            setIsAgreementOpen(true);
+                                            requestCoachMessage('page_view', {
+                                                intent: 'locked_content_explainer',
+                                                chapter_title: chapterTitle
+                                            }, { forceBubble: true });
+                                        }
+                                    }}
                                     className={`
                                         w-28 h-28 rounded-full border-[6px] flex flex-col items-center justify-center shadow-2xl transition-all
                                         ${unlocked

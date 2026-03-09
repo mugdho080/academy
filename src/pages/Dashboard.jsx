@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, BookOpen, Play, Clock } from 'lucide-react';
 import axios from 'axios';
 import SensoryBackground from '../components/SensoryBackground';
-import { useActiveTimer } from '../hooks/useActiveTimer';
 import AvatarSelector from '../components/AvatarSelector';
+import { useCoach } from '../context/CoachContext';
 
 const quotes = [
     "You are capable of amazing things! ✨",
@@ -25,7 +25,15 @@ const Dashboard = () => {
     const [chapters, setChapters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAvatarOpen, setIsAvatarOpen] = useState(false);
+    const welcomedRef = useRef(false);
     const navigate = useNavigate();
+    const {
+        recommendation,
+        message: coachMessage,
+        requestCoachMessage,
+        emitCoachEvent,
+        setPanelOpen
+    } = useCoach();
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -35,6 +43,13 @@ const Dashboard = () => {
         fetchChapters();
         return () => clearInterval(timer);
     }, []);
+
+    useEffect(() => {
+        if (welcomedRef.current) return;
+        welcomedRef.current = true;
+        emitCoachEvent('session_resume', { route: '/dashboard' }, { immediate: true });
+        requestCoachMessage('session_resume', { intent: 'welcome' }, { forceBubble: true, force: true });
+    }, [emitCoachEvent, requestCoachMessage]);
 
     const fetchChapters = async () => {
         try {
@@ -99,6 +114,37 @@ const Dashboard = () => {
                                         "{quotes[quoteIndex]}"
                                     </motion.p>
                                 </AnimatePresence>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 bg-white/90 border border-white rounded-2xl shadow-lg p-4 max-w-xl">
+                            <p className="text-[10px] uppercase tracking-[0.14em] font-black text-slate-400 mb-1">
+                                Panda Coach
+                            </p>
+                            <p className="text-sm font-bold text-[#00695C] leading-snug">
+                                {coachMessage?.message || 'I can help you continue where you left off with one easy step.'}
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => {
+                                        if (recommendation?.recommended_route) {
+                                            navigate(recommendation.recommended_route, {
+                                                state: recommendation?.recommended_lesson_id
+                                                    ? { recommendedLessonId: recommendation.recommended_lesson_id }
+                                                    : undefined
+                                            });
+                                        }
+                                    }}
+                                    className="px-3 py-1.5 rounded-full bg-[#00695C] text-white text-xs font-black uppercase tracking-wider"
+                                >
+                                    Continue Path
+                                </button>
+                                <button
+                                    onClick={() => setPanelOpen(true)}
+                                    className="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-xs font-black uppercase tracking-wider"
+                                >
+                                    Open Coach
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -187,6 +187,12 @@ const AdminPanel = () => {
                     >
                         <BookOpen size={20} /> Curriculum
                     </button>
+                    <button
+                        onClick={() => navigate('/admin/invoicing')}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-white/10"
+                    >
+                        <FileText size={20} /> Invoicing
+                    </button>
                 </nav>
 
                 <button

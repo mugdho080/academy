@@ -1,7 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const AnimatedPanda = ({ isSpeaking = false, isListening = false, mood = 'happy', className = "" }) => {
+const AnimatedPanda = ({
+    isSpeaking = false,
+    isListening = false,
+    mood = 'happy',
+    animationState = 'idle',
+    className = ""
+}) => {
+    const shouldNod = animationState === 'nod';
+    const shouldWave = animationState === 'wave';
+    const shouldBreathe = animationState === 'breathe';
+    const celebrate = animationState === 'celebrate_soft';
+
     return (
         <svg viewBox="0 0 100 100" className={`w-full h-full drop-shadow-xl ${className}`}>
             {/* Background context - removed so it can be transparent and use parent's background */}
@@ -18,8 +29,20 @@ const AnimatedPanda = ({ isSpeaking = false, isListening = false, mood = 'happy'
 
             {/* Panda Group - Bobbing slightly when speaking */}
             <motion.g
-                animate={isSpeaking ? { y: [0, -2, 0] } : { y: 0 }}
-                transition={{ repeat: Infinity, duration: 0.4 }}
+                animate={
+                    isSpeaking
+                        ? { y: [0, -2, 0] }
+                        : shouldBreathe
+                            ? { scale: [1, 1.02, 1] }
+                            : shouldNod
+                                ? { rotate: [0, 2, 0, -2, 0] }
+                                : shouldWave
+                                    ? { rotate: [0, 6, 0] }
+                                    : celebrate
+                                        ? { scale: [1, 1.06, 1] }
+                                        : { y: 0 }
+                }
+                transition={{ repeat: Infinity, duration: isSpeaking ? 0.4 : 1.5 }}
             >
                 {/* Body/Shoulders */}
                 <path d="M 20 85 Q 50 70 80 85 L 90 100 L 10 100 Z" fill="#2d3748" />
@@ -83,8 +106,8 @@ const AnimatedPanda = ({ isSpeaking = false, isListening = false, mood = 'happy'
                 )}
 
                 {/* Blushes */}
-                <circle cx="21" cy="56" r="4.5" fill="#fca5a5" opacity="0.6" />
-                <circle cx="79" cy="56" r="4.5" fill="#fca5a5" opacity="0.6" />
+                <circle cx="21" cy="56" r="4.5" fill={mood === 'resting' ? '#cbd5e1' : '#fca5a5'} opacity="0.6" />
+                <circle cx="79" cy="56" r="4.5" fill={mood === 'resting' ? '#cbd5e1' : '#fca5a5'} opacity="0.6" />
             </motion.g>
         </svg>
     );

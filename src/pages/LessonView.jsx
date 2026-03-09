@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { ChevronLeft, Star, ArrowLeft, CheckCircle, Play } from 'lucide-react';
@@ -8,6 +8,7 @@ import confetti from 'canvas-confetti';
 import AIFriend from '../components/AIFriend';
 import SensoryBackground from '../components/SensoryBackground';
 import { useActivityTimer } from '../context/ActivityTimerProvider';
+import { useCoach } from '../context/CoachContext';
 
 const splitIntoSentences = (text) => {
     if (!text) return [];
@@ -30,6 +31,11 @@ const LessonView = () => {
     const [quizCorrectness, setQuizCorrectness] = useState({}); // { [quizId]: boolean }
     const [completedLessons, setCompletedLessons] = useState([]);
     const { setCurrentLessonId } = useActivityTimer();
+    const { emitCoachEvent, requestCoachMessage, state: coachState, recommendation, profile } = useCoach();
+    const contentScrollerRef = React.useRef(null);
+    const lastScrollLeftRef = React.useRef(0);
+    const lastSwipeEventRef = React.useRef(0);
+    const lessonCoachLoadedRef = React.useRef(null);
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -79,6 +85,14 @@ const LessonView = () => {
             ...prev,
             [quizId]: optionIndex
         }));
+
+        emitCoachEvent('quiz_option_selected', {
+            route: location.pathname,
+            chapter_id: levelData?.level?.chapter_id || null,
+            level_id: Number(levelId),
+            lesson_id: lesson?.id || null,
+            payload_json: { quiz_id: quizId, option_index: optionIndex }
+        });
     };
 
     const checkAnswer = async (quizId, correctAnswerIndex) => {
@@ -88,6 +102,13 @@ const LessonView = () => {
         const isCorrect = selected === parseInt(correctAnswerIndex);
 
         if (isCorrect) {
+            emitCoachEvent('quiz_answer_correct', {
+                route: location.pathname,
+                chapter_id: levelData?.level?.chapter_id || null,
+                level_id: Number(levelId),
+                lesson_id: lesson?.id || null,
+                payload_json: { quiz_id: quizId }
+            }, { immediate: true });
             confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
 
             const newCorrectness = { ...quizCorrectness, [quizId]: true };
@@ -105,11 +126,36 @@ const LessonView = () => {
                         lesson_id: lesson.id
                     });
                     setCompletedLessons(prev => [...prev, lesson.id]);
+                    emitCoachEvent('lesson_completed', {
+                        route: location.pathname,
+                        chapter_id: levelData?.level?.chapter_id || null,
+                        level_id: Number(levelId),
+                        lesson_id: lesson.id,
+                        payload_json: { lesson_title: lesson.title }
+                    }, { immediate: true });
+                    requestCoachMessage('lesson_completed', {
+                        intent: 'completion_celebration',
+                        lesson_id: lesson.id,
+                        lesson_title: lesson.title
+                    }, { forceBubble: true });
                     confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
                 } catch (e) {
                     console.error("Failed to mark completed", e);
                 }
             }
+        } else {
+            emitCoachEvent('quiz_answer_incorrect', {
+                route: location.pathname,
+                chapter_id: levelData?.level?.chapter_id || null,
+                level_id: Number(levelId),
+                lesson_id: lesson?.id || null,
+                payload_json: { quiz_id: quizId }
+            }, { immediate: true });
+            requestCoachMessage('quiz_answer_incorrect', {
+                intent: 'mistake_reassurance',
+                lesson_id: lesson?.id || null,
+                lesson_title: lesson?.title
+            }, { forceBubble: true });
         }
     };
 
@@ -120,10 +166,70 @@ const LessonView = () => {
             setCurrentLessonId(null);
             return undefined;
         }
+        if (lessonCoachLoadedRef.current === lesson.id) {
+            return undefined;
+        }
+        lessonCoachLoadedRef.current = lesson.id;
 
         setCurrentLessonId(lesson.id);
+        emitCoachEvent('lesson_opened', {
+            route: location.pathname,
+            chapter_id: levelData?.level?.chapter_id || null,
+            level_id: Number(levelId),
+            lesson_id: lesson.id,
+            payload_json: { lesson_title: lesson.title }
+        }, { immediate: true });
+
+        requestCoachMessage('lesson_opened', {
+            intent: 'navigation_help',
+            chapter_title: levelData?.level?.chapter_title,
+            level_title: levelData?.level?.title,
+            lesson_title: lesson.title,
+            lesson_id: lesson.id
+        });
+
         return () => setCurrentLessonId(null);
-    }, [lesson?.id, setCurrentLessonId]);
+    }, [
+        emitCoachEvent,
+        lesson?.id,
+        lesson?.title,
+        levelData?.level?.chapter_id,
+        levelData?.level?.chapter_title,
+        levelData?.level?.title,
+        levelId,
+        location.pathname,
+        requestCoachMessage,
+        setCurrentLessonId
+    ]);
+
+    useEffect(() => {
+        const scroller = contentScrollerRef.current;
+        if (!scroller) return undefined;
+
+        const onScroll = () => {
+            const now = Date.now();
+            if (now - lastSwipeEventRef.current < 1500) return;
+
+            const current = scroller.scrollLeft;
+            const previous = lastScrollLeftRef.current;
+            const delta = current - previous;
+            lastScrollLeftRef.current = current;
+
+            if (Math.abs(delta) < 50) return;
+            const type = delta > 0 ? 'lesson_swipe_next' : 'lesson_swipe_prev';
+            emitCoachEvent(type, {
+                route: location.pathname,
+                chapter_id: levelData?.level?.chapter_id || null,
+                level_id: Number(levelId),
+                lesson_id: lesson?.id || null,
+                payload_json: { delta_x: delta }
+            });
+            lastSwipeEventRef.current = now;
+        };
+
+        scroller.addEventListener('scroll', onScroll, { passive: true });
+        return () => scroller.removeEventListener('scroll', onScroll);
+    }, [emitCoachEvent, lesson?.id, levelData?.level?.chapter_id, levelId, location.pathname]);
 
     if (loading) return (
         <div className="min-h-screen w-full bg-[#00695C] flex items-center justify-center text-white">
@@ -201,7 +307,7 @@ const LessonView = () => {
                     {/* Content Section (Horizontal Tabs - Side wise scrollable) */}
                     <div className="mb-12">
                         <h2 className="text-xl font-black text-[#00695C] ml-4 mb-4 uppercase tracking-widest">Read & Swipe ✨</h2>
-                        <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 hide-scrollbar pt-2 px-4 -mx-4">
+                        <div ref={contentScrollerRef} className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 hide-scrollbar pt-2 px-4 -mx-4">
                             {contentTabs.map((text, i) => (
                                 <div key={i} className="snap-center shrink-0 w-[85vw] max-w-md min-h-[300px] h-auto bg-white rounded-[2.5rem] p-8 md:p-10 flex flex-col items-center justify-center shadow-[0_15px_40px_rgba(0,0,0,0.1)] border-[6px] border-white hover:border-yellow-300 transition-colors relative group">
                                     <div className="absolute top-4 left-6 text-6xl font-black text-[#e0f7fa] select-none pointer-events-none transform -rotate-12 group-hover:scale-110 transition-transform">{i + 1}</div>
@@ -286,7 +392,13 @@ const LessonView = () => {
                 <AIFriend context={{
                     chapter: levelData.level.title,
                     lesson: lesson.title,
-                    content: contentTabs.join(" ")
+                    content: contentTabs.join(" "),
+                    chapterId: levelData.level.chapter_id || null,
+                    levelId: Number(levelId),
+                    lessonId: lesson.id,
+                    frustrationBand: coachState?.frustration_band || 'normal',
+                    recommendedAction: recommendation?.recommended_route || null,
+                    ageBand: profile?.age_band || 'age_20_40'
                 }} />
             </div>
 
@@ -295,7 +407,13 @@ const LessonView = () => {
                 <AIFriend context={{
                     chapter: levelData.level.title,
                     lesson: lesson.title,
-                    content: contentTabs.join(" ")
+                    content: contentTabs.join(" "),
+                    chapterId: levelData.level.chapter_id || null,
+                    levelId: Number(levelId),
+                    lessonId: lesson.id,
+                    frustrationBand: coachState?.frustration_band || 'normal',
+                    recommendedAction: recommendation?.recommended_route || null,
+                    ageBand: profile?.age_band || 'age_20_40'
                 }} floating={true} />
             </div>
 

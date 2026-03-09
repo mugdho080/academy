@@ -1,30 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, ShieldCheck, Mail, Calendar, MapPin, Phone, AlertCircle, FileText, CheckCircle, Clock } from 'lucide-react';
+import { User, ShieldCheck, Mail, MapPin, FileText, CheckCircle, Download, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import SensoryBackground from '../components/SensoryBackground';
 import TimeLogsViewer from '../components/TimeLogsViewer';
+import { useCoach } from '../context/CoachContext';
 
 const Profile = () => {
     const [agreement, setAgreement] = useState(null);
+    const [paidInvoices, setPaidInvoices] = useState([]);
+    const [invoiceLoading, setInvoiceLoading] = useState(true);
     const [loading, setLoading] = useState(true);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const { emitCoachEvent } = useCoach();
 
     useEffect(() => {
         const fetchData = async () => {
             if (!user.id) return;
             try {
                 const agreementRes = await axios.get(`/api/learner/fetch_my_agreement.php?user_id=${user.id}`);
+                const invoiceRes = await axios.get('/api/learner/get_my_invoices.php', {
+                    params: { status: 'paid' }
+                });
 
                 if (!agreementRes.data.error) setAgreement(agreementRes.data);
+                if (!invoiceRes.data?.error) setPaidInvoices(invoiceRes.data?.invoices || []);
             } catch (err) {
                 console.error("Failed to fetch profile data", err);
             } finally {
+                setInvoiceLoading(false);
                 setLoading(false);
             }
         };
         fetchData();
     }, [user.id]);
+
+    useEffect(() => {
+        emitCoachEvent('page_view', { route: '/profile' }, { immediate: true });
+    }, [emitCoachEvent]);
 
     const formatStatus = (status) => {
         switch (status) {
@@ -149,6 +162,40 @@ const Profile = () => {
                         className="md:col-span-3"
                     >
                         <TimeLogsViewer userId={user.id} />
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="md:col-span-3 bg-white/80 backdrop-blur-md rounded-[2.5rem] p-8 shadow-xl border-4 border-white"
+                    >
+                        <h2 className="text-xl font-black text-[#00695C] uppercase italic mb-6 border-b-2 border-slate-100 pb-2 flex items-center gap-2">
+                            <FileText size={22} /> Paid Invoices
+                        </h2>
+
+                        {invoiceLoading ? (
+                            <p className="text-slate-400 font-bold">Loading invoices...</p>
+                        ) : paidInvoices.length === 0 ? (
+                            <p className="text-slate-400 font-bold">No paid invoices yet.</p>
+                        ) : (
+                            <div className="space-y-3">
+                                {paidInvoices.map((inv) => (
+                                    <div key={inv.id} className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                        <div>
+                                            <p className="font-black text-slate-700">{inv.invoice_number}</p>
+                                            <p className="text-sm text-slate-500">Invoice Date {inv.invoice_date} • Paid {inv.paid_at ? new Date(inv.paid_at).toLocaleDateString() : '-'}</p>
+                                            <p className="text-sm font-bold text-[#00695C]">Total ${Number(inv.total || 0).toFixed(2)}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => window.open(`/api/admin/download_invoice.php?id=${inv.id}`, '_blank')}
+                                            className="inline-flex items-center gap-2 bg-[#00695C] text-white px-4 py-2 rounded-lg font-bold text-sm"
+                                        >
+                                            <Download size={16} /> Download PDF
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
                 </div>
             </div>

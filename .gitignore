@@ -22,6 +22,8 @@ dump_tables.php
 test_db.php
 test_curl_login.php
 api/add_time_tracking.php
+tmp_generate.json
+*.tmp
 
 # Env files
 .env
