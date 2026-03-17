@@ -37,7 +37,7 @@ try {
         $itemsStmt->execute([$invoiceId]);
         $items = $itemsStmt->fetchAll(PDO::FETCH_ASSOC);
         $company = inv_get_company_settings($pdo);
-        $pdfPath = inv_generate_invoice_pdf_file($invoice, $items, $company);
+        $pdfPath = inv_generate_invoice_pdf_file($pdo, $invoice, $items, $company);
         $update = $pdo->prepare("UPDATE invoices SET pdf_path = ?, updated_at = UTC_TIMESTAMP() WHERE id = ?");
         $update->execute([$pdfPath, $invoiceId]);
     }

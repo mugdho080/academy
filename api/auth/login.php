@@ -32,8 +32,11 @@ try {
                 'email' => $user['email'],
                 'ndis_number' => $user['ndis_number'],
                 'role' => $user['role'],
-                'status' => $user['status'],
-                'points' => $user['points']
+                'status' => $user['status'] ?? null,
+                'points' => $user['points'] ?? 0,
+                'avatar' => $user['avatar'] ?? null,
+                'profile_image_url' => $user['profile_image_url'] ?? null,
+                'about_me' => $user['about_me'] ?? null
             ]
         ]);
     } else {

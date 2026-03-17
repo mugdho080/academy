@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, BookOpen, Settings, LogOut, CheckCircle, Clock, Plus, Trash2, Edit2, Save, ChevronRight, ArrowLeft, FileText, HelpCircle, Upload, LayoutDashboard, X } from 'lucide-react';
+import { Users, BookOpen, Settings, LogOut, CheckCircle, Clock, Plus, Trash2, Edit2, Save, ChevronRight, ArrowLeft, FileText, HelpCircle, Upload, LayoutDashboard, X, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-import AdminDashboard from './admin/AdminDashboard';
 import CRMProfileModal from './admin/CRMProfileModal';
+import ResponsiveTable from '../components/layout/ResponsiveTable';
+import { useUiVariant } from '../context/UiVariantContext';
+import ClayToggle from '../components/clay/ClayToggle';
 
 const AdminPanel = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -23,6 +25,9 @@ const AdminPanel = () => {
     const [viewingAgreement, setViewingAgreement] = useState(null);
     const [importingJson, setImportingJson] = useState(false); // boolean for modal
     const [jsonInput, setJsonInput] = useState('');
+    const [adminNavOpen, setAdminNavOpen] = useState(false);
+    const { variant, setVariant } = useUiVariant('admin');
+    const isClay = variant === 'clay';
 
     const navigate = useNavigate();
 
@@ -44,6 +49,10 @@ const AdminPanel = () => {
 
     useEffect(() => {
         fetchData();
+    }, [activeTab]);
+
+    useEffect(() => {
+        setAdminNavOpen(false);
     }, [activeTab]);
 
     const fetchData = async () => {
@@ -160,40 +169,77 @@ const AdminPanel = () => {
     const getCurrentQuizzes = () => selectedLesson ? (getCurrentLessons().find(l => l.id === selectedLesson.id)?.quizzes || []) : [];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
-            {/* Sidebar */}
-            <aside className="w-64 bg-primary-dark text-white p-6 space-y-8 fixed h-full z-10">
+        <div className={`min-h-screen flex relative ${isClay ? 'ui-variant-clay ui-admin-shell admin-page-shell' : 'bg-gray-50'}`}>
+            {adminNavOpen && (
+                <button
+                    onClick={() => setAdminNavOpen(false)}
+                    className="lg:hidden fixed inset-0 bg-black/40 z-20"
+                    aria-label="Close admin navigation overlay"
+                />
+            )}
+
+            <header className={`lg:hidden fixed top-0 inset-x-0 z-30 px-3 py-3 border-b ${isClay ? 'ui-clay-topbar border-white/60' : 'bg-primary-dark text-white border-white/10'}`}>
+                <div className="flex items-center justify-between gap-3">
+                    <button
+                        onClick={() => setAdminNavOpen((prev) => !prev)}
+                        className={`h-11 w-11 rounded-xl flex items-center justify-center ${isClay ? 'ui-clay-button-secondary' : 'bg-white/10'}`}
+                        aria-label="Open admin navigation"
+                        aria-expanded={adminNavOpen}
+                    >
+                        <Menu size={22} />
+                    </button>
+                    <div className="text-center">
+                        <p className={`text-[11px] uppercase tracking-[0.14em] font-black ${isClay ? 'text-[color:var(--clay-text-soft)]' : 'text-primary-light'}`}>Goodwill Care Academy</p>
+                        <p className="text-base font-black">Admin Panel</p>
+                    </div>
+                    <div className="w-11" aria-hidden="true" />
+                </div>
+            </header>
+
+            <aside className={`w-64 p-4 sm:p-6 space-y-8 fixed h-full z-40 transition-transform duration-200 ${isClay ? 'ui-clay-sidebar text-[color:var(--clay-text)]' : 'bg-primary-dark text-white'} ${adminNavOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                 <div>
                     <h1 className="text-2xl font-bold">LMS Admin</h1>
-                    <p className="text-primary-light text-sm">Goodwillcare Academy Portal</p>
+                    <p className={`text-sm ${isClay ? 'text-[color:var(--clay-text-soft)]' : 'text-primary-light'}`}>Goodwill Care Academy Portal</p>
                 </div>
 
                 <nav className="space-y-4">
                     <button
                         onClick={() => setActiveTab('dashboard')}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeTab === 'dashboard' ? 'bg-white/20' : 'hover:bg-white/10'}`}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeTab === 'dashboard' ? (isClay ? 'ui-clay-surface' : 'bg-white/20') : isClay ? 'hover:bg-white/35' : 'hover:bg-white/10'}`}
                     >
                         <LayoutDashboard size={20} /> Command Centre
                     </button>
                     <button
                         onClick={() => { setActiveTab('crm'); setSelectedChapter(null); }}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeTab === 'crm' ? 'bg-white/20' : 'hover:bg-white/10'}`}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeTab === 'crm' ? (isClay ? 'ui-clay-surface' : 'bg-white/20') : isClay ? 'hover:bg-white/35' : 'hover:bg-white/10'}`}
                     >
                         <Users size={20} /> Students
                     </button>
                     <button
                         onClick={() => setActiveTab('content')}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeTab === 'content' ? 'bg-white/20' : 'hover:bg-white/10'}`}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeTab === 'content' ? (isClay ? 'ui-clay-surface' : 'bg-white/20') : isClay ? 'hover:bg-white/35' : 'hover:bg-white/10'}`}
                     >
                         <BookOpen size={20} /> Curriculum
                     </button>
                     <button
                         onClick={() => navigate('/admin/invoicing')}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-white/10"
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${isClay ? 'hover:bg-white/35' : 'hover:bg-white/10'}`}
                     >
                         <FileText size={20} /> Invoicing
                     </button>
                 </nav>
+
+                <ClayToggle
+                    label="Admin pages"
+                    value={variant}
+                    onChange={setVariant}
+                    options={[
+                        { label: 'Classic', value: 'classic' },
+                        { label: 'Clay', value: 'clay' }
+                    ]}
+                    appearance={isClay ? 'clay' : 'classic'}
+                    compact={true}
+                />
 
                 <button
                     onClick={async () => {
@@ -206,48 +252,59 @@ const AdminPanel = () => {
                         localStorage.removeItem('ndis_session_id');
                         navigate('/login');
                     }}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-500 transition-colors mt-auto absolute bottom-8 left-6 right-6"
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors mt-auto absolute bottom-8 left-4 right-4 sm:left-6 sm:right-6 ${isClay ? 'ui-clay-button-danger' : 'hover:bg-red-500'}`}
                 >
                     <LogOut size={20} /> Logout
                 </button>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 p-10 ml-64">
+            <main className="flex-1 p-3 sm:p-5 lg:p-10 pt-20 lg:pt-10 lg:ml-64">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center h-full space-y-4">
                         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-gray-500 font-bold">Loading your dashboard...</p>
+                        <p className={`font-bold ${isClay ? 'text-[color:var(--clay-text-soft)]' : 'text-gray-500'}`}>Loading your dashboard...</p>
                     </div>
                 ) : (
                     <>
                         {activeTab === 'dashboard' && (
-                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                                <AdminDashboard />
+                            <div className={`rounded-3xl p-6 sm:p-8 ${isClay ? 'ui-clay-surface' : 'bg-white shadow-sm border border-gray-100'}`}>
+                                <h2 className={`text-2xl sm:text-3xl font-bold ${isClay ? 'ui-clay-heading' : 'text-gray-800'}`}>Admin Command Center</h2>
+                                <p className={`text-sm sm:text-base mt-3 max-w-2xl ${isClay ? 'ui-clay-text-soft' : 'text-gray-500'}`}>
+                                    Open the customizable dashboard to monitor learners, engagement, finance, compliance, and operations with widget-based layouts.
+                                </p>
+                                <div className="mt-6">
+                                    <button
+                                        onClick={() => navigate('/admin/dashboard')}
+                                        className={`inline-flex items-center gap-2 rounded-2xl px-5 py-3 font-bold ${isClay ? 'ui-clay-button-primary' : 'bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/20'}`}
+                                    >
+                                        <LayoutDashboard size={18} />
+                                        Open Admin Dashboard
+                                    </button>
+                                </div>
                             </div>
                         )}
 
                         {activeTab === 'crm' && (
-                            <div className="space-y-8">
-                                <h2 className="text-3xl font-bold text-gray-800">Student Management</h2>
+                            <div className="space-y-5 sm:space-y-8">
+                                <h2 className={`text-2xl sm:text-3xl font-bold ${isClay ? 'ui-clay-heading' : 'text-gray-800'}`}>Student Management</h2>
 
-                                {/* CRM Sub-tabs */}
-                                <div className="flex gap-4 border-b border-gray-200 pb-1">
+                                <div className="flex flex-wrap gap-2 sm:gap-4 border-b border-gray-200 pb-1">
                                     <button
                                         onClick={() => setCrmFilter('new')}
-                                        className={`px-6 py-3 font-bold rounded-t-xl transition-all ${crmFilter === 'new' ? 'bg-white border-x border-t border-gray-100 text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                                        className={`px-4 sm:px-6 py-3 font-bold rounded-t-xl transition-all text-sm sm:text-base ${crmFilter === 'new' ? (isClay ? 'ui-clay-surface text-[#21A7F1]' : 'bg-white border-x border-t border-gray-100 text-primary') : isClay ? 'text-[color:var(--clay-text-soft)] hover:text-[color:var(--clay-text)]' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
                                         New Signups ({users.filter(u => !u.status || u.status === 'new' || u.status === 'locked').length})
                                     </button>
                                     <button
                                         onClick={() => setCrmFilter('agreement')}
-                                        className={`px-6 py-3 font-bold rounded-t-xl transition-all ${crmFilter === 'agreement' ? 'bg-white border-x border-t border-gray-100 text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                                        className={`px-4 sm:px-6 py-3 font-bold rounded-t-xl transition-all text-sm sm:text-base ${crmFilter === 'agreement' ? (isClay ? 'ui-clay-surface text-[#21A7F1]' : 'bg-white border-x border-t border-gray-100 text-primary') : isClay ? 'text-[color:var(--clay-text-soft)] hover:text-[color:var(--clay-text)]' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
                                         Service Agreements ({users.filter(u => u.status === 'pending' || u.status === 'active').length})
                                     </button>
                                 </div>
 
-                                <div className="bg-white rounded-b-[2.5rem] rounded-tr-[2.5rem] shadow-sm overflow-hidden border border-gray-100 p-1">
+                                <div className={`rounded-b-[2.5rem] rounded-tr-[2.5rem] p-1 ${isClay ? 'ui-clay-surface' : 'bg-white shadow-sm border border-gray-100'}`}>
+                                    <ResponsiveTable className="border-0 rounded-[2rem]">
                                     <table className="w-full text-left">
                                         <thead className="bg-gray-50 border-b border-gray-100">
                                             <tr>
@@ -283,16 +340,16 @@ const AdminPanel = () => {
                                                     </td>
                                                     <td className="p-6">
                                                         {u.status === 'pending' && (
-                                                            <div className="flex gap-2">
+                                                            <div className="flex flex-wrap gap-2">
                                                                 <button
                                                                     onClick={() => handleViewAgreement(u.id)}
-                                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
+                                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
                                                                 >
                                                                     <FileText size={16} /> View Agreement
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleUpdateStatus(u.id, 'active')}
-                                                                    className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2"
+                                                                    className="bg-primary hover:bg-primary-dark text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2"
                                                                 >
                                                                     <CheckCircle size={16} /> Approve
                                                                 </button>
@@ -319,14 +376,15 @@ const AdminPanel = () => {
                                             )}
                                         </tbody>
                                     </table>
+                                    </ResponsiveTable>
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'content' && (
-                            <div className="space-y-8">
+                            <div className="space-y-5 sm:space-y-8">
                                 {/* Breadcrumbs */}
-                                <div className="flex items-center gap-2 text-gray-500 font-medium">
+                                <div className="flex flex-wrap items-center gap-2 text-gray-500 font-medium text-sm sm:text-base">
                                     <span
                                         onClick={() => { setSelectedChapter(null); setSelectedLevel(null); setSelectedLesson(null); }}
                                         className="cursor-pointer hover:text-primary"
@@ -363,18 +421,18 @@ const AdminPanel = () => {
                                     )}
                                 </div>
 
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-3xl font-bold text-gray-800">
+                                <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-3">
+                                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
                                         {selectedLesson ? `Quizzes for ${selectedLesson.title}` :
                                             selectedLevel ? `Lessons in ${selectedLevel.title}` :
                                                 selectedChapter ? `Levels in ${selectedChapter.title}` :
                                                     'All Chapters'}
                                     </h2>
-                                    <div className="flex gap-3">
+                                    <div className="flex flex-wrap gap-2 sm:gap-3">
                                         {!selectedChapter && (
                                             <button
                                                 onClick={handleImportContent}
-                                                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg"
+                                                className="bg-purple-600 hover:bg-purple-700 text-white px-4 sm:px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg text-sm sm:text-base"
                                             >
                                                 <Upload size={20} /> Import ALL JSON
                                             </button>
@@ -382,7 +440,7 @@ const AdminPanel = () => {
                                         {selectedChapter && !selectedLevel && (
                                             <button
                                                 onClick={() => setImportingJson(true)}
-                                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg"
+                                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg text-sm sm:text-base"
                                             >
                                                 <Upload size={20} /> Add Level JSON
                                             </button>
@@ -394,27 +452,27 @@ const AdminPanel = () => {
                                                 else if (selectedChapter) setEditingItem({ type: 'level', data: { chapter_id: selectedChapter.id, title: '', video_url: '', is_free: 0, order_index: getCurrentLevels().length } });
                                                 else setEditingItem({ type: 'chapter', data: { title: '', emoji: '📚', order_index: content.length } });
                                             }}
-                                            className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg"
+                                            className="bg-primary hover:bg-primary-dark text-white px-4 sm:px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg text-sm sm:text-base"
                                         >
                                             <Plus size={20} /> Add {selectedLesson ? 'Quiz' : selectedLevel ? 'Lesson' : selectedChapter ? 'Level' : 'Chapter'}
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 gap-6">
+                                <div className="grid grid-cols-1 gap-4 sm:gap-6">
                                     {/* Chapters View */}
                                     {!selectedChapter && content.map(chapter => (
                                         <motion.div
                                             key={chapter.id}
                                             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                                             onClick={() => setSelectedChapter(chapter)}
-                                            className="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100 cursor-pointer hover:border-primary-light transition-all group relative"
+                                            className="bg-white p-4 sm:p-8 rounded-[2rem] sm:rounded-[3rem] shadow-sm border border-gray-100 cursor-pointer hover:border-primary-light transition-all group relative"
                                         >
                                             <div className="flex justify-between items-center">
                                                 <div className="flex items-center gap-4">
                                                     <span className="text-4xl">{chapter.emoji}</span>
                                                     <div>
-                                                        <h3 className="text-2xl font-bold text-gray-800 group-hover:text-primary transition-colors">{chapter.title}</h3>
+                                                        <h3 className="text-xl sm:text-2xl font-bold text-gray-800 group-hover:text-primary transition-colors">{chapter.title}</h3>
                                                         <p className="text-gray-500">{chapter.levels?.length || 0} Levels</p>
                                                     </div>
                                                 </div>
@@ -434,14 +492,14 @@ const AdminPanel = () => {
                                             key={level.id}
                                             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
                                             onClick={() => setSelectedLevel(level)}
-                                            className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 cursor-pointer hover:border-primary-light transition-all flex justify-between items-center"
+                                            className="bg-white p-4 sm:p-6 rounded-3xl shadow-sm border border-gray-100 cursor-pointer hover:border-primary-light transition-all flex justify-between items-center gap-3"
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center font-bold text-primary text-lg">
                                                     {level.order_index + 1}
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-xl font-bold text-gray-800">{level.title}</h3>
+                                                    <h3 className="text-lg sm:text-xl font-bold text-gray-800">{level.title}</h3>
                                                     <p className="text-xs text-gray-400 truncate max-w-xs">{level.video_url || 'No video'}</p>
                                                     <p className="text-gray-500 text-sm mt-1">{level.lessons?.length || 0} Lessons</p>
                                                 </div>
@@ -461,14 +519,14 @@ const AdminPanel = () => {
                                             key={lesson.id}
                                             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
                                             onClick={() => setSelectedLesson(lesson)}
-                                            className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 cursor-pointer hover:border-primary-light transition-all flex justify-between items-center"
+                                            className="bg-white p-4 sm:p-6 rounded-3xl shadow-sm border border-gray-100 cursor-pointer hover:border-primary-light transition-all flex justify-between items-center gap-3"
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div className="p-3 bg-secondary/10 text-secondary rounded-xl">
                                                     <FileText size={20} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-xl font-bold text-gray-800">{lesson.title}</h3>
+                                                    <h3 className="text-lg sm:text-xl font-bold text-gray-800">{lesson.title}</h3>
                                                     <p className="text-gray-500 text-sm">{lesson.quizzes?.length || 0} Quizzes</p>
                                                 </div>
                                             </div>
@@ -486,7 +544,7 @@ const AdminPanel = () => {
                                         <motion.div
                                             key={quiz.id}
                                             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                                            className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100"
+                                            className="bg-white p-4 sm:p-6 rounded-3xl shadow-sm border border-gray-100"
                                         >
                                             <div className="flex justify-between items-start">
                                                 <div className="flex items-start gap-4">
@@ -495,7 +553,7 @@ const AdminPanel = () => {
                                                     </div>
                                                     <div>
                                                         <h3 className="font-bold text-gray-800 mb-2">Q{idx + 1}: {quiz.question}</h3>
-                                                        <div className="flex gap-2 text-sm">
+                                                        <div className="flex flex-wrap gap-2 text-sm">
                                                             {JSON.parse(quiz.options).map((opt, i) => (
                                                                 <span key={i} className={`px-2 py-1 rounded-md border ${i === quiz.correct_answer ? 'bg-green-100 border-green-200 text-green-700' : 'bg-gray-50 border-gray-100 text-gray-500'}`}>
                                                                     {opt}
@@ -523,10 +581,10 @@ const AdminPanel = () => {
             {/* Modal for Editing */}
             <AnimatePresence>
                 {editingItem && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditingItem(null)} />
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto relative z-10">
-                            <h3 className="text-2xl font-bold mb-6 text-gray-800 capitalize">
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-lg rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 max-h-[94vh] sm:max-h-[90vh] overflow-y-auto relative z-10">
+                            <h3 className="text-xl sm:text-2xl font-bold mb-5 sm:mb-6 text-gray-800 capitalize">
                                 {editingItem.data.id ? 'Edit' : 'Create'} {editingItem.type}
                             </h3>
 
@@ -580,7 +638,7 @@ const AdminPanel = () => {
                                 )}
                             </div>
 
-                            <div className="flex gap-4 mt-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-8">
                                 <button onClick={() => setEditingItem(null)} className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold">Cancel</button>
                                 <button onClick={() => handleSaveContent(editingItem.type, editingItem.data)} className="flex-1 py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20">Save</button>
                             </div>
@@ -592,10 +650,10 @@ const AdminPanel = () => {
             {/* Modal for Level JSON Import */}
             <AnimatePresence>
                 {importingJson && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setImportingJson(false)} />
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-2xl rounded-[2.5rem] p-8 max-h-[90vh] flex flex-col relative z-10">
-                            <h3 className="text-2xl font-bold mb-2 text-gray-800">
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-2xl rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 max-h-[94vh] sm:max-h-[90vh] flex flex-col relative z-10">
+                            <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-800">
                                 Import Level JSON
                             </h3>
                             <p className="text-sm text-gray-500 mb-6 font-medium">
@@ -609,7 +667,7 @@ const AdminPanel = () => {
                                 onChange={(e) => setJsonInput(e.target.value)}
                             />
 
-                            <div className="flex gap-4 mt-8 shrink-0">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-8 shrink-0">
                                 <button onClick={() => setImportingJson(false)} className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold">Cancel</button>
                                 <button onClick={handleImportLevelJson} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-600/20">Import & Save</button>
                             </div>
@@ -631,11 +689,11 @@ const AdminPanel = () => {
             {/* Agreement View Modal */}
             <AnimatePresence>
                 {viewingAgreement && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setViewingAgreement(null)} />
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-2xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto relative z-10">
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white w-full max-w-2xl rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 max-h-[94vh] sm:max-h-[90vh] overflow-y-auto relative z-10">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-2xl font-bold text-gray-800">Service Agreement</h3>
+                                <h3 className="text-xl sm:text-2xl font-bold text-gray-800">Service Agreement</h3>
                                 <button onClick={() => setViewingAgreement(null)} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
                             </div>
 
@@ -645,7 +703,7 @@ const AdminPanel = () => {
                                 <div className="p-10 text-center text-red-500">No agreement found for this user.</div>
                             ) : (
                                 <div className="space-y-6">
-                                    <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 grid grid-cols-2 gap-4">
+                                    <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <p className="text-xs text-gray-500 uppercase font-bold">Full Name</p>
                                             <p className="font-bold">{viewingAgreement.full_name}</p>
@@ -668,7 +726,7 @@ const AdminPanel = () => {
                                         </div>
                                     </div>
 
-                                    <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 grid grid-cols-2 gap-4">
+                                    <div className="bg-blue-50 p-4 sm:p-6 rounded-2xl border border-blue-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <p className="text-xs text-blue-500 uppercase font-bold">NDIS Number</p>
                                             <p className="font-bold text-blue-900">{viewingAgreement.ndis_number}</p>

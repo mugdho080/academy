@@ -5,6 +5,8 @@ import { ChevronLeft, ChevronRight, Play, Star, CheckCircle } from 'lucide-react
 import SensoryBackground from '../components/SensoryBackground';
 import { motion } from 'framer-motion';
 import { useCoach } from '../context/CoachContext';
+import PageContainer from '../components/layout/PageContainer';
+import { useUiVariant } from '../context/UiVariantContext';
 
 const LevelDashboard = () => {
     const { levelId } = useParams();
@@ -13,6 +15,8 @@ const LevelDashboard = () => {
     const [loading, setLoading] = useState(true);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const { emitCoachEvent } = useCoach();
+    const { variant } = useUiVariant('learner');
+    const isClay = variant === 'clay';
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -50,48 +54,43 @@ const LevelDashboard = () => {
     }, [emitCoachEvent, levelData?.level?.chapter_id, levelId]);
 
     if (loading) return (
-        <div className="h-screen w-full bg-[#00A5C4] flex items-center justify-center text-white">
+        <div className={`h-screen w-full flex items-center justify-center px-4 ${isClay ? 'ui-clay-page text-[color:var(--clay-text)]' : 'bg-[#00A5C4] text-white'}`}>
             <h1 className="text-2xl font-bold animate-pulse">Loading Mission...</h1>
         </div>
     );
 
     if (!levelData) return (
-        <div className="h-screen w-full bg-[#3B1B54] flex flex-col items-center justify-center text-white p-10">
+        <div className={`h-screen w-full flex flex-col items-center justify-center p-10 ${isClay ? 'ui-clay-page text-[color:var(--clay-text)]' : 'bg-[#3B1B54] text-white'}`}>
             <h1 className="text-4xl font-black italic mb-4">Level Not Found</h1>
-            <button onClick={() => navigate(-1)} className="underline">Go Back</button>
+            <button onClick={() => navigate(-1)} className={isClay ? 'ui-clay-button-secondary px-4 py-3' : 'underline'}>Go Back</button>
         </div>
     );
 
     const { level = {}, lessons = [] } = levelData;
 
     return (
-        <div className="min-h-screen bg-[#e0f7fa] font-sans text-[#00695C] relative">
+        <div className={`min-h-screen font-sans relative ${isClay ? 'ui-clay-page text-[color:var(--clay-text)]' : 'bg-[#e0f7fa] text-[#00695C]'}`}>
             <SensoryBackground />
 
-            {/* Top Bar */}
-            <div className="bg-[#00695C] text-white p-6 shadow-xl sticky top-0 z-50 flex justify-between items-center">
+            <div className={`px-3 sm:px-6 py-3 sm:py-4 sticky top-0 z-50 flex justify-between items-center gap-3 ${isClay ? 'ui-clay-topbar' : 'bg-[#00695C] text-white shadow-xl'}`}>
                 <button
                     onClick={() => navigate(`/chapter/${levelData.level.chapter_id}`)}
-                    className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+                    className={`flex items-center gap-2 transition-colors min-w-0 ${isClay ? 'text-[color:var(--clay-text-soft)] hover:text-[color:var(--clay-text)]' : 'text-white/80 hover:text-white'}`}
                 >
-                    <ChevronLeft size={28} />
+                    <ChevronLeft size={24} />
                     <span className="font-bold uppercase tracking-widest hidden md:inline">Back to Map</span>
                 </button>
-                <h1 className="text-2xl font-black italic tracking-tighter uppercase">{levelData.level.title}</h1>
-                <div className="w-10"></div> {/* Spacer */}
+                <h1 className="text-lg sm:text-2xl font-black italic tracking-tighter uppercase text-center break-words">{levelData.level.title}</h1>
+                <div className="w-6 sm:w-10"></div> {/* Spacer */}
             </div>
 
-            <div className="p-8 max-w-6xl mx-auto relative z-10">
+            <PageContainer className="relative z-10 pb-24 lg:pb-10">
+                <div className={`rounded-[2rem] sm:rounded-[3rem] p-4 sm:p-8 lg:p-10 min-h-[60vh] relative overflow-hidden ${isClay ? 'ui-clay-surface' : 'bg-white shadow-2xl border-4 border-[#00695C]/10'}`}>
+                    <div className={`absolute inset-0 opacity-5 [background-size:24px_24px] ${isClay ? 'bg-[radial-gradient(circle_at_center,#21A7F1_2px,transparent_2px)]' : 'bg-[radial-gradient(circle_at_center,#00695C_2px,transparent_2px)]'}`}></div>
 
-                {/* Main Content Area - Zoomed In Landmass */}
-                <div className="bg-white rounded-[3rem] p-10 shadow-2xl border-4 border-[#00695C]/10 min-h-[60vh] relative overflow-hidden">
+                    <h2 className={`text-2xl sm:text-3xl font-black text-center mb-6 sm:mb-10 italic ${isClay ? 'text-[#21A7F1]' : 'text-[#00897B]'}`}>Select Your Mission</h2>
 
-                    {/* Background Pattern */}
-                    <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_center,#00695C_2px,transparent_2px)] [background-size:24px_24px]"></div>
-
-                    <h2 className="text-3xl font-black text-center mb-12 italic text-[#00897B]">Select Your Mission</h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                         {levelData.lessons.map((lesson, idx) => {
                             const isCompleted = levelData.completed_lessons?.includes(lesson.id);
 
@@ -102,7 +101,7 @@ const LevelDashboard = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: idx * 0.1 }}
                                     onClick={() => startLesson(idx)}
-                                    className="bg-white rounded-[2rem] p-4 shadow-lg border-[3px] border-[#00695C]/20 hover:border-[#00695C] hover:scale-105 transition-all cursor-pointer group relative"
+                                    className={`rounded-[1.5rem] sm:rounded-[2rem] p-4 hover:scale-[1.02] transition-all cursor-pointer group relative ${isClay ? 'ui-clay-surface ui-clay-interactive' : 'bg-white shadow-lg border-[3px] border-[#00695C]/20 hover:border-[#00695C]'}`}
                                 >
                                     {isCompleted && (
                                         <div className="absolute -top-3 -right-3 z-10 bg-green-500 text-white rounded-full p-1 shadow-lg border-2 border-white animate-bounce">
@@ -110,7 +109,7 @@ const LevelDashboard = () => {
                                         </div>
                                     )}
 
-                                    <div className="aspect-video bg-indigo-100 rounded-3xl mb-4 overflow-hidden relative">
+                                    <div className={`aspect-video rounded-3xl mb-4 overflow-hidden relative ${isClay ? 'ui-clay-inset-surface' : 'bg-indigo-100'}`}>
                                         <div className={`absolute inset-0 opacity-80 group-hover:opacity-100 transition-opacity flex items-center justify-center ${isCompleted ? 'bg-gradient-to-br from-green-600 to-green-800' : 'bg-gradient-to-br from-[#00897B] to-[#00695C]'}`}>
                                             <Play className="text-white fill-current w-12 h-12 opacity-80" />
                                         </div>
@@ -119,17 +118,29 @@ const LevelDashboard = () => {
                                         </div>
                                     </div>
 
-                                    <h3 className="text-lg font-bold text-[#00695C] leading-tight line-clamp-2">
+                                    <h3 className={`text-base sm:text-lg font-bold leading-tight line-clamp-2 ${isClay ? 'ui-clay-heading' : 'text-[#00695C]'}`}>
                                         {lesson.title}
                                     </h3>
 
                                     <div className="mt-3 flex items-center justify-between">
-                                        <span className={`text-xs font-bold uppercase tracking-wider ${isCompleted ? 'text-green-600' : 'text-gray-400'}`}>
+                                        <span className={`text-xs font-bold uppercase tracking-wider ${isClay ? (isCompleted ? 'text-green-700' : 'text-[color:var(--clay-text-soft)]') : isCompleted ? 'text-green-600' : 'text-gray-400'}`}>
                                             {isCompleted ? 'Completed' : 'Start'}
                                         </span>
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isCompleted ? 'bg-green-100 text-green-600 group-hover:bg-green-500 group-hover:text-white' : 'bg-[#00695C]/10 text-[#00695C] group-hover:bg-[#00695C] group-hover:text-white'}`}>
-                                            <ChevronRight size={16} strokeWidth={3} />
-                                        </div>
+                                        {isCompleted ? (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    startLesson(idx);
+                                                }}
+                                                className={`px-4 py-1.5 text-[10px] sm:text-xs font-black uppercase rounded-full transition-all hover:scale-105 active:scale-95 z-10 ${isClay ? 'ui-clay-button-warning' : 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow-md border-2 border-yellow-500'}`}
+                                            >
+                                                Retry
+                                            </button>
+                                        ) : (
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isClay ? 'ui-clay-icon-pocket text-[#21A7F1]' : 'bg-[#00695C]/10 text-[#00695C] group-hover:bg-[#00695C] group-hover:text-white'}`}>
+                                                <ChevronRight size={16} strokeWidth={3} />
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             );
@@ -137,7 +148,7 @@ const LevelDashboard = () => {
                     </div>
 
                 </div>
-            </div>
+            </PageContainer>
         </div>
     );
 };

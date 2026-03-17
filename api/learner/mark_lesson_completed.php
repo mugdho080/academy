@@ -1,39 +1,46 @@
 <?php
-// api/learner/mark_lesson_completed.php
-header("Content-Type: application/json");
+header('Content-Type: application/json');
 require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/../services/AchievementService.php';
 
-$data = json_decode(file_get_contents('php://input'), true);
-$userId = $data['user_id'] ?? null;
-$lessonId = $data['lesson_id'] ?? null;
+session_start();
+
+$payload = json_decode(file_get_contents('php://input'), true);
+$payload = is_array($payload) ? $payload : [];
+
+$sessionUserId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+$payloadUserId = isset($payload['user_id']) ? (int) $payload['user_id'] : null;
+$userId = $sessionUserId ?: $payloadUserId;
+$lessonId = isset($payload['lesson_id']) ? (int) $payload['lesson_id'] : 0;
 
 if (!$userId || !$lessonId) {
     http_response_code(400);
-    echo json_encode(['error' => 'User ID and Lesson ID are required']);
+    echo json_encode(['error' => 'user_id and lesson_id are required']);
+    exit;
+}
+
+if ($sessionUserId && $payloadUserId && $sessionUserId !== $payloadUserId) {
+    http_response_code(403);
+    echo json_encode(['error' => 'User mismatch']);
     exit;
 }
 
 try {
-    // Check if already completed
-    $stmt = $pdo->prepare("SELECT id FROM completed_lessons WHERE user_id = ? AND lesson_id = ?");
-    $stmt->execute([$userId, $lessonId]);
-    if ($stmt->fetch()) {
-        echo json_encode(['success' => true, 'message' => 'Already completed']);
-        exit;
-    }
+    $service = new AchievementService($pdo);
+    $result = $service->handleLessonCompletion($userId, $lessonId, [
+        'is_recommended' => !empty($payload['is_recommended'])
+    ]);
+    $summary = $service->buildAchievementSummary($userId);
 
-    // Insert completion
-    $stmt = $pdo->prepare("INSERT INTO completed_lessons (user_id, lesson_id) VALUES (?, ?)");
-    $stmt->execute([$userId, $lessonId]);
-
-    // Reward points for lesson completion (e.g. 10 points)
-    $stmt = $pdo->prepare("UPDATE users SET points = points + 10 WHERE id = ?");
-    $stmt->execute([$userId]);
-
-    echo json_encode(['success' => true]);
-
-} catch (\PDOException $e) {
+    echo json_encode([
+        'success' => true,
+        'new_completion' => (bool) ($result['new_completion'] ?? false),
+        'points_awarded' => (int) ($result['points_awarded'] ?? 0),
+        'total_points' => (int) ($summary['total_points'] ?? 0),
+        'current_rank' => $summary['current_rank'] ?? 'Seed',
+        'summary' => $summary
+    ]);
+} catch (\Throwable $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to log completion: ' . $e->getMessage()]);
+    echo json_encode(['error' => 'Failed to mark lesson completed', 'details' => $e->getMessage()]);
 }
-?>

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/../services/ActivityTrackingService.php';
+require_once __DIR__ . '/../services/AchievementService.php';
 
 session_start();
 
@@ -89,6 +90,16 @@ try {
 
     $pdo->commit();
 
+    $achievementSummary = null;
+    try {
+        $achievementService = new AchievementService($pdo);
+        $achievementService->handleSessionStart($userId, $sessionId);
+        $achievementSummary = $achievementService->buildAchievementSummary($userId);
+    } catch (\Throwable $achievementError) {
+        // Do not fail session start if rewards update fails.
+        $achievementSummary = null;
+    }
+
     echo json_encode([
         'success' => true,
         'session_id' => $sessionId,
@@ -100,7 +111,8 @@ try {
             'total_seconds_active' => (int) $session['total_seconds_active'],
             'summary' => at_session_summary($session)
         ],
-        'context' => $context
+        'context' => $context,
+        'achievement_summary' => $achievementSummary
     ]);
 } catch (\Throwable $e) {
     if ($pdo->inTransaction()) {

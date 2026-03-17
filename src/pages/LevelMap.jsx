@@ -1,10 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Lock, Search, ChevronLeft } from 'lucide-react';
+import { Lock, Search } from 'lucide-react';
 import axios from 'axios';
 import ServiceAgreementModal from '../components/ServiceAgreementModal';
 import { useCoach } from '../context/CoachContext';
+import { useUiVariant } from '../context/UiVariantContext';
+
+const levelPositions = [
+    { top: '1250px', left: '150px' },
+    { top: '1100px', left: '300px' },
+    { top: '950px', left: '400px' },
+    { top: '800px', left: '250px' },
+    { top: '650px', left: '350px' },
+    { top: '550px', left: '550px' },
+    { top: '450px', left: '750px' },
+    { top: '300px', left: '850px' },
+    { top: '200px', left: '650px' },
+    { top: '150px', left: '400px' }
+];
 
 const LevelMap = () => {
     const { chapterId } = useParams();
@@ -13,8 +27,10 @@ const LevelMap = () => {
     const [levels, setLevels] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAgreementOpen, setIsAgreementOpen] = useState(false);
-    const [chapterTitle, setChapterTitle] = useState("World");
+    const [chapterTitle, setChapterTitle] = useState('World');
     const { emitCoachEvent, requestCoachMessage } = useCoach();
+    const { variant } = useUiVariant('learner');
+    const isClay = variant === 'clay';
 
     const mapContainerRef = React.useRef(null);
 
@@ -29,23 +45,28 @@ const LevelMap = () => {
         }, { immediate: true });
     }, [chapterId, emitCoachEvent]);
 
-    // Scroll to the bottom ("Start Here") on load
     useEffect(() => {
         if (mapContainerRef.current) {
             mapContainerRef.current.scrollTop = mapContainerRef.current.scrollHeight;
+            mapContainerRef.current.scrollLeft = 180;
         }
     }, [levels]);
+
+    const sortedLevels = useMemo(
+        () => [...levels].sort((a, b) => a.order_index - b.order_index),
+        [levels]
+    );
 
     const fetchLevels = async () => {
         try {
             const res = await axios.get('/api/learner/chapters.php');
-            const chapter = res.data.find(c => c.id === parseInt(chapterId));
+            const chapter = res.data.find((c) => c.id === parseInt(chapterId, 10));
             if (chapter) {
                 setLevels(chapter.levels || []);
                 setChapterTitle(chapter.title);
             }
         } catch (err) {
-            console.error("Failed to fetch levels", err);
+            console.error('Failed to fetch levels', err);
         } finally {
             setLoading(false);
         }
@@ -59,18 +80,22 @@ const LevelMap = () => {
             setUser(updatedUser);
             setIsAgreementOpen(false);
         } catch (err) {
-            alert("Failed to submit agreement");
+            alert('Failed to submit agreement');
         }
     };
 
-    const isUnlocked = (level) => {
-        if (level.is_free) return true;
-        if (user.status === 'active') return true;
-        return false;
-    };
+    const isUnlocked = (level) => level.is_free || user.status === 'active';
+
+    if (loading) {
+        return (
+            <div className={`min-h-screen safe-mobile-height flex items-center justify-center px-4 ${isClay ? 'ui-clay-page text-[color:var(--clay-text)]' : 'bg-[#00A5C4] text-white'}`}>
+                <p className="text-xl font-black">Loading world map...</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="h-full w-full relative overflow-hidden flex flex-col font-sans">
+        <div className={`h-full w-full relative overflow-hidden flex flex-col font-sans safe-mobile-height ${isClay ? 'ui-clay-page' : ''}`}>
             <ServiceAgreementModal
                 isOpen={isAgreementOpen}
                 onClose={() => setIsAgreementOpen(false)}
@@ -79,35 +104,32 @@ const LevelMap = () => {
                 userId={user.id}
             />
 
-            {/* Ocean (Teal) */}
-            <div className="absolute inset-0 bg-[#00A5C4] z-0" />
+            <div className={`absolute inset-0 z-0 ${isClay ? 'bg-[linear-gradient(180deg,#F4F8FF_0%,#ECF2FB_100%)]' : 'bg-[#00A5C4]'}`} />
 
-            {/* Header / Title Banner */}
-            <div className="relative z-30 p-8 flex justify-between items-start pointer-events-none">
-                <div className="bg-white/90 backdrop-blur-md px-10 py-4 rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border-[6px] border-[#00695C] pointer-events-auto">
-                    <h1 className="text-4xl font-black text-[#00695C] italic tracking-tighter uppercase">
-                        {chapterTitle} <span className="text-yellow-500">World</span>
+            <div className="relative z-30 p-3 sm:p-6 lg:p-8 flex flex-col sm:flex-row justify-between gap-3 sm:gap-4 items-start pointer-events-none">
+                <div className={`px-4 sm:px-8 lg:px-10 py-3 sm:py-4 rounded-[1.5rem] sm:rounded-[2.5rem] pointer-events-auto ${isClay ? 'ui-clay-surface' : 'bg-white/90 backdrop-blur-md shadow-[0_15px_40px_rgba(0,0,0,0.3)] border-4 sm:border-[6px] border-[#00695C]'}`}>
+                    <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-black italic tracking-tighter uppercase ${isClay ? 'ui-clay-heading' : 'text-[#00695C]'}`}>
+                        {chapterTitle} <span className={isClay ? 'text-[#21A7F1]' : 'text-yellow-500'}>World</span>
                     </h1>
                 </div>
 
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="pointer-events-auto flex items-center gap-3 bg-[#00695C] text-white px-8 py-4 rounded-full font-black text-xl shadow-[0_10px_25px_rgba(0,0,0,0.4)] hover:bg-[#00897B] transition-all transform hover:-translate-y-1 active:translate-y-0 group"
+                    className={`pointer-events-auto flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-full font-black text-sm sm:text-lg lg:text-xl transition-all group ${isClay ? 'ui-clay-button-primary' : 'bg-[#00695C] text-white shadow-[0_10px_25px_rgba(0,0,0,0.4)] hover:bg-[#00897B]'}`}
                 >
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#00695C] group-hover:rotate-12 transition-transform">
-                        <Search size={20} />
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-transform ${isClay ? 'ui-clay-icon-pocket text-[#21A7F1]' : 'bg-white text-[#00695C] group-hover:rotate-12'}`}>
+                        <Search size={18} />
                     </div>
                     BACK TO WORLD
                 </button>
             </div>
 
-            {/* Map Area */}
-            <div ref={mapContainerRef} className="flex-1 relative z-10 overflow-auto scrollbar-hide select-none cursor-grab active:cursor-grabbing">
-                <div className="relative w-full min-h-[1400px]">
-
-                    {/* SVG Continents */}
+            <div
+                ref={mapContainerRef}
+                className="flex-1 relative z-10 overflow-auto scrollbar-hide select-none cursor-grab active:cursor-grabbing pb-24"
+            >
+                <div className="relative w-[1000px] min-h-[1400px] mx-auto px-2">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-2xl" viewBox="0 0 1000 1400" preserveAspectRatio="xMidYMid slice">
-                        {/* Continent 1 */}
                         <motion.path
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -116,7 +138,6 @@ const LevelMap = () => {
                             stroke="#7BA641"
                             strokeWidth="6"
                         />
-                        {/* Continent 2 */}
                         <motion.path
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -126,7 +147,6 @@ const LevelMap = () => {
                             stroke="#7BA641"
                             strokeWidth="6"
                         />
-                        {/* Continent 3 */}
                         <motion.path
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -136,8 +156,6 @@ const LevelMap = () => {
                             stroke="#a2c65f"
                             strokeWidth="6"
                         />
-
-                        {/* Progression Path */}
                         <path
                             d="M330,420 Q550,550 750,700 T750,450 T400,950"
                             fill="none"
@@ -148,46 +166,19 @@ const LevelMap = () => {
                         />
                     </svg>
 
-                    {/* Decorations */}
-                    <motion.div animate={{ y: [0, -30, 0] }} transition={{ repeat: Infinity, duration: 5 }} className="absolute top-[15%] left-[65%] z-20 text-9xl select-none">🐬</motion.div>
-                    <motion.div animate={{ x: [0, 60, 0] }} transition={{ repeat: Infinity, duration: 10 }} className="absolute bottom-[10%] right-[15%] z-20 text-9xl select-none">🐢</motion.div>
-
-                    <div className="absolute top-[65%] left-[8%] z-20 flex gap-2 select-none">
-                        <span className="text-7xl animate-bounce">🐧</span>
-                        <span className="text-7xl animate-bounce [animation-delay:0.2s]">🐧</span>
-                        <span className="text-7xl animate-bounce [animation-delay:0.4s]">🐧</span>
-                    </div>
-
-                    {/* Start Banner */}
                     <motion.div
                         initial={{ x: -100, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         className="absolute top-[1150px] left-[50px] z-50 pointer-events-none"
                     >
-                        <div className="bg-[#00897B] text-white px-8 py-3 rounded-2xl font-black text-2xl shadow-2xl border-4 border-white relative">
-                            START HERE!
-                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#00897B] rotate-45 border-b-4 border-r-4 border-white" />
+                        <div className={`px-8 py-3 rounded-2xl font-black text-2xl shadow-2xl relative ${isClay ? 'ui-clay-button-primary border border-white/70' : 'bg-[#00897B] text-white border-4 border-white'}`}>
+                            START HERE
+                            <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rotate-45 ${isClay ? 'bg-[#21A7F1] border-b border-r border-white/70' : 'bg-[#00897B] border-b-4 border-r-4 border-white'}`} />
                         </div>
                     </motion.div>
 
-                    {/* Level Badges */}
-                    {[...levels].sort((a, b) => a.order_index - b.order_index).map((level, idx) => {
-                        const coords = [
-                            { top: '1250px', left: '150px' },  // Level 1 (Start)
-                            { top: '1100px', left: '300px' },  // Level 2
-                            { top: '950px', left: '400px' },   // Level 3
-                            { top: '800px', left: '250px' },   // Level 4
-                            { top: '650px', left: '350px' },   // Level 5
-                            { top: '550px', left: '550px' },   // Level 6
-                            { top: '450px', left: '750px' },  // Level 7
-                            { top: '300px', left: '850px' },   // Level 8
-                            { top: '200px', left: '650px' },   // Level 9
-                            { top: '150px', left: '400px' },   // Level 10 (End)
-                        ];
-
-                        // Ensure we don't crash if we have > 10 levels
-                        const pos = coords[idx] || { top: '50%', left: '50%' };
-
+                    {sortedLevels.map((level, idx) => {
+                        const pos = levelPositions[idx] || { top: '50%', left: '50%' };
                         const unlocked = isUnlocked(level);
 
                         return (
@@ -211,28 +202,26 @@ const LevelMap = () => {
                                             }, { forceBubble: true });
                                         }
                                     }}
-                                    className={`
-                                        w-28 h-28 rounded-full border-[6px] flex flex-col items-center justify-center shadow-2xl transition-all
-                                        ${unlocked
-                                            ? 'bg-[#00897B] border-white text-white hover:scale-110'
+                                    className={`w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full border-4 lg:border-[6px] flex flex-col items-center justify-center shadow-2xl transition-all ${
+                                        unlocked
+                                            ? isClay ? 'bg-[linear-gradient(135deg,#81c9ff,#21A7F1)] border-white text-white hover:scale-110' : 'bg-[#00897B] border-white text-white hover:scale-110'
                                             : user.status === 'pending'
                                                 ? 'bg-amber-500 border-white text-white hover:scale-105'
-                                                : 'bg-[#00897B] border-slate-400 text-slate-200 grayscale opacity-80'
-                                        }
-                                    `}
+                                                : isClay ? 'bg-[#d6e0ee] border-white text-[color:var(--clay-text-soft)] grayscale opacity-80' : 'bg-[#00897B] border-slate-400 text-slate-200 grayscale opacity-80'
+                                    }`}
                                 >
-                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-80 leading-none">Level</span>
-                                    <span className="text-4xl font-black mt-[-4px] italic">{idx + 1}</span>
-                                    {!unlocked && <Lock size={20} className="mt-1" />}
+                                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest opacity-80 leading-none">Level</span>
+                                    <span className="text-2xl sm:text-3xl lg:text-4xl font-black mt-[-2px] italic">{idx + 1}</span>
+                                    {!unlocked && <Lock size={16} className="mt-1" />}
                                 </button>
 
-                                <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 bg-white px-5 py-2 rounded-2xl shadow-xl border-2 border-[#00897B] opacity-0 group-hover:opacity-100 transition-all pointer-events-none transform translate-y-2 group-hover:translate-y-0 z-50">
-                                    <p className="font-black text-xs text-[#00897B] uppercase italic tracking-tighter whitespace-nowrap">
+                                <div className={`absolute -bottom-14 left-1/2 -translate-x-1/2 px-4 py-2 rounded-2xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none transform translate-y-2 group-hover:translate-y-0 z-50 ${isClay ? 'ui-clay-surface' : 'bg-white shadow-xl border-2 border-[#00897B]'}`}>
+                                    <p className={`font-black text-xs uppercase italic tracking-tight whitespace-nowrap ${isClay ? 'text-[#21A7F1]' : 'text-[#00897B]'}`}>
                                         {unlocked
                                             ? level.title
                                             : user.status === 'pending'
-                                                ? "Account Under Review 🕒"
-                                                : "Unlock with NDIS Plan 🔐"}
+                                                ? 'Account Under Review'
+                                                : 'Unlock with NDIS Plan'}
                                     </p>
                                 </div>
                             </motion.div>
@@ -241,21 +230,20 @@ const LevelMap = () => {
                 </div>
             </div>
 
-            {/* Status Radar */}
-            <div className="absolute bottom-10 right-10 z-50 pointer-events-none">
-                <div className="bg-white/95 backdrop-blur-md p-6 rounded-[2.5rem] shadow-2xl border-4 border-[#00695C] pointer-events-auto flex items-center gap-5">
-                    <div className="w-16 h-16 bg-[#00897B] rounded-full flex items-center justify-center text-3xl shadow-lg">
-                        🦁
+            <div className="absolute bottom-3 sm:bottom-6 lg:bottom-10 left-3 sm:left-6 lg:left-auto lg:right-10 z-50 pointer-events-none">
+                <div className="bg-white/95 backdrop-blur-md p-3 sm:p-5 lg:p-6 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl border-4 border-[#00695C] pointer-events-auto flex items-center gap-3 sm:gap-5">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-[#00897B] rounded-full flex items-center justify-center text-lg sm:text-xl lg:text-2xl shadow-lg">
+                        PK
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-[#00695C] uppercase tracking-widest opacity-60">Status</p>
-                        <h3 className="text-2xl font-black text-[#00695C] italic tracking-tighter uppercase leading-none mt-1">
+                        <h3 className="text-base sm:text-xl lg:text-2xl font-black text-[#00695C] italic tracking-tighter uppercase leading-none mt-1">
                             {user.status === 'active' ? 'Super Explorer' : 'New Voyager'}
                         </h3>
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

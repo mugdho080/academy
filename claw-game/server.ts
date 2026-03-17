@@ -22,7 +22,7 @@ async function startServer() {
   let activePlayer: string | null = null;
   let turnEndTime = 0;
   let prizes: any[] = [];
-  
+
   const colorValues: Record<string, number> = {
     '#FBBC04': 50, // Yellow
     '#EA4335': 40, // Medium red
@@ -30,30 +30,30 @@ async function startServer() {
     '#E37400': 20, // Orange
     '#9AA0A6': 10  // Gray (lowest points)
   };
-  
+
   const typeMultipliers: Record<string, number> = {
     'dodecahedron': 3,
     'sphere': 2,
     'box': 1
   };
-  
+
   const colors = Object.keys(colorValues);
   const types = Object.keys(typeMultipliers);
 
   const DISALLOW_LIST = new Set([
     'ASS', 'CUM', 'FAG', 'FUK', 'FUQ', 'GAY', 'JEW', 'JIZ', 'KKK', 'SEX', 'TIT', 'VAG', 'WAP', 'WTF', 'WTG', 'DIK', 'COK', 'FUC', 'FUX', 'NIG', 'NGR', 'BCH', 'BIT', 'HOE', 'SLT', 'CUN', 'KYS'
   ]);
-  
+
   function initPrizes() {
     prizes = [];
-    for(let i=0; i<60; i++) {
-      let x = (Math.random()-0.5)*7;
-      let z = (Math.random()-0.5)*7;
+    for (let i = 0; i < 60; i++) {
+      let x = (Math.random() - 0.5) * 7;
+      let z = (Math.random() - 0.5) * 7;
       // Avoid chute area (x: -5 to -2, z: 2 to 5)
       if (x < -2 && z > 2) {
         x += 3;
       }
-      
+
       const type = types[Math.floor(Math.random() * types.length)];
       const color = colors[Math.floor(Math.random() * colors.length)];
       const value = colorValues[color] * typeMultipliers[type];
@@ -63,24 +63,24 @@ async function startServer() {
         type,
         color,
         value,
-        position: [x, Math.random()*4 + 1, z],
-        rotation: [0,0,0,1]
+        position: [x, Math.random() * 4 + 1, z],
+        rotation: [0, 0, 0, 1]
       });
     }
-    
+
     // Add 3 bugdroids
-    for(let i=0; i<3; i++) {
-      let x = (Math.random()-0.5)*7;
-      let z = (Math.random()-0.5)*7;
+    for (let i = 0; i < 3; i++) {
+      let x = (Math.random() - 0.5) * 7;
+      let z = (Math.random() - 0.5) * 7;
       if (x < -2 && z > 2) x += 3;
-      
+
       prizes.push({
         id: `prize_bugdroid_${uuidv4()}`,
         type: 'bugdroid',
         color: '#34A853',
         value: 100,
-        position: [x, Math.random()*2 + 5, z],
-        rotation: [0,0,0,1]
+        position: [x, Math.random() * 2 + 5, z],
+        rotation: [0, 0, 0, 1]
       });
     }
   }
@@ -127,7 +127,7 @@ async function startServer() {
         playerCount++;
         finalName = `P${playerCount}`.slice(0, 3); // Fallback
       }
-      
+
       players[socket.id] = {
         id: socket.id,
         name: finalName,
@@ -168,16 +168,16 @@ async function startServer() {
 
     socket.on('prize_captured', (prizeId) => {
       const playerIds = Object.keys(players);
-      const isPhysicsHost = socket.id === activePlayer || 
-                            (!activePlayer && playerIds[0] === socket.id);
-      
+      const isPhysicsHost = socket.id === activePlayer ||
+        (!activePlayer && playerIds[0] === socket.id);
+
       if (isPhysicsHost) {
         const index = prizes.findIndex(p => p.id === prizeId);
         if (index !== -1) {
           const prize = prizes[index];
-          
+
           const targetPlayer = activePlayer;
-          
+
           if (targetPlayer && players[targetPlayer]) {
             players[targetPlayer].currentScore = (players[targetPlayer].currentScore || 0) + prize.value;
             if (players[targetPlayer].currentScore > players[targetPlayer].score) {
@@ -187,9 +187,9 @@ async function startServer() {
           } else {
             io.emit('prize_removed', { prizeId, playerId: null, score: null });
           }
-          
+
           prizes.splice(index, 1);
-          
+
           if (prizes.length < 10) {
             initPrizes();
             io.emit('prizes_reset', prizes);
@@ -219,7 +219,7 @@ async function startServer() {
     app.use(express.static('dist'));
   }
 
-  const PORT = 3000;
+  const PORT = 3001;
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
   });

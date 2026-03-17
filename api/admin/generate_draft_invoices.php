@@ -55,13 +55,21 @@ $currency = (string) ($settings['default_currency'] ?? 'AUD');
 
 $placeholders = implode(',', array_fill(0, count($userIds), '?'));
 $eligibleStmt = $pdo->prepare("
-    SELECT u.id, u.name, u.ndis_number
+    SELECT
+        u.id,
+        u.name,
+        u.email,
+        u.ndis_number,
+        sa.phone
     FROM users u
     INNER JOIN (
         SELECT user_id, MAX(signed_at) AS signed_at
         FROM service_agreements
         GROUP BY user_id
-    ) sa ON sa.user_id = u.id
+    ) latest_sa ON latest_sa.user_id = u.id
+    LEFT JOIN service_agreements sa
+        ON sa.user_id = latest_sa.user_id
+       AND sa.signed_at = latest_sa.signed_at
     WHERE u.id IN ({$placeholders})
       AND u.role = 'learner'
       AND u.status = 'active'
@@ -151,8 +159,10 @@ try {
                 company_bank_account_snapshot,
                 company_account_name_snapshot,
                 company_logo_snapshot,
-                payment_instruction_code
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, 'activity_logs', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                payment_instruction_code,
+                participant_email_snapshot,
+                participant_phone_snapshot
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, 'activity_logs', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         $insertInvoice->execute([
@@ -183,7 +193,9 @@ try {
             $settings['bank_account_number'] ?? '',
             $settings['account_name'] ?? '',
             $settings['logo_path'] ?? null,
-            $settings['payment_instruction_code'] ?? 'INV_RR_006_CB'
+            $settings['payment_instruction_code'] ?? 'INV_RR_006_CB',
+            $user['email'] ?? '',
+            $user['phone'] ?? ''
         ]);
         $invoiceId = (int) $pdo->lastInsertId();
 

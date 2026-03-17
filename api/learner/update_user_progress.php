@@ -1,6 +1,7 @@
 <?php
 // api/learner/update_user_progress.php
 require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/../services/AchievementService.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
 $userId = $data['user_id'] ?? null;
@@ -14,9 +15,10 @@ if (!$userId) {
 
 try {
     if ($points !== null) {
-        // Increment points
-        $stmt = $pdo->prepare("UPDATE users SET points = points + ? WHERE id = ?");
-        $stmt->execute([$points, $userId]);
+        $service = new AchievementService($pdo);
+        $service->awardPoints((int) $userId, 'manual_points', 'user_progress', gmdate('Y-m-d H:i:s'), [
+            'points_override' => (int) $points
+        ]);
     }
 
     if ($avatar !== null) {

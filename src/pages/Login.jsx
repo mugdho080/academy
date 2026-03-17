@@ -25,7 +25,7 @@ const Login = () => {
                 localStorage.setItem('user', JSON.stringify(response.data.user));
 
                 if (response.data.user.role === 'admin') {
-                    navigate('/admin');
+                    navigate('/admin/dashboard');
                 } else {
                     try {
                         await startSession({ context_type: 'dashboard' });
@@ -44,15 +44,15 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen safe-mobile-height flex items-center justify-center p-3 sm:p-4">
             <SensoryBackground />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl w-full max-w-md relative z-10 border-4 border-primary-light"
+                className="bg-white/80 backdrop-blur-md p-5 sm:p-8 rounded-3xl shadow-xl w-full max-w-md relative z-10 border-4 border-primary-light"
             >
-                <div className="text-center mb-8">
+                <div className="text-center mb-6 sm:mb-8">
                     <motion.div
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
@@ -60,16 +60,16 @@ const Login = () => {
                     >
                         <LogIn size={32} />
                     </motion.div>
-                    <h1 className="text-3xl font-bold text-primary-dark">Welcome Back!</h1>
-                    <p className="text-gray-600 mt-2 italic font-medium">"Every small step is a great victory."</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-primary-dark">Welcome Back!</h1>
+                    <p className="text-sm sm:text-base text-gray-600 mt-2 italic font-medium">"Every small step is a great victory."</p>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-6">
+                <form onSubmit={handleLogin} className="space-y-5">
                     <div>
                         <label className="block text-gray-700 font-semibold mb-2">Email or NDIS Number</label>
                         <input
                             type="text"
-                            className="w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all"
+                            className="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all text-base"
                             placeholder="Your email or NDIS number..."
                             value={identifier}
                             onChange={(e) => setIdentifier(e.target.value)}
@@ -81,7 +81,7 @@ const Login = () => {
                         <label className="block text-gray-700 font-semibold mb-2">Password</label>
                         <input
                             type="password"
-                            className="w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all"
+                            className="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all text-base"
                             placeholder="Your secret password..."
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -98,7 +98,7 @@ const Login = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`w-full py-4 rounded-2xl font-bold text-lg text-white shadow-lg transform transition-all active:scale-95 ${loading ? 'bg-gray-400' : 'bg-primary hover:bg-primary-dark'}`}
+                        className={`w-full py-4 rounded-2xl font-bold text-base sm:text-lg text-white shadow-lg transform transition-all active:scale-95 ${loading ? 'bg-gray-400' : 'bg-primary hover:bg-primary-dark'}`}
                     >
                         {loading ? 'Joining the adventure...' : 'Let\'s Start Learning! 🚀'}
                     </button>
@@ -118,7 +118,7 @@ const Login = () => {
                 </div>
             </motion.div>
 
-            <div className="fixed bottom-4 left-4 flex items-center gap-2 text-primary-dark/60 font-medium">
+            <div className="fixed bottom-4 left-4 items-center gap-2 text-primary-dark/60 font-medium hidden sm:flex">
                 <Heart size={20} className="fill-current" />
                 <span>Built with care for you</span>
             </div>

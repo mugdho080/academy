@@ -1,6 +1,7 @@
 <?php
 // learner/fetch_level_content.php
 require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/../services/AchievementService.php';
 
 if (!isset($_GET['level_id'])) {
     http_response_code(400);
@@ -12,6 +13,9 @@ $levelId = $_GET['level_id'];
 $userId = $_GET['user_id'] ?? null;
 
 try {
+    $achievementService = new AchievementService($pdo);
+    $achievementService->ensureSchema();
+
     // 1. Fetch Level Info (Video)
     $stmt = $pdo->prepare("SELECT * FROM levels WHERE id = ?");
     $stmt->execute([$levelId]);

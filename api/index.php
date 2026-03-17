@@ -64,6 +64,30 @@ switch ($clean_endpoint) {
     case '/learner/end_session':
         require 'learner/end_session.php';
         break;
+    case '/learner/mark_lesson_completed':
+        require 'learner/mark_lesson_completed.php';
+        break;
+    case '/learner/submit_quiz_answer':
+        require 'learner/submit_quiz_answer.php';
+        break;
+    case '/learner/update_points':
+        require 'learner/update_points.php';
+        break;
+    case '/learner/get_achievement_summary':
+        require 'learner/get_achievement_summary.php';
+        break;
+    case '/learner/get_achievements':
+        require 'learner/get_achievements.php';
+        break;
+    case '/learner/get_weekly_target':
+        require 'learner/get_weekly_target.php';
+        break;
+    case '/learner/get_recent_wins':
+        require 'learner/get_recent_wins.php';
+        break;
+    case '/learner/get_chapter_mastery':
+        require 'learner/get_chapter_mastery.php';
+        break;
     case '/learner/get_time_logs':
         require 'learner/get_time_logs.php';
         break;
@@ -75,6 +99,18 @@ switch ($clean_endpoint) {
         break;
     case '/learner/submit_agreement':
         require 'learner/submit_agreement.php';
+        break;
+    case '/learner/get_chapter_progress':
+        require 'learner/get_chapter_progress.php';
+        break;
+    case '/learner/fetch_user_profile':
+        require 'learner/fetch_user_profile.php';
+        break;
+    case '/learner/update_profile_text':
+        require 'learner/update_profile_text.php';
+        break;
+    case '/learner/upload_profile_image':
+        require 'learner/upload_profile_image.php';
         break;
     case '/learner/fetch_my_agreement':
         require 'learner/fetch_my_agreement.php';
@@ -133,6 +169,30 @@ switch ($clean_endpoint) {
     case '/admin/fetch_content':
         require 'admin/fetch_content.php';
         break;
+    case '/admin/get_dashboard_layout':
+        require 'admin/get_dashboard_layout.php';
+        break;
+    case '/admin/save_dashboard_layout':
+        require 'admin/save_dashboard_layout.php';
+        break;
+    case '/admin/reset_dashboard_layout':
+        require 'admin/reset_dashboard_layout.php';
+        break;
+    case '/admin/get_widget_library':
+        require 'admin/get_widget_library.php';
+        break;
+    case '/admin/get_dashboard_presets':
+        require 'admin/get_dashboard_presets.php';
+        break;
+    case '/admin/load_dashboard_preset':
+        require 'admin/load_dashboard_preset.php';
+        break;
+    case '/admin/get_dashboard_data':
+        require 'admin/get_dashboard_data.php';
+        break;
+    case '/admin/get_widget_data':
+        require 'admin/get_widget_data.php';
+        break;
     case '/admin/save_content':
         require 'admin/save_content.php';
         break;
@@ -141,6 +201,12 @@ switch ($clean_endpoint) {
         break;
     case '/admin/add_level_json':
         require 'admin/add_level_json.php';
+        break;
+    case '/admin/rebuild_achievements':
+        require 'admin/rebuild_achievements.php';
+        break;
+    case '/admin/recalculate_user_achievements':
+        require 'admin/recalculate_user_achievements.php';
         break;
     case '/admin/where':
         require 'admin/where_am_i.php';

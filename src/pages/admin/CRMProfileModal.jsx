@@ -86,21 +86,21 @@ export default function CRMProfileModal({ userId, onClose }) {
     );
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-            <div className="bg-gray-50 w-full max-w-4xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto relative z-10 flex flex-col">
+            <div className="bg-gray-50 w-full max-w-4xl rounded-[1.5rem] sm:rounded-[2.5rem] max-h-[94vh] sm:max-h-[90vh] overflow-y-auto relative z-10 flex flex-col">
 
                 {/* Header Profile Ribbon */}
-                <div className="bg-white p-8 pb-6 rounded-t-[2.5rem] border-b border-gray-100 sticky top-0 z-20 shadow-sm">
+                <div className="bg-white p-4 sm:p-8 pb-4 sm:pb-6 rounded-t-[1.5rem] sm:rounded-t-[2.5rem] border-b border-gray-100 sticky top-0 z-20 shadow-sm">
                     <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"><X size={20} /></button>
 
-                    <div className="flex justify-between items-end">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-3">
                         <div>
-                            <h2 className="text-3xl font-black text-gray-800">{participant.full_name}</h2>
+                            <h2 className="text-2xl sm:text-3xl font-black text-gray-800">{participant.full_name}</h2>
                             <p className="text-primary font-bold font-mono mt-1">{participant.ndis_number}</p>
                         </div>
 
-                        <div className="flex gap-4 items-center">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
                             <label className="flex items-center gap-2 text-sm font-bold bg-gray-50 px-4 py-2 rounded-xl">
                                 Risk Flag:
                                 <input
@@ -138,7 +138,7 @@ export default function CRMProfileModal({ userId, onClose }) {
                     </div>
                 )}
 
-                <div className="p-8 space-y-8">
+                <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
                     {/* Plans Editor */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                         <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -148,7 +148,7 @@ export default function CRMProfileModal({ userId, onClose }) {
                         <div className="space-y-6">
                             {plans.map(plan => (
                                 <div key={plan.id} className="border border-gray-200 rounded-2xl p-5 bg-gray-50">
-                                    <form onSubmit={(e) => handleSavePlan(e, plan.id)} className="flex gap-4 items-end mb-4">
+                                    <form onSubmit={(e) => handleSavePlan(e, plan.id)} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end mb-4">
                                         <div className="flex-1">
                                             <label className="text-xs font-bold text-gray-500 uppercase">Start Date</label>
                                             <input type="date" name="start_date" defaultValue={plan.start_date} className="w-full mt-1 p-2 border border-gray-200 rounded-lg" required />
@@ -157,7 +157,7 @@ export default function CRMProfileModal({ userId, onClose }) {
                                             <label className="text-xs font-bold text-gray-500 uppercase">End Date</label>
                                             <input type="date" name="end_date" defaultValue={plan.end_date} className="w-full mt-1 p-2 border border-gray-200 rounded-lg" required />
                                         </div>
-                                        <button type="submit" className="bg-gray-800 text-white px-4 py-2 rounded-lg font-bold hover:bg-black transition-colors flex items-center gap-2">
+                                        <button type="submit" className="bg-gray-800 text-white px-4 py-2.5 rounded-lg font-bold hover:bg-black transition-colors flex items-center justify-center gap-2">
                                             <Save size={16} /> Update Plan
                                         </button>
                                     </form>
@@ -166,7 +166,7 @@ export default function CRMProfileModal({ userId, onClose }) {
                                     <div className="pl-4 border-l-2 border-primary-light space-y-2">
                                         <p className="text-sm font-bold text-gray-500 mb-2">Line Items Budget</p>
                                         {plan.line_items?.map(li => (
-                                            <div key={li.id} className="flex justify-between items-center bg-white p-3 rounded-lg text-sm border border-gray-100">
+                                            <div key={li.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white p-3 rounded-lg text-sm border border-gray-100 gap-1">
                                                 <span className="font-bold text-gray-700">{li.code} ({li.category})</span>
                                                 <span className="text-gray-500 font-mono">Bal: ${parseFloat(li.remaining_balance).toFixed(2)}</span>
                                             </div>
@@ -178,7 +178,7 @@ export default function CRMProfileModal({ userId, onClose }) {
                             {/* Add New Plan form */}
                             <form onSubmit={(e) => handleSavePlan(e)} className="border-2 border-dashed border-gray-200 rounded-2xl p-5 bg-white">
                                 <p className="text-sm font-bold text-primary mb-3 flex items-center gap-1"><Plus size={16} /> Register New Plan</p>
-                                <div className="flex gap-4 items-end">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                                     <div className="flex-1">
                                         <label className="text-xs font-bold text-gray-500 uppercase">Start Date</label>
                                         <input type="date" name="start_date" className="w-full mt-1 p-2 border border-gray-200 rounded-lg bg-gray-50" required />
@@ -187,7 +187,7 @@ export default function CRMProfileModal({ userId, onClose }) {
                                         <label className="text-xs font-bold text-gray-500 uppercase">End Date</label>
                                         <input type="date" name="end_date" className="w-full mt-1 p-2 border border-gray-200 rounded-lg bg-gray-50" required />
                                     </div>
-                                    <button type="submit" className="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-primary-dark transition-colors">
+                                    <button type="submit" className="bg-primary text-white px-4 py-2.5 rounded-lg font-bold hover:bg-primary-dark transition-colors">
                                         Add Plan
                                     </button>
                                 </div>

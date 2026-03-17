@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronLeft, Star, ArrowLeft, CheckCircle, Play } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 import AIFriend from '../components/AIFriend';
 import SensoryBackground from '../components/SensoryBackground';
 import { useActivityTimer } from '../context/ActivityTimerProvider';
 import { useCoach } from '../context/CoachContext';
+import PageContainer from '../components/layout/PageContainer';
+import ActionGroup from '../components/layout/ActionGroup';
+import { useUiVariant } from '../context/UiVariantContext';
 
 const splitIntoSentences = (text) => {
     if (!text) return [];
-    // Split by . ! ? followed by space, or newline
-    return text.match(/[^.?!]+[.?!]+(?=\s|$)|[^.?!]+/g)?.map(s => s.trim()).filter(s => s.length > 0) || [text];
+    return text.match(/[^.?!]+[.?!]+(?=\s|$)|[^.?!]+/g)?.map((s) => s.trim()).filter(Boolean) || [text];
 };
 
 const LessonView = () => {
@@ -25,17 +26,29 @@ const LessonView = () => {
     const [currentLessonIndex, setCurrentLessonIndex] = useState(location.state?.startLessonIndex || 0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [user] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
 
-    const [quizSelections, setQuizSelections] = useState({}); // { [quizId]: optionIndex }
-    const [quizCorrectness, setQuizCorrectness] = useState({}); // { [quizId]: boolean }
+    const [quizSelections, setQuizSelections] = useState({});
+    const [quizCorrectness, setQuizCorrectness] = useState({});
     const [completedLessons, setCompletedLessons] = useState([]);
+
     const { setCurrentLessonId } = useActivityTimer();
     const { emitCoachEvent, requestCoachMessage, state: coachState, recommendation, profile } = useCoach();
+    const { variant } = useUiVariant('learner');
+    const isClay = variant === 'clay';
+
     const contentScrollerRef = React.useRef(null);
     const lastScrollLeftRef = React.useRef(0);
     const lastSwipeEventRef = React.useRef(0);
     const lessonCoachLoadedRef = React.useRef(null);
+    const recommendedLessonId = Number(location.state?.recommendedLessonId || 0) || null;
+
+    const syncUserPoints = (totalPoints) => {
+        if (!Number.isFinite(totalPoints)) return;
+        const updatedUser = { ...user, points: Number(totalPoints) };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+    };
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -44,10 +57,14 @@ const LessonView = () => {
                 if (res.data.error) throw new Error(res.data.error);
 
                 const data = res.data;
-                const processedLessons = (data.lessons || []).map(l => {
+                const processedLessons = (data.lessons || []).map((l) => {
                     let structured = l.structured_content;
                     if (typeof structured === 'string' && structured.trim().startsWith('{')) {
-                        try { structured = JSON.parse(structured); } catch (e) { structured = {}; }
+                        try {
+                            structured = JSON.parse(structured);
+                        } catch (_) {
+                            structured = {};
+                        }
                     } else if (typeof structured === 'string') {
                         structured = { paragraphs: [structured] };
                     }
@@ -55,10 +72,14 @@ const LessonView = () => {
                     return {
                         ...l,
                         structured_content: structured || {},
-                        quizzes: (l.quizzes || []).map(q => {
+                        quizzes: (l.quizzes || []).map((q) => {
                             let opts = q.options;
                             if (typeof opts === 'string' && opts.trim().startsWith('[')) {
-                                try { opts = JSON.parse(opts); } catch (e) { opts = []; }
+                                try {
+                                    opts = JSON.parse(opts);
+                                } catch (_) {
+                                    opts = [];
+                                }
                             }
                             return { ...q, options: Array.isArray(opts) ? opts : [] };
                         })
@@ -68,8 +89,8 @@ const LessonView = () => {
                 setLevelData({ ...data, lessons: processedLessons });
                 setCompletedLessons(data.completed_lessons || []);
             } catch (err) {
-                console.error("Error:", err);
-                setError("Could not load the lesson. Please try again.");
+                console.error('Error:', err);
+                setError('Could not load the lesson. Please try again.');
             } finally {
                 setLoading(false);
             }
@@ -78,10 +99,39 @@ const LessonView = () => {
         fetchContent();
     }, [levelId, user.id]);
 
-    const handleOptionSelect = (quizId, optionIndex) => {
-        if (quizCorrectness[quizId]) return; // Already correct
+    const lesson = levelData?.lessons?.[currentLessonIndex];
 
-        setQuizSelections(prev => ({
+    const contentTabs = useMemo(() => {
+        if (!lesson) return [];
+
+        const nextTabs = [];
+        if (lesson.structured_content?.paragraphs) {
+            lesson.structured_content.paragraphs.forEach((para) => {
+                nextTabs.push(...splitIntoSentences(para));
+            });
+        }
+        if (lesson.structured_content?.bullets) nextTabs.push(...lesson.structured_content.bullets);
+        if (lesson.mini_activity) nextTabs.push(`Activity: ${lesson.mini_activity}`);
+        if (lesson.fun_reminder) nextTabs.push(`Did you know? ${lesson.fun_reminder}`);
+        if (nextTabs.length === 0) nextTabs.push(lesson.title);
+
+        return nextTabs;
+    }, [lesson]);
+
+    const isLessonCompleted = lesson ? completedLessons.includes(lesson.id) : false;
+    const lessonCount = levelData?.lessons?.length || 0;
+    const progressPercent = lessonCount > 0 ? Math.round(((currentLessonIndex + 1) / lessonCount) * 100) : 0;
+
+    const goToLesson = (nextIndex) => {
+        if (!levelData?.lessons?.[nextIndex]) return;
+        setCurrentLessonIndex(nextIndex);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleOptionSelect = (quizId, optionIndex) => {
+        if (quizCorrectness[quizId]) return;
+
+        setQuizSelections((prev) => ({
             ...prev,
             [quizId]: optionIndex
         }));
@@ -99,7 +149,7 @@ const LessonView = () => {
         const selected = quizSelections[quizId];
         if (selected === undefined) return;
 
-        const isCorrect = selected === parseInt(correctAnswerIndex);
+        const isCorrect = selected === parseInt(correctAnswerIndex, 10);
 
         if (isCorrect) {
             emitCoachEvent('quiz_answer_correct', {
@@ -109,23 +159,36 @@ const LessonView = () => {
                 lesson_id: lesson?.id || null,
                 payload_json: { quiz_id: quizId }
             }, { immediate: true });
+
+            try {
+                const quizRes = await axios.post('/api/learner/submit_quiz_answer.php', {
+                    user_id: user.id,
+                    quiz_id: quizId,
+                    is_correct: true,
+                    lesson_id: lesson?.id || null,
+                    level_id: Number(levelId),
+                    chapter_id: levelData?.level?.chapter_id || null
+                });
+                syncUserPoints(quizRes?.data?.total_points);
+            } catch (quizErr) {
+                console.error('Failed to submit quiz answer', quizErr);
+            }
+
             confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
 
             const newCorrectness = { ...quizCorrectness, [quizId]: true };
             setQuizCorrectness(newCorrectness);
 
-            // Check if lesson is fully complete
-            const lesson = levelData.lessons[currentLessonIndex];
-            const allPassed = lesson.quizzes?.every(q => newCorrectness[q.id]);
-
-            if (allPassed && !completedLessons.includes(lesson.id)) {
-                // Mark complete
+            const allPassed = lesson?.quizzes?.every((q) => newCorrectness[q.id]);
+            if (allPassed && lesson && !completedLessons.includes(lesson.id)) {
                 try {
-                    await axios.post('/api/learner/mark_lesson_completed.php', {
+                    const completionRes = await axios.post('/api/learner/mark_lesson_completed.php', {
                         user_id: user.id,
-                        lesson_id: lesson.id
+                        lesson_id: lesson.id,
+                        is_recommended: recommendedLessonId ? lesson.id === recommendedLessonId : false
                     });
-                    setCompletedLessons(prev => [...prev, lesson.id]);
+                    syncUserPoints(completionRes?.data?.total_points);
+                    setCompletedLessons((prev) => [...prev, lesson.id]);
                     emitCoachEvent('lesson_completed', {
                         route: location.pathname,
                         chapter_id: levelData?.level?.chapter_id || null,
@@ -138,12 +201,25 @@ const LessonView = () => {
                         lesson_id: lesson.id,
                         lesson_title: lesson.title
                     }, { forceBubble: true });
-                    confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+                    confetti({ particleCount: 180, spread: 90, origin: { y: 0.5 } });
                 } catch (e) {
-                    console.error("Failed to mark completed", e);
+                    console.error('Failed to mark completed', e);
                 }
             }
         } else {
+            try {
+                await axios.post('/api/learner/submit_quiz_answer.php', {
+                    user_id: user.id,
+                    quiz_id: quizId,
+                    is_correct: false,
+                    lesson_id: lesson?.id || null,
+                    level_id: Number(levelId),
+                    chapter_id: levelData?.level?.chapter_id || null
+                });
+            } catch (quizErr) {
+                console.error('Failed to submit incorrect quiz attempt', quizErr);
+            }
+
             emitCoachEvent('quiz_answer_incorrect', {
                 route: location.pathname,
                 chapter_id: levelData?.level?.chapter_id || null,
@@ -159,19 +235,16 @@ const LessonView = () => {
         }
     };
 
-    const lesson = levelData?.lessons?.[currentLessonIndex];
-
     useEffect(() => {
         if (!lesson?.id) {
             setCurrentLessonId(null);
             return undefined;
         }
-        if (lessonCoachLoadedRef.current === lesson.id) {
-            return undefined;
-        }
-        lessonCoachLoadedRef.current = lesson.id;
+        if (lessonCoachLoadedRef.current === lesson.id) return undefined;
 
+        lessonCoachLoadedRef.current = lesson.id;
         setCurrentLessonId(lesson.id);
+
         emitCoachEvent('lesson_opened', {
             route: location.pathname,
             chapter_id: levelData?.level?.chapter_id || null,
@@ -231,71 +304,64 @@ const LessonView = () => {
         return () => scroller.removeEventListener('scroll', onScroll);
     }, [emitCoachEvent, lesson?.id, levelData?.level?.chapter_id, levelId, location.pathname]);
 
-    if (loading) return (
-        <div className="min-h-screen w-full bg-[#00695C] flex items-center justify-center text-white">
-            <h1 className="text-2xl font-bold animate-pulse">Loading amazing things...</h1>
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className={`min-h-screen w-full flex items-center justify-center px-4 ${isClay ? 'ui-clay-page text-[color:var(--clay-text)]' : 'bg-[#00695C] text-white'}`}>
+                <h1 className="text-xl sm:text-2xl font-bold animate-pulse">Loading lesson...</h1>
+            </div>
+        );
+    }
 
-    if (error || !levelData || !levelData.lessons) return (
-        <div className="min-h-screen w-full bg-[#00695C] flex flex-col items-center justify-center p-10 text-center text-white">
-            <h1 className="text-3xl font-bold mb-4">Ops! 🐢</h1>
-            <button onClick={() => navigate(-1)} className="bg-white text-[#00695C] px-6 py-3 rounded-xl font-bold">Go Back</button>
-        </div>
-    );
+    if (error || !levelData || !levelData.lessons) {
+        return (
+            <div className={`min-h-screen w-full flex flex-col items-center justify-center p-6 text-center gap-4 ${isClay ? 'ui-clay-page text-[color:var(--clay-text)]' : 'bg-[#00695C] text-white'}`}>
+                <h1 className="text-2xl sm:text-3xl font-bold">Oops, lesson unavailable</h1>
+                <button onClick={() => navigate(-1)} className={`px-6 py-3 rounded-xl font-bold ${isClay ? 'ui-clay-button-secondary' : 'bg-white text-[#00695C]'}`}>
+                    Go Back
+                </button>
+            </div>
+        );
+    }
 
     if (!lesson) return null;
 
-    // Process Content into Tabs (Sentences)
-    let contentTabs = [];
-    if (lesson.structured_content?.paragraphs) {
-        lesson.structured_content.paragraphs.forEach(para => {
-            contentTabs.push(...splitIntoSentences(para));
-        });
-    }
-    if (lesson.structured_content?.bullets) {
-        contentTabs.push(...lesson.structured_content.bullets);
-    }
-    if (lesson.mini_activity) contentTabs.push(`Activity: ${lesson.mini_activity}`);
-    if (lesson.fun_reminder) contentTabs.push(`Did you know? ${lesson.fun_reminder}`);
-    if (contentTabs.length === 0) contentTabs.push(lesson.title);
-
-    const isLessonCompleted = completedLessons.includes(lesson.id);
-
     return (
-        <div className="min-h-screen w-full bg-[#e0f7fa] font-sans text-slate-800 relative overflow-x-hidden flex pb-20">
+        <div className={`min-h-screen w-full font-sans text-slate-800 relative overflow-x-hidden pb-24 lg:pb-8 ${isClay ? 'ui-clay-page' : 'bg-[#e0f7fa]'}`}>
             <SensoryBackground />
 
-            {/* Main scrollable container wrapper, leaves room for right sidebar */}
-            <div className="flex-1 w-full lg:pr-80">
-                <div className="max-w-5xl mx-auto px-4 md:px-8 pt-8 relative z-10 transition-all">
+            <div className="w-full lg:pr-80">
+                <PageContainer className="relative z-10 space-y-5 sm:space-y-6 pb-28 lg:pb-10">
+                    <div className="content-card p-4 sm:p-5">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <button
+                                onClick={() => navigate(`/level/${levelId}`)}
+                                className={`px-4 py-3 rounded-2xl font-bold flex items-center gap-2 w-full sm:w-auto justify-center ${isClay ? 'ui-clay-button-secondary text-[color:var(--clay-text)]' : 'bg-white shadow-md text-[#00695C]'}`}
+                            >
+                                <ArrowLeft size={18} /> Back to Lesson List
+                            </button>
 
-                    {/* Header Back Button */}
-                    <div className="flex justify-between items-center mb-8">
-                        <button
-                            onClick={() => navigate(`/level/${levelId}`)}
-                            className="bg-white/80 backdrop-blur shadow-md px-6 py-3 rounded-[2rem] font-bold text-[#00695C] flex items-center gap-2 hover:bg-white transition-all transform hover:-translate-x-1"
-                        >
-                            <ArrowLeft size={20} /> Back to Lesson List
-                        </button>
+                            {isLessonCompleted && (
+                                <div className={`px-4 py-2.5 rounded-2xl font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm ${isClay ? 'ui-clay-chip-success' : 'bg-green-100 text-green-700 border-2 border-green-200'}`}>
+                                    <CheckCircle size={18} /> Completed
+                                </div>
+                            )}
+                        </div>
 
-                        {isLessonCompleted && (
-                            <div className="bg-green-100 text-green-700 px-6 py-3 rounded-[2rem] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm border-2 border-green-200 animate-bounce">
-                                <CheckCircle /> Completed
-                            </div>
-                        )}
+                        <div className="mt-4">
+                            <p className={`font-black tracking-widest uppercase text-xs sm:text-sm mb-2 break-words ${isClay ? 'text-[#21A7F1]' : 'text-[#00897B]'}`}>{levelData.level.title}</p>
+                            <h1 className={`text-2xl sm:text-3xl lg:text-5xl font-black italic leading-tight break-words ${isClay ? 'ui-clay-heading' : 'text-[#00695C]'}`}>{lesson.title}</h1>
+                            <p className={`mt-2 text-sm font-semibold ${isClay ? 'ui-clay-text-soft' : 'text-slate-600'}`}>Lesson {currentLessonIndex + 1} of {lessonCount}</p>
+                        </div>
+
+                        <div className={`mt-3 h-3 rounded-full overflow-hidden ${isClay ? 'ui-clay-progress-track border border-white/70' : 'bg-[#d4ece8] border border-[#b7dcd6]'}`}>
+                            <div className={`h-full transition-all ${isClay ? 'ui-clay-progress-bar' : 'bg-[#00897B]'}`} style={{ width: `${progressPercent}%` }} />
+                        </div>
                     </div>
 
-                    <div className="text-center mb-10">
-                        <p className="text-[#00897B] font-black tracking-widest uppercase text-sm mb-2">{levelData.level.title}</p>
-                        <h1 className="text-4xl md:text-5xl font-black text-[#00695C] italic leading-tight">{lesson.title}</h1>
-                    </div>
-
-                    {/* Video Section (Scrollable with page) */}
                     {levelData.level.video_url && (
-                        <div className="w-full max-w-3xl mx-auto aspect-video mb-12 rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white relative bg-black shrink-0">
+                        <div className={`w-full max-w-4xl mx-auto aspect-video rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden relative bg-black ${isClay ? 'ui-clay-surface' : 'shadow-2xl border-4 sm:border-[6px] border-white'}`}>
                             <iframe
-                                className="w-full h-full object-cover"
+                                className="w-full h-full"
                                 src={levelData.level.video_url}
                                 title="Lesson Video"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -304,49 +370,52 @@ const LessonView = () => {
                         </div>
                     )}
 
-                    {/* Content Section (Horizontal Tabs - Side wise scrollable) */}
-                    <div className="mb-12">
-                        <h2 className="text-xl font-black text-[#00695C] ml-4 mb-4 uppercase tracking-widest">Read & Swipe ✨</h2>
-                        <div ref={contentScrollerRef} className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 hide-scrollbar pt-2 px-4 -mx-4">
+                    <section className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                            <h2 className={`text-lg sm:text-xl font-black uppercase tracking-wide ${isClay ? 'ui-clay-heading' : 'text-[#00695C]'}`}>Read and Swipe</h2>
+                            <p className={`text-xs sm:text-sm font-semibold ${isClay ? 'ui-clay-text-soft' : 'text-slate-500'}`}>Swipe cards or use lesson buttons below</p>
+                        </div>
+                        <div ref={contentScrollerRef} className="flex overflow-x-auto snap-x snap-mandatory gap-4 sm:gap-5 pb-3 hide-scrollbar pt-1 px-1">
                             {contentTabs.map((text, i) => (
-                                <div key={i} className="snap-center shrink-0 w-[85vw] max-w-md min-h-[300px] h-auto bg-white rounded-[2.5rem] p-8 md:p-10 flex flex-col items-center justify-center shadow-[0_15px_40px_rgba(0,0,0,0.1)] border-[6px] border-white hover:border-yellow-300 transition-colors relative group">
-                                    <div className="absolute top-4 left-6 text-6xl font-black text-[#e0f7fa] select-none pointer-events-none transform -rotate-12 group-hover:scale-110 transition-transform">{i + 1}</div>
-                                    <p className="text-2xl md:text-3xl font-bold text-[#00695C] text-center leading-relaxed relative z-10">{text}</p>
-                                </div>
+                                <article
+                                    key={i}
+                                    className={`snap-center shrink-0 w-[88vw] sm:w-[75vw] md:w-[62vw] lg:w-[46vw] max-w-xl min-h-[220px] sm:min-h-[280px] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-7 flex flex-col items-center justify-center relative ${isClay ? 'ui-clay-surface' : 'bg-white shadow-[0_12px_30px_rgba(0,0,0,0.09)] border-4 border-white'}`}
+                                >
+                                    <div className={`absolute top-3 left-4 text-5xl sm:text-6xl font-black select-none pointer-events-none ${isClay ? 'text-[#cfe4ff]' : 'text-[#e0f7fa]'}`}>{i + 1}</div>
+                                    <p className={`text-lg sm:text-2xl md:text-3xl font-bold text-center leading-relaxed relative z-10 break-words ${isClay ? 'ui-clay-heading' : 'text-[#00695C]'}`}>{text}</p>
+                                </article>
                             ))}
                         </div>
-                    </div>
+                    </section>
 
-                    {/* Quizzes Section (Vertical Stack) */}
                     {lesson.quizzes && lesson.quizzes.length > 0 && (
-                        <div className="max-w-3xl mx-auto">
-                            <h2 className="text-xl font-black text-[#00695C] mb-6 uppercase tracking-widest text-center">Quiz Time! 🧠</h2>
-                            <div className="flex flex-col gap-8">
+                        <section className="max-w-4xl mx-auto w-full space-y-5 sm:space-y-6">
+                            <h2 className={`text-xl sm:text-2xl font-black uppercase tracking-wide text-center ${isClay ? 'ui-clay-heading' : 'text-[#00695C]'}`}>Quiz Time</h2>
+                            <div className="flex flex-col gap-5 sm:gap-6">
                                 {lesson.quizzes.map((quiz, qIdx) => {
                                     const selected = quizSelections[quiz.id];
                                     const isCorrect = quizCorrectness[quiz.id];
-                                    const correctIndex = parseInt(quiz.correct_answer);
+                                    const correctIndex = parseInt(quiz.correct_answer, 10);
 
                                     return (
-                                        <div key={quiz.id} className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl border-4 border-white relative">
-                                            {/* Status Header Bar inside the card */}
-                                            <div className={`absolute top-0 inset-x-0 h-4 rounded-t-[2.1rem] ${isCorrect ? 'bg-green-400' : 'bg-yellow-400'} transition-colors duration-500`}></div>
+                                        <article key={quiz.id} className={`rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-7 relative ${isClay ? 'ui-clay-surface' : 'bg-white shadow-xl border-4 border-white'}`}>
+                                            <div className={`absolute top-0 inset-x-0 h-3 rounded-t-[1.4rem] sm:rounded-t-[1.8rem] ${isCorrect ? 'bg-green-400' : isClay ? 'bg-[#21A7F1]' : 'bg-yellow-400'} transition-colors`} />
 
-                                            <div className="mt-4 mb-8">
-                                                <span className="text-yellow-500 font-bold uppercase tracking-wider text-sm bg-yellow-50 px-3 py-1 rounded-full">Question {qIdx + 1}</span>
-                                                <h3 className="text-2xl font-black text-slate-800 mt-4 leading-snug">{quiz.question}</h3>
+                                            <div className="mt-3 mb-5">
+                                                <span className={`font-bold uppercase tracking-wider text-xs px-3 py-1 rounded-full ${isClay ? 'ui-clay-button-secondary text-[#21A7F1]' : 'text-yellow-600 bg-yellow-50'}`}>Question {qIdx + 1}</span>
+                                                <h3 className={`text-xl sm:text-2xl font-black mt-3 leading-snug break-words ${isClay ? 'ui-clay-heading' : 'text-slate-800'}`}>{quiz.question}</h3>
                                             </div>
 
-                                            <div className="space-y-4 mb-8">
+                                            <div className="space-y-3 sm:space-y-4 mb-5">
                                                 {quiz.options.map((opt, optIdx) => {
-                                                    let stateStyle = "bg-slate-50 border-slate-200 text-slate-600 hover:bg-[#e0f7fa] hover:border-[#00897B]";
+                                                    let stateStyle = isClay ? 'ui-clay-button-secondary text-[color:var(--clay-text)]' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-[#e0f7fa] hover:border-[#00897B]';
                                                     if (isCorrect) {
-                                                        if (optIdx === correctIndex) stateStyle = "bg-green-100 border-green-500 text-green-900 font-bold border-4";
-                                                        else stateStyle = "opacity-50 grayscale border-2";
+                                                        if (optIdx === correctIndex) stateStyle = 'bg-green-100 border-green-500 text-green-900 font-bold border-4';
+                                                        else stateStyle = 'opacity-50 grayscale border-2';
                                                     } else if (selected === optIdx) {
-                                                        stateStyle = "bg-yellow-100 border-yellow-400 text-yellow-900 font-bold border-4";
+                                                        stateStyle = isClay ? 'ui-clay-button-primary text-white border-transparent' : 'bg-yellow-100 border-yellow-400 text-yellow-900 font-bold border-4';
                                                     } else {
-                                                        stateStyle += " border-2";
+                                                        stateStyle += isClay ? ' border border-white/70' : ' border-2';
                                                     }
 
                                                     return (
@@ -354,12 +423,12 @@ const LessonView = () => {
                                                             key={optIdx}
                                                             onClick={() => handleOptionSelect(quiz.id, optIdx)}
                                                             disabled={isCorrect}
-                                                            className={`w-full text-left p-5 rounded-2xl transition-all flex items-center gap-4 ${stateStyle}`}
+                                                            className={`w-full text-left px-4 py-3.5 sm:p-5 rounded-2xl transition-all flex items-center gap-3 sm:gap-4 ${stateStyle}`}
                                                         >
-                                                            <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 bg-white ${selected === optIdx || (isCorrect && optIdx === correctIndex) ? 'border-current' : 'border-slate-300'}`}>
-                                                                {(selected === optIdx || (isCorrect && optIdx === correctIndex)) && <div className="w-4 h-4 bg-current rounded-full" />}
+                                                            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center shrink-0 ${isClay ? 'bg-white/80' : 'bg-white'} ${selected === optIdx || (isCorrect && optIdx === correctIndex) ? 'border-current' : 'border-slate-300'}`}>
+                                                                {(selected === optIdx || (isCorrect && optIdx === correctIndex)) && <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-current rounded-full" />}
                                                             </div>
-                                                            <span className="text-lg font-medium">{opt}</span>
+                                                            <span className="text-base sm:text-lg font-medium break-words">{opt}</span>
                                                         </button>
                                                     );
                                                 })}
@@ -368,31 +437,51 @@ const LessonView = () => {
                                             <button
                                                 onClick={() => checkAnswer(quiz.id, quiz.correct_answer)}
                                                 disabled={selected === undefined || isCorrect}
-                                                className={`w-full py-5 rounded-[2rem] font-black text-xl shadow-lg transition-all transform active:scale-95 border-b-4
-                                                ${isCorrect
+                                                className={`w-full py-4 sm:py-5 rounded-2xl font-black text-lg sm:text-xl shadow-lg transition-all transform active:scale-95 border-b-4 ${
+                                                    isCorrect
                                                         ? 'bg-green-500 text-white border-green-700 cursor-default'
                                                         : selected !== undefined
-                                                            ? 'bg-[#00897B] text-white hover:bg-[#00695C] border-[#004D40]'
+                                                            ? isClay ? 'bg-[linear-gradient(135deg,#81c9ff,#21A7F1)] text-white border-[#0E90D1]' : 'bg-[#00897B] text-white hover:bg-[#00695C] border-[#004D40]'
                                                             : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                                                    }`}
+                                                }`}
                                             >
-                                                {isCorrect ? 'Brilliant! Correct! 🎉' : 'Check My Answer'}
+                                                {isCorrect ? 'Brilliant, correct!' : 'Check My Answer'}
                                             </button>
-                                        </div>
+                                        </article>
                                     );
                                 })}
                             </div>
-                        </div>
+                        </section>
                     )}
-                </div>
+
+                    <div className="sticky bottom-20 lg:bottom-6 z-20">
+                        <div className="content-card p-3 sm:p-4">
+                            <ActionGroup className="justify-between">
+                                <button
+                                    onClick={() => goToLesson(Math.max(0, currentLessonIndex - 1))}
+                                    disabled={currentLessonIndex === 0}
+                                    className={`px-4 sm:px-5 py-3 rounded-2xl font-black disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 ${isClay ? 'ui-clay-button-secondary' : 'bg-white border border-slate-200 text-slate-700'}`}
+                                >
+                                    <ChevronLeft size={18} /> Previous Lesson
+                                </button>
+                                <button
+                                    onClick={() => goToLesson(Math.min(lessonCount - 1, currentLessonIndex + 1))}
+                                    disabled={currentLessonIndex >= lessonCount - 1}
+                                    className={`px-4 sm:px-5 py-3 rounded-2xl font-black disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 ${isClay ? 'ui-clay-button-primary' : 'bg-[#00695C] text-white'}`}
+                                >
+                                    Next Lesson <ChevronRight size={18} />
+                                </button>
+                            </ActionGroup>
+                        </div>
+                    </div>
+                </PageContainer>
             </div>
 
-            {/* Fixed Sidebar for AI Friend Desktop / Floating for mobile */}
-            <div className="fixed right-0 top-0 bottom-0 w-80 bg-white/40 backdrop-blur-md border-l border-white/50 shadow-2xl p-4 hidden lg:block z-50">
+            <div className={`fixed right-0 top-0 bottom-0 w-80 p-4 hidden lg:block z-50 ${isClay ? 'ui-clay-overlay-panel' : 'bg-white/40 backdrop-blur-md border-l border-white/50 shadow-2xl'}`}>
                 <AIFriend context={{
                     chapter: levelData.level.title,
                     lesson: lesson.title,
-                    content: contentTabs.join(" "),
+                    content: contentTabs.join(' '),
                     chapterId: levelData.level.chapter_id || null,
                     levelId: Number(levelId),
                     lessonId: lesson.id,
@@ -402,21 +491,22 @@ const LessonView = () => {
                 }} />
             </div>
 
-            {/* Mobile AI Friend (Floating) */}
-            <div className="lg:hidden fixed bottom-6 right-6 z-50">
-                <AIFriend context={{
-                    chapter: levelData.level.title,
-                    lesson: lesson.title,
-                    content: contentTabs.join(" "),
-                    chapterId: levelData.level.chapter_id || null,
-                    levelId: Number(levelId),
-                    lessonId: lesson.id,
-                    frustrationBand: coachState?.frustration_band || 'normal',
-                    recommendedAction: recommendation?.recommended_route || null,
-                    ageBand: profile?.age_band || 'age_20_40'
-                }} floating={true} />
+            <div className="lg:hidden fixed bottom-28 right-3 sm:right-4 z-50">
+                <AIFriend
+                    context={{
+                        chapter: levelData.level.title,
+                        lesson: lesson.title,
+                        content: contentTabs.join(' '),
+                        chapterId: levelData.level.chapter_id || null,
+                        levelId: Number(levelId),
+                        lessonId: lesson.id,
+                        frustrationBand: coachState?.frustration_band || 'normal',
+                        recommendedAction: recommendation?.recommended_route || null,
+                        ageBand: profile?.age_band || 'age_20_40'
+                    }}
+                    floating={true}
+                />
             </div>
-
         </div>
     );
 };

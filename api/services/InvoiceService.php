@@ -212,7 +212,9 @@ function inv_ensure_schema(PDO $pdo): void
         'company_bank_account_snapshot' => "VARCHAR(64) NULL",
         'company_account_name_snapshot' => "VARCHAR(255) NULL",
         'company_logo_snapshot' => "VARCHAR(512) NULL",
-        'payment_instruction_code' => "VARCHAR(64) NULL"
+        'payment_instruction_code' => "VARCHAR(64) NULL",
+        'participant_email_snapshot' => "VARCHAR(255) NULL",
+        'participant_phone_snapshot' => "VARCHAR(64) NULL"
     ];
 
     foreach ($invoiceColumns as $name => $definition) {
@@ -449,34 +451,136 @@ function inv_escape_pdf_text(string $text): string
     return $escaped;
 }
 
-function inv_build_pdf_stream(array $lines): string
+function inv_pdf_num(float $value): string
 {
-    $stream = "BT\n/F1 11 Tf\n";
-    $y = 810;
-
-    foreach ($lines as $line) {
-        if ($y < 40) {
-            break;
-        }
-        $stream .= sprintf("1 0 0 1 40 %d Tm (%s) Tj\n", $y, inv_escape_pdf_text($line));
-        $y -= 16;
-    }
-
-    $stream .= "ET";
-    return $stream;
+    $formatted = number_format($value, 2, '.', '');
+    return rtrim(rtrim($formatted, '0'), '.');
 }
 
-function inv_write_simple_pdf(string $filePath, array $lines): void
+function inv_pdf_text_width(string $text, float $fontSize): float
 {
-    $content = inv_build_pdf_stream($lines);
-    $length = strlen($content);
+    $units = 0.0;
+    $wide = 'WMQG@%&';
+    $narrow = 'ijlI1.,:;|!\'` ';
 
+    foreach (preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY) as $char) {
+        if (strpos($wide, $char) !== false) {
+            $units += 0.9;
+        } elseif (strpos($narrow, $char) !== false) {
+            $units += 0.28;
+        } elseif (ctype_upper($char)) {
+            $units += 0.68;
+        } else {
+            $units += 0.56;
+        }
+    }
+
+    return $units * $fontSize;
+}
+
+function inv_pdf_wrap_text(string $text, float $maxWidth, float $fontSize): array
+{
+    $text = trim(preg_replace('/\s+/', ' ', $text));
+    if ($text === '') {
+        return [''];
+    }
+
+    $words = preg_split('/\s+/', $text) ?: [];
+    $lines = [];
+    $current = '';
+
+    foreach ($words as $word) {
+        $candidate = $current === '' ? $word : $current . ' ' . $word;
+        if ($current !== '' && inv_pdf_text_width($candidate, $fontSize) > $maxWidth) {
+            $lines[] = $current;
+            $current = $word;
+            continue;
+        }
+        $current = $candidate;
+    }
+
+    if ($current !== '') {
+        $lines[] = $current;
+    }
+
+    return $lines ?: [''];
+}
+
+function inv_pdf_add_text(array &$pages, int $pageIndex, float $x, float $y, string $text, string $font = 'F1', float $size = 10.0, string $align = 'left'): void
+{
+    $width = inv_pdf_text_width($text, $size);
+    if ($align === 'right') {
+        $x -= $width;
+    } elseif ($align === 'center') {
+        $x -= $width / 2;
+    }
+
+    $pages[$pageIndex][] = sprintf(
+        "BT /%s %s Tf 1 0 0 1 %s %s Tm (%s) Tj ET",
+        $font,
+        inv_pdf_num($size),
+        inv_pdf_num($x),
+        inv_pdf_num($y),
+        inv_escape_pdf_text($text)
+    );
+}
+
+function inv_pdf_add_line(array &$pages, int $pageIndex, float $x1, float $y1, float $x2, float $y2, float $width = 0.6): void
+{
+    $pages[$pageIndex][] = sprintf(
+        "%s w %s %s m %s %s l S",
+        inv_pdf_num($width),
+        inv_pdf_num($x1),
+        inv_pdf_num($y1),
+        inv_pdf_num($x2),
+        inv_pdf_num($y2)
+    );
+}
+
+function inv_pdf_new_page(array &$pages): int
+{
+    $pages[] = [
+        "0 0 0 rg",
+        "0 0 0 RG"
+    ];
+    return count($pages) - 1;
+}
+
+function inv_pdf_write_document(string $filePath, array $pages): void
+{
     $objects = [];
     $objects[] = "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj";
-    $objects[] = "2 0 obj << /Type /Pages /Count 1 /Kids [3 0 R] >> endobj";
-    $objects[] = "3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj";
-    $objects[] = "4 0 obj << /Length {$length} >> stream\n{$content}\nendstream endobj";
-    $objects[] = "5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj";
+
+    $pageCount = count($pages);
+    $kids = [];
+    $nextObjectId = 3;
+    $pageObjectIds = [];
+    $contentObjectIds = [];
+
+    for ($i = 0; $i < $pageCount; $i++) {
+        $pageObjectIds[$i] = $nextObjectId++;
+        $contentObjectIds[$i] = $nextObjectId++;
+        $kids[] = $pageObjectIds[$i] . ' 0 R';
+    }
+
+    $objects[] = "2 0 obj << /Type /Pages /Count {$pageCount} /Kids [" . implode(' ', $kids) . "] >> endobj";
+
+    for ($i = 0; $i < $pageCount; $i++) {
+        $objects[] = sprintf(
+            "%d 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents %d 0 R /Resources << /Font << /F1 %d 0 R /F2 %d 0 R >> >> >> endobj",
+            $pageObjectIds[$i],
+            $contentObjectIds[$i],
+            $nextObjectId,
+            $nextObjectId + 1
+        );
+
+        $content = implode("\n", $pages[$i]);
+        $length = strlen($content);
+        $objects[] = sprintf("%d 0 obj << /Length %d >> stream\n%s\nendstream endobj", $contentObjectIds[$i], $length, $content);
+    }
+
+    $objects[] = sprintf("%d 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj", $nextObjectId);
+    $objects[] = sprintf("%d 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> endobj", $nextObjectId + 1);
 
     $pdf = "%PDF-1.4\n";
     $offsets = [0];
@@ -498,7 +602,85 @@ function inv_write_simple_pdf(string $filePath, array $lines): void
     file_put_contents($filePath, $pdf);
 }
 
-function inv_generate_invoice_pdf_file(array $invoice, array $items, array $company): string
+function inv_format_invoice_display_date(?string $date, string $format = 'd-M-Y'): string
+{
+    if (!$date) {
+        return '';
+    }
+
+    $ts = strtotime($date);
+    if ($ts === false) {
+        return (string) $date;
+    }
+
+    return date($format, $ts);
+}
+
+function inv_resolve_invoice_recipient(PDO $pdo, array $invoice): array
+{
+    $email = trim((string) ($invoice['participant_email_snapshot'] ?? ''));
+    $phone = trim((string) ($invoice['participant_phone_snapshot'] ?? ''));
+    $userId = (int) ($invoice['user_id'] ?? 0);
+
+    if ($userId > 0 && ($email === '' || $phone === '')) {
+        $stmt = $pdo->prepare("
+            SELECT
+                u.email,
+                (
+                    SELECT sa.phone
+                    FROM service_agreements sa
+                    WHERE sa.user_id = u.id
+                    ORDER BY sa.signed_at DESC, sa.id DESC
+                    LIMIT 1
+                ) AS phone
+            FROM users u
+            WHERE u.id = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        if ($email === '') {
+            $email = trim((string) ($row['email'] ?? ''));
+        }
+        if ($phone === '') {
+            $phone = trim((string) ($row['phone'] ?? ''));
+        }
+    }
+
+    return [
+        'email' => $email,
+        'phone' => $phone
+    ];
+}
+
+function inv_render_invoice_header(array &$pages, int $pageIndex, float $left, float $right, array $companyLines, array $recipientLines, array $metaRows): float
+{
+    inv_pdf_add_text($pages, $pageIndex, $left, 794, 'INVOICE', 'F2', 21);
+
+    $y = 764;
+    foreach ($companyLines as $index => $line) {
+        inv_pdf_add_text($pages, $pageIndex, $left, $y, $line, $index === 0 ? 'F2' : 'F1', $index === 0 ? 12 : 10);
+        $y -= $index === 0 ? 18 : 14;
+    }
+
+    $recipientTop = 690;
+    foreach ($recipientLines as $index => $line) {
+        inv_pdf_add_text($pages, $pageIndex, $left, $recipientTop - ($index * 15), $line, $index === 0 ? 'F2' : 'F1', 10);
+    }
+
+    $metaLabelX = 380;
+    $metaValueX = $right;
+    $metaY = 760;
+    foreach ($metaRows as $row) {
+        inv_pdf_add_text($pages, $pageIndex, $metaLabelX, $metaY, $row['label'], 'F2', 10);
+        inv_pdf_add_text($pages, $pageIndex, $metaValueX, $metaY, $row['value'], 'F1', 10, 'right');
+        $metaY -= 16;
+    }
+
+    return 626;
+}
+
+function inv_generate_invoice_pdf_file(PDO $pdo, array $invoice, array $items, array $company): string
 {
     $baseDir = __DIR__ . '/../uploads/invoices';
     if (!is_dir($baseDir)) {
@@ -510,62 +692,138 @@ function inv_generate_invoice_pdf_file(array $invoice, array $items, array $comp
     $filename = sprintf('%s-%s.pdf', $safeNumber, $safeParticipant);
     $fullPath = $baseDir . '/' . $filename;
 
-    $companyName = $invoice['company_name_snapshot'] ?: ($company['company_name'] ?? 'Goodwill Care Academy');
-    $companyAbn = $invoice['company_abn_snapshot'] ?: ($company['abn'] ?? '');
-    $companyEmail = $invoice['company_email_snapshot'] ?: ($company['email'] ?? '');
-    $companyPhone = $invoice['company_phone_snapshot'] ?: ($company['phone'] ?? '');
-    $companyAddress = $invoice['company_address_snapshot'] ?: ($company['address'] ?? '');
-    $companyLogo = $invoice['company_logo_snapshot'] ?: ($company['logo_path'] ?? '');
-    $bsb = $invoice['company_bsb_snapshot'] ?: ($company['bsb'] ?? '');
-    $bankAccount = $invoice['company_bank_account_snapshot'] ?: ($company['bank_account_number'] ?? '');
-    $accountName = $invoice['company_account_name_snapshot'] ?: ($company['account_name'] ?? '');
-    $paymentCode = $invoice['payment_instruction_code'] ?: ($company['payment_instruction_code'] ?? 'INV_RR_006_CB');
+    $defaults = [
+        'company_name' => 'Goodwill Care',
+        'abn' => '41 633 362 893',
+        'address' => '132 Tower Street, Panania, Panania, NSW-2213, Australia.',
+        'phone' => '1800 070 872',
+        'email' => 'accounts@goodwillcare.com.au',
+        'bsb' => '062-334',
+        'bank_account_number' => '1180 4799',
+        'account_name' => 'Goodwill Care'
+    ];
 
-    $lines = [];
-    $lines[] = $companyName;
-    $lines[] = 'ABN: ' . $companyAbn;
-    $lines[] = trim('Email: ' . $companyEmail . '  Phone: ' . $companyPhone);
-    if ($companyAddress) {
-        $lines[] = 'Address: ' . $companyAddress;
-    }
-    if ($companyLogo) {
-        $lines[] = 'Logo: ' . $companyLogo;
-    }
-    $lines[] = str_repeat('-', 90);
-    $lines[] = 'Invoice Number: ' . ($invoice['invoice_number'] ?? '');
-    $lines[] = 'Invoice Date: ' . ($invoice['invoice_date'] ?? '');
-    $lines[] = 'Due Date: ' . ($invoice['due_date'] ?? '');
-    $lines[] = 'Participant: ' . ($invoice['participant_name'] ?? '');
-    $lines[] = 'NDIS Number: ' . ($invoice['participant_ndis_number'] ?? '');
-    $lines[] = 'Service Date Range: ' . ($invoice['date_from'] ?? '') . ' to ' . ($invoice['date_to'] ?? '');
-    $lines[] = str_repeat('-', 90);
-    $lines[] = 'Items';
-    $lines[] = 'Date Range | Line Item | Hours | Rate | Amount';
+    $companyName = trim((string) (($invoice['company_name_snapshot'] ?: ($company['company_name'] ?? '')) ?: $defaults['company_name']));
+    $companyAbn = trim((string) (($invoice['company_abn_snapshot'] ?: ($company['abn'] ?? '')) ?: $defaults['abn']));
+    $companyEmail = trim((string) (($invoice['company_email_snapshot'] ?: ($company['email'] ?? '')) ?: $defaults['email']));
+    $companyPhone = trim((string) (($invoice['company_phone_snapshot'] ?: ($company['phone'] ?? '')) ?: $defaults['phone']));
+    $companyAddress = trim((string) (($invoice['company_address_snapshot'] ?: ($company['address'] ?? '')) ?: $defaults['address']));
+    $bsb = trim((string) (($invoice['company_bsb_snapshot'] ?: ($company['bsb'] ?? '')) ?: $defaults['bsb']));
+    $bankAccount = trim((string) (($invoice['company_bank_account_snapshot'] ?: ($company['bank_account_number'] ?? '')) ?: $defaults['bank_account_number']));
+    $accountName = trim((string) (($invoice['company_account_name_snapshot'] ?: ($company['account_name'] ?? '')) ?: $defaults['account_name']));
+
+    $recipient = inv_resolve_invoice_recipient($pdo, $invoice);
+
+    $left = 36.0;
+    $right = 559.0;
+    $tableTop = 0.0;
+    $pages = [];
+    $pageIndex = inv_pdf_new_page($pages);
+
+    $companyLines = [
+        $companyName,
+        'ABN ' . $companyAbn,
+        'Address: ' . $companyAddress,
+        'Phone: ' . $companyPhone,
+        'Email: ' . $companyEmail
+    ];
+
+    $recipientLines = [
+        'To: ' . (string) ($invoice['participant_name'] ?? ''),
+        'Ph: ' . $recipient['phone'],
+        'Email: ' . $recipient['email']
+    ];
+
+    $metaRows = [
+        ['label' => 'Invoice Number:', 'value' => (string) ($invoice['invoice_number'] ?? '')],
+        ['label' => 'Invoice Date:', 'value' => inv_format_invoice_display_date($invoice['invoice_date'] ?? null)],
+        ['label' => 'Due Date:', 'value' => inv_format_invoice_display_date($invoice['due_date'] ?? null)],
+        ['label' => 'NDIS Participant:', 'value' => (string) ($invoice['participant_name'] ?? '')],
+        ['label' => 'NDIS Number:', 'value' => (string) ($invoice['participant_ndis_number'] ?? '')]
+    ];
+
+    $tableTop = inv_render_invoice_header($pages, $pageIndex, $left, $right, $companyLines, $recipientLines, $metaRows);
+
+    $columns = [
+        ['label' => 'Dt.From', 'x' => 36.0, 'w' => 52.0, 'align' => 'left'],
+        ['label' => 'Dt.To', 'x' => 88.0, 'w' => 52.0, 'align' => 'left'],
+        ['label' => 'Description', 'x' => 140.0, 'w' => 176.0, 'align' => 'left'],
+        ['label' => 'NDIS S.L.Item', 'x' => 316.0, 'w' => 92.0, 'align' => 'left'],
+        ['label' => 'Frequency', 'x' => 408.0, 'w' => 44.0, 'align' => 'center'],
+        ['label' => 'Rate', 'x' => 452.0, 'w' => 45.0, 'align' => 'right'],
+        ['label' => 'Amount', 'x' => 497.0, 'w' => 62.0, 'align' => 'right']
+    ];
+
+    $drawTableHeader = static function (array &$pdfPages, int $idx, float $y) use ($columns, $left, $right): float {
+        inv_pdf_add_line($pdfPages, $idx, $left, $y + 4, $right, $y + 4, 0.9);
+        foreach ($columns as $column) {
+            $textX = $column['align'] === 'right'
+                ? $column['x'] + $column['w'] - 1
+                : ($column['align'] === 'center' ? $column['x'] + ($column['w'] / 2) : $column['x']);
+            inv_pdf_add_text($pdfPages, $idx, $textX, $y - 8, $column['label'], 'F2', 9, $column['align']);
+        }
+        inv_pdf_add_line($pdfPages, $idx, $left, $y - 14, $right, $y - 14, 0.8);
+        return $y - 28;
+    };
+
+    $y = $drawTableHeader($pages, $pageIndex, $tableTop);
 
     foreach ($items as $item) {
-        $range = ($item['service_date_from'] ?? '') . ' to ' . ($item['service_date_to'] ?? '');
-        $lineItem = trim(($item['line_item_code'] ?? '') . ' ' . ($item['line_item_description'] ?? ''));
-        $hours = inv_format_money((float) ($item['quantity_hours'] ?? 0));
-        $rate = inv_format_money((float) ($item['rate'] ?? 0));
-        $amount = inv_format_money((float) ($item['amount'] ?? 0));
-        $lines[] = sprintf('%s | %s | %s | %s | %s', $range, $lineItem, $hours, $rate, $amount);
+        $from = inv_format_invoice_display_date($item['service_date_from'] ?? null, 'd-m-Y');
+        $to = inv_format_invoice_display_date($item['service_date_to'] ?? null, 'd-m-Y');
+        $descLines = inv_pdf_wrap_text((string) ($item['line_item_description'] ?? ''), 172, 9.5);
+        $codeLines = inv_pdf_wrap_text((string) ($item['line_item_code'] ?? ''), 88, 9.5);
+        $rowLines = max(count($descLines), count($codeLines), 1);
+        $rowHeight = max(18.0, ($rowLines * 12.0) + 4.0);
+
+        if ($y - $rowHeight < 120) {
+            $pageIndex = inv_pdf_new_page($pages);
+            $y = inv_render_invoice_header($pages, $pageIndex, $left, $right, $companyLines, $recipientLines, $metaRows);
+            $y = $drawTableHeader($pages, $pageIndex, $y);
+        }
+
+        inv_pdf_add_text($pages, $pageIndex, 36.0, $y, $from, 'F1', 9.5);
+        inv_pdf_add_text($pages, $pageIndex, 88.0, $y, $to, 'F1', 9.5);
+
+        foreach ($descLines as $lineIndex => $line) {
+            inv_pdf_add_text($pages, $pageIndex, 140.0, $y - ($lineIndex * 12), $line, 'F1', 9.5);
+        }
+        foreach ($codeLines as $lineIndex => $line) {
+            inv_pdf_add_text($pages, $pageIndex, 316.0, $y - ($lineIndex * 12), $line, 'F1', 9.5);
+        }
+
+        inv_pdf_add_text($pages, $pageIndex, 430.0, $y, inv_format_money((float) ($item['quantity_hours'] ?? 0)), 'F1', 9.5, 'center');
+        inv_pdf_add_text($pages, $pageIndex, 496.0, $y, inv_format_money((float) ($item['rate'] ?? 0)), 'F1', 9.5, 'right');
+        inv_pdf_add_text($pages, $pageIndex, 557.0, $y, inv_format_money((float) ($item['amount'] ?? 0)), 'F1', 9.5, 'right');
+
+        $bottomLineY = $y - $rowHeight + 5;
+        inv_pdf_add_line($pages, $pageIndex, $left, $bottomLineY, $right, $bottomLineY, 0.35);
+        $y -= $rowHeight;
     }
 
-    $lines[] = str_repeat('-', 90);
-    $lines[] = 'Subtotal: AUD ' . inv_format_money((float) ($invoice['subtotal'] ?? 0));
-    $lines[] = 'Total: AUD ' . inv_format_money((float) ($invoice['total'] ?? 0));
-    $lines[] = str_repeat('-', 90);
-    $lines[] = 'Payment Details';
-    $lines[] = 'Account Name: ' . $accountName;
-    $lines[] = 'BSB: ' . $bsb;
-    $lines[] = 'Account Number: ' . $bankAccount;
-    $lines[] = 'Reference: ' . $paymentCode;
-
-    if (!empty($invoice['notes'])) {
-        $lines[] = str_repeat('-', 90);
-        $lines[] = 'Notes: ' . $invoice['notes'];
+    $totalY = $y - 8;
+    if ($totalY < 140) {
+        $pageIndex = inv_pdf_new_page($pages);
+        $totalY = 760;
     }
 
-    inv_write_simple_pdf($fullPath, $lines);
+    inv_pdf_add_line($pages, $pageIndex, 390, $totalY + 12, 559, $totalY + 12, 0.8);
+    inv_pdf_add_text($pages, $pageIndex, 455, $totalY, 'Invoice Total', 'F2', 11, 'right');
+    inv_pdf_add_text($pages, $pageIndex, 557, $totalY, inv_format_money((float) ($invoice['total'] ?? 0)), 'F2', 11, 'right');
+
+    $paymentY = $totalY - 40;
+    inv_pdf_add_text($pages, $pageIndex, $left, $paymentY, 'PLEASE MAKE PAYMENT TO:', 'F2', 10.5);
+    inv_pdf_add_text($pages, $pageIndex, $left, $paymentY - 18, 'ACCOUNT NAME: ' . $accountName, 'F1', 10);
+    inv_pdf_add_text($pages, $pageIndex, $left, $paymentY - 34, 'BSB: ' . $bsb, 'F1', 10);
+    inv_pdf_add_text($pages, $pageIndex, $left, $paymentY - 50, 'ACCOUNT: ' . $bankAccount, 'F1', 10);
+
+    $footerText = 'A full list of codes and description of these line items can be found in the Price Guide of the NDIS, available at https://www.ndis.gov.au/providers/pricing-and-payment.html';
+    $footerLines = inv_pdf_wrap_text($footerText, 520, 9);
+    $footerY = max(56, $paymentY - 96);
+    foreach ($footerLines as $index => $line) {
+        inv_pdf_add_text($pages, $pageIndex, $left, $footerY - ($index * 12), $line, 'F1', 9);
+    }
+
+    inv_pdf_write_document($fullPath, $pages);
     return '/api/uploads/invoices/' . $filename;
 }

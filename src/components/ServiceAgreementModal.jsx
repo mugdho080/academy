@@ -83,7 +83,7 @@ const ServiceAgreementModal = ({ isOpen, onClose, onSign, status, userId }) => {
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -96,12 +96,12 @@ const ServiceAgreementModal = ({ isOpen, onClose, onSign, status, userId }) => {
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden border-8 border-white flex flex-col max-h-[90vh]"
+                    className="bg-white w-full max-w-4xl rounded-[1.5rem] sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden border-4 sm:border-8 border-white flex flex-col max-h-[95vh] sm:max-h-[90vh]"
                 >
                     {/* Header */}
-                    <div className="bg-[#00695C] p-6 text-white flex justify-between items-center">
+                    <div className="bg-[#00695C] p-4 sm:p-6 text-white flex justify-between items-center">
                         <div>
-                            <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-2">
+                            <h2 className="text-xl sm:text-2xl font-black italic tracking-tighter uppercase flex items-center gap-2">
                                 <ShieldCheck size={28} /> Service Agreement
                             </h2>
                             <p className="text-white/70 text-sm">Step {step} of 3</p>
@@ -111,14 +111,14 @@ const ServiceAgreementModal = ({ isOpen, onClose, onSign, status, userId }) => {
                         </button>
                     </div>
 
-                    <div className="p-8 overflow-y-auto flex-1">
+                    <div className="p-4 sm:p-8 overflow-y-auto flex-1">
                         {!signed ? (
                             <>
                                 {/* Step 1: Personal Details */}
                                 {step === 1 && (
                                     <div className="space-y-4 animate-in fade-in slide-in-from-right duration-500">
                                         <h3 className="text-xl font-bold text-[#00695C] mb-4">1. Personal Details</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                             <input name="full_name" placeholder="Full Legal Name" className="p-3 bg-gray-50 rounded-xl border border-gray-200" onChange={handleChange} value={formData.full_name} />
                                             <input name="dob" type="date" placeholder="Date of Birth" className="p-3 bg-gray-50 rounded-xl border border-gray-200" onChange={handleChange} value={formData.dob} />
                                             <input name="address" placeholder="Address" className="p-3 bg-gray-50 rounded-xl border border-gray-200 md:col-span-2" onChange={handleChange} value={formData.address} />
@@ -132,7 +132,7 @@ const ServiceAgreementModal = ({ isOpen, onClose, onSign, status, userId }) => {
                                 {step === 2 && (
                                     <div className="space-y-4 animate-in fade-in slide-in-from-right duration-500">
                                         <h3 className="text-xl font-bold text-[#00695C] mb-4">2. NDIS Details</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                             <input name="ndis_number" placeholder="NDIS Number" className="p-3 bg-gray-50 rounded-xl border border-gray-200" onChange={handleChange} value={formData.ndis_number} />
                                             <input name="nominee" placeholder="Nominee (Optional)" className="p-3 bg-gray-50 rounded-xl border border-gray-200" onChange={handleChange} value={formData.nominee} />
 
@@ -162,7 +162,7 @@ const ServiceAgreementModal = ({ isOpen, onClose, onSign, status, userId }) => {
                                                 </div>
                                             )}
 
-                                            <div className="grid grid-cols-2 gap-4 md:col-span-2">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:col-span-2">
                                                 <div>
                                                     <label className="text-xs font-bold text-gray-500">Plan Start (Optional)</label>
                                                     <input name="plan_start_date" type="date" className="w-full p-3 bg-gray-50 rounded-xl border border-gray-200" onChange={handleChange} value={formData.plan_start_date} />
@@ -227,22 +227,22 @@ const ServiceAgreementModal = ({ isOpen, onClose, onSign, status, userId }) => {
 
                     {/* Footer Actions */}
                     {!signed && (
-                        <div className="p-6 border-t border-gray-100 flex justify-between">
+                        <div className="p-4 sm:p-6 border-t border-gray-100 flex flex-col-reverse sm:flex-row gap-3 sm:justify-between">
                             {step > 1 ? (
-                                <button onClick={() => setStep(s => s - 1)} className="px-6 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl flex items-center gap-2">
+                                <button onClick={() => setStep(s => s - 1)} className="px-6 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl flex items-center justify-center gap-2 w-full sm:w-auto">
                                     <ChevronLeft size={20} /> Back
                                 </button>
-                            ) : <div></div>}
+                            ) : <div className="hidden sm:block"></div>}
 
                             {step < 3 ? (
-                                <button onClick={() => setStep(s => s + 1)} className="px-8 py-3 bg-[#00695C] text-white font-bold rounded-xl shadow-lg hover:bg-[#00897B] flex items-center gap-2">
+                                <button onClick={() => setStep(s => s + 1)} className="px-8 py-3 bg-[#00695C] text-white font-bold rounded-xl shadow-lg hover:bg-[#00897B] flex items-center justify-center gap-2 w-full sm:w-auto">
                                     Next <ChevronRight size={20} />
                                 </button>
                             ) : (
                                 <button
                                     onClick={handleSubmit}
                                     disabled={loading}
-                                    className="px-8 py-3 bg-[#00695C] text-white font-bold rounded-xl shadow-lg hover:bg-[#00897B] flex items-center gap-2 disabled:opacity-50"
+                                    className="px-8 py-3 bg-[#00695C] text-white font-bold rounded-xl shadow-lg hover:bg-[#00897B] flex items-center justify-center gap-2 disabled:opacity-50 w-full sm:w-auto"
                                 >
                                     {loading ? 'Submitting...' : 'Sign & Submit'} <PenTool size={18} />
                                 </button>

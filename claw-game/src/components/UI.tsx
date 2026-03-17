@@ -40,6 +40,28 @@ export const UI = () => {
   const isActive = activePlayer === myId && myId !== null;
 
   useEffect(() => {
+    // Auto-join if '?name=XYZ' is provided in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoName = urlParams.get('name');
+    if (autoName && !me && connected) {
+      setName(autoName);
+      join(autoName.substring(0, 3).toUpperCase());
+    }
+  }, [connected, me, join]);
+
+  useEffect(() => {
+    if (gameOver && gameOver.winner?.id === myId) {
+      // Send score to parent if hosted in iframe
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'CLAW_GAME_OVER',
+          score: gameOver.winner.currentScore || 0
+        }, '*');
+      }
+    }
+  }, [gameOver, myId]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       if (activePlayer && turnEndTime) {
         setTimeLeft(Math.max(0, Math.ceil((turnEndTime - Date.now()) / 1000)));
@@ -58,11 +80,11 @@ export const UI = () => {
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-gray-100 text-center">
           <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">NEON CLAW</h1>
           <p className="text-gray-500 font-medium mb-6">Grab as many prizes as you can in 60 seconds!</p>
-          
+
           <div className="mb-6">
-            <input 
-              type="text" 
-              placeholder="AAA" 
+            <input
+              type="text"
+              placeholder="AAA"
               className={`w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-2xl focus:outline-none focus:ring-2 font-black text-center text-2xl uppercase tracking-[0.5em] border transition-all ${nameError ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 focus:ring-[#4285F4]'}`}
               value={name}
               onChange={e => {
@@ -75,7 +97,7 @@ export const UI = () => {
             {nameError && <p className="text-red-500 text-xs font-bold mt-2">{nameError}</p>}
           </div>
 
-          <button 
+          <button
             onClick={handleJoin}
             className="w-full bg-[#4285F4] text-white font-bold py-4 rounded-full hover:bg-[#3367D6] hover:shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2"
           >
@@ -107,19 +129,19 @@ export const UI = () => {
         <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-3xl p-5 w-80 pointer-events-auto border border-gray-100 flex flex-col max-h-[calc(100vh-48px)]">
           {/* Tabs */}
           <div className="flex gap-2 mb-4 bg-gray-100/50 p-1 rounded-xl">
-            <button 
+            <button
               onClick={() => setActiveTab('play')}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${activeTab === 'play' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
             >
               <Play size={14} className={activeTab === 'play' ? 'text-[#4285F4]' : ''} /> Play
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('leaderboard')}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${activeTab === 'leaderboard' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
             >
               <Trophy size={14} className={activeTab === 'leaderboard' ? 'text-[#FBBC04]' : ''} /> Top
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('legend')}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${activeTab === 'legend' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
             >
@@ -134,7 +156,7 @@ export const UI = () => {
                 {Object.values(players).sort((a: any, b: any) => b.score - a.score).slice(0, 10).map((p: any, i) => (
                   <div key={p.id} className="flex justify-between items-center text-sm">
                     <span className="font-bold flex items-center gap-2" style={{ color: p.color }}>
-                      <span className="text-gray-400 text-xs w-4">{i+1}.</span> {p.name} {p.id === myId && <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-1">YOU</span>}
+                      <span className="text-gray-400 text-xs w-4">{i + 1}.</span> {p.name} {p.id === myId && <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-1">YOU</span>}
                     </span>
                     <span className="font-bold text-gray-900">{p.score}</span>
                   </div>
@@ -160,7 +182,7 @@ export const UI = () => {
                     </div>
                     <h3 className="text-lg font-black text-gray-900 mb-2">Ready to Play?</h3>
                     <p className="text-sm text-gray-500 mb-6 font-medium">You have 60 seconds to grab as many prizes as possible.</p>
-                    <button 
+                    <button
                       onClick={joinQueue}
                       className="w-full bg-[#4285F4] text-white font-bold py-4 rounded-xl hover:bg-[#3367D6] hover:shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-base"
                     >
@@ -208,20 +230,20 @@ export const UI = () => {
             <p className="text-lg text-gray-600 mb-8 font-medium">
               You scored <span className="font-bold text-[#34A853]">{gameOver.winner?.currentScore || 0}</span> points!
             </p>
-            
+
             <div className="space-y-2 mb-8 text-left bg-gray-50 p-5 rounded-2xl border border-gray-100">
               {gameOver.players.slice(0, 5).map((p: any, i: number) => (
                 <div key={p.id} className="flex justify-between items-center p-2 rounded-xl hover:bg-white transition-colors">
                   <span className="font-bold flex items-center gap-3" style={{ color: p.color }}>
-                    <span className="text-gray-400 text-sm">{i + 1}.</span> 
+                    <span className="text-gray-400 text-sm">{i + 1}.</span>
                     {p.name} {p.id === myId ? <span className="text-[10px] uppercase font-bold bg-gray-200 px-2 py-0.5 rounded-full text-gray-600 ml-1">You</span> : ''}
                   </span>
                   <span className="text-gray-900 font-black">{p.score}</span>
                 </div>
               ))}
             </div>
-            
-            <button 
+
+            <button
               onClick={() => useGameStore.setState({ gameOver: null })}
               className="w-full py-4 bg-gray-900 text-white rounded-full font-bold hover:bg-gray-800 transition-all active:scale-[0.98]"
             >

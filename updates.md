@@ -272,3 +272,26 @@ This file is a running handover log for any agent working on this project.
 - Expected result:
   - coach bubble text no longer spins rapidly.
   - `coach_chat.php` and `log_coach_event.php` request volume drops to normal event-driven levels.
+
+## 2026-03-16 (Antigravity)
+
+### Learner Profile Enhancements
+- Added dynamic DB migrations in `scripts/migrate_goals.sql` for adding `profile_image_url` and `about_me` columns.
+- Implemented new backend API endpoints for handling profile updates and picture uploads:
+  - `api/learner/upload_profile_image.php`
+  - `api/learner/update_profile_text.php`
+  - `api/learner/fetch_user_profile.php`
+- Updated `Profile.jsx` to dynamically render user attributes and manage interactive image upload flows cleanly with loading states.
+- Handled backwards-compatible updates in `auth/login.php` to hydrate extended user profile properties on standard sign-in.
+
+### Chapter Completion Dashboard Sync
+- Computed dynamically calculated chapter progress using available statistics.
+- Implemented new backend API:
+  - `api/learner/get_chapter_progress.php`
+- Added progression progress bar injection directly into `Dashboard.jsx`.
+- Extended the CRM view with module progress in `admin/ParticipantDetail.jsx`.
+
+### Router/Deployment Fixes
+- Addressed deployment integration 404 block for new APIs:
+  - Explicitly registered new fetch endpoints in `api/index.php`.
+  - Re-synced core `/api` and `/scripts` files dynamically into the active `htdocs/academy` XAMPP environment.

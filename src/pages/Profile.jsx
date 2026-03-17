@@ -1,23 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { User, ShieldCheck, Mail, MapPin, FileText, CheckCircle, Download, AlertCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AlertCircle, CheckCircle, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
-import SensoryBackground from '../components/SensoryBackground';
-import TimeLogsViewer from '../components/TimeLogsViewer';
 import { useCoach } from '../context/CoachContext';
+import { useUiVariant } from '../context/UiVariantContext';
+import ProfileClassicView from '../components/profile/ProfileClassicView';
+import ProfileClayView from '../components/profile/ProfileClayView';
 
 const Profile = () => {
     const [agreement, setAgreement] = useState(null);
     const [paidInvoices, setPaidInvoices] = useState([]);
     const [invoiceLoading, setInvoiceLoading] = useState(true);
     const [loading, setLoading] = useState(true);
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
+    const [isEditingAbout, setIsEditingAbout] = useState(false);
+    const [aboutText, setAboutText] = useState(user?.about_me || '');
+    const [uploadingImage, setUploadingImage] = useState(false);
     const { emitCoachEvent } = useCoach();
+    const { variant, setVariant } = useUiVariant('learner');
 
     useEffect(() => {
         const fetchData = async () => {
             if (!user.id) return;
             try {
+                try {
+                    const profileRes = await axios.get(`/api/learner/fetch_user_profile.php?user_id=${user.id}`);
+                    if (profileRes.data?.success) {
+                        setUser(profileRes.data.user);
+                        setAboutText(profileRes.data.user.about_me || '');
+                        localStorage.setItem('user', JSON.stringify(profileRes.data.user));
+                    }
+                } catch (profileErr) {
+                    console.error('Profile fetch error', profileErr);
+                }
+
                 const agreementRes = await axios.get(`/api/learner/fetch_my_agreement.php?user_id=${user.id}`);
                 const invoiceRes = await axios.get('/api/learner/get_my_invoices.php', {
                     params: { status: 'paid' }
@@ -26,12 +41,13 @@ const Profile = () => {
                 if (!agreementRes.data.error) setAgreement(agreementRes.data);
                 if (!invoiceRes.data?.error) setPaidInvoices(invoiceRes.data?.invoices || []);
             } catch (err) {
-                console.error("Failed to fetch profile data", err);
+                console.error('Failed to fetch profile data', err);
             } finally {
                 setInvoiceLoading(false);
                 setLoading(false);
             }
         };
+
         fetchData();
     }, [user.id]);
 
@@ -41,166 +57,85 @@ const Profile = () => {
 
     const formatStatus = (status) => {
         switch (status) {
-            case 'active': return { label: 'Active Account', color: 'bg-green-100 text-green-600', icon: <CheckCircle size={18} /> };
-            case 'pending': return { label: 'Under Review', color: 'bg-amber-100 text-amber-600', icon: <AlertCircle size={18} /> };
-            default: return { label: 'Contact Us to Unlock', color: 'bg-gray-100 text-gray-600', icon: <ShieldCheck size={18} /> };
+            case 'active':
+                return { label: 'Active Account', color: 'bg-green-100 text-green-600', icon: <CheckCircle size={18} /> };
+            case 'pending':
+                return { label: 'Under Review', color: 'bg-amber-100 text-amber-600', icon: <AlertCircle size={18} /> };
+            default:
+                return { label: 'Contact Us to Unlock', color: 'bg-gray-100 text-gray-600', icon: <ShieldCheck size={18} /> };
         }
     };
 
-    const statusStyle = formatStatus(user.status);
+    const handleImageUpload = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
 
-    return (
-        <div className="min-h-screen bg-[#e0f7fa] font-sans text-slate-800 relative">
-            <SensoryBackground />
+        const formData = new FormData();
+        formData.append('profile_image', file);
+        formData.append('user_id', user.id);
 
-            <div className="max-w-4xl mx-auto p-6 md:p-10 relative z-10">
-                <header className="mb-10 text-center">
-                    <div className="w-24 h-24 bg-[#00695C] rounded-full mx-auto mb-4 flex items-center justify-center text-white shadow-xl">
-                        <User size={48} />
-                    </div>
-                    <h1 className="text-4xl font-black text-[#00695C] uppercase italic tracking-tighter">My <span className="text-yellow-500">Profile</span></h1>
-                    <div className="mt-4 flex justify-center">
-                        <div className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold shadow-sm ${statusStyle.color}`}>
-                            {statusStyle.icon}
-                            {statusStyle.label}
-                        </div>
-                    </div>
-                </header>
+        setUploadingImage(true);
+        try {
+            const res = await axios.post('/api/learner/upload_profile_image.php', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            if (res.data.success) {
+                setUser(res.data.user);
+                localStorage.setItem('user', JSON.stringify(res.data.user));
+            } else {
+                alert(res.data.error || 'Upload failed');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Upload error');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* User Info */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="bg-white/80 backdrop-blur-md rounded-[2.5rem] p-8 shadow-xl border-4 border-white h-fit"
-                    >
-                        <h2 className="text-xl font-black text-[#00695C] uppercase italic mb-6 border-b-2 border-slate-100 pb-2">Account Info</h2>
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-slate-100 rounded-lg text-slate-400"><User size={18} /></div>
-                                <div className="text-sm font-bold text-slate-600">{user.name}</div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-slate-100 rounded-lg text-slate-400"><Mail size={18} /></div>
-                                <div className="text-sm font-bold text-slate-600 truncate">{user.email}</div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-slate-100 rounded-lg text-slate-400"><ShieldCheck size={18} /></div>
-                                <div className="text-sm font-bold text-[#00695C]">{user.ndis_number}</div>
-                            </div>
-                        </div>
-                    </motion.div>
+    const saveAboutMe = async () => {
+        try {
+            const res = await axios.post('/api/learner/update_profile_text.php', {
+                user_id: user.id,
+                about_me: aboutText
+            });
+            if (res.data.success) {
+                setIsEditingAbout(false);
+                setUser(res.data.user);
+                localStorage.setItem('user', JSON.stringify(res.data.user));
+            } else {
+                alert(res.data.error || 'Update failed');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Update error');
+        }
+    };
 
-                    {/* Service Agreement Details */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="md:col-span-2 bg-white/80 backdrop-blur-md rounded-[2.5rem] p-8 shadow-xl border-4 border-white"
-                    >
-                        <h2 className="text-xl font-black text-[#00695C] uppercase italic mb-6 border-b-2 border-slate-100 pb-2 flex items-center gap-2">
-                            <FileText size={24} /> Service Agreement
-                        </h2>
+    const viewProps = {
+        variant,
+        setVariant,
+        agreement,
+        paidInvoices,
+        invoiceLoading,
+        loading,
+        user,
+        statusStyle: formatStatus(user.status),
+        isEditingAbout,
+        setIsEditingAbout,
+        aboutText,
+        setAboutText,
+        uploadingImage,
+        handleImageUpload,
+        saveAboutMe
+    };
 
-                        {loading ? (
-                            <div className="py-10 text-center text-slate-400 font-bold">Checking for agreement...</div>
-                        ) : agreement ? (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Full Legal Name</p>
-                                        <p className="font-bold text-slate-800">{agreement.full_name}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Date of Birth</p>
-                                        <p className="font-bold text-slate-800">{agreement.dob}</p>
-                                    </div>
-                                    <div className="space-y-1 md:col-span-2">
-                                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Address</p>
-                                        <p className="font-bold text-slate-800 flex items-center gap-1"><MapPin size={14} /> {agreement.address}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Plan Type</p>
-                                        <p className="font-bold text-[#00695C]">{agreement.plan_type}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Who Pays</p>
-                                        <p className="font-bold text-[#00695C]">{agreement.who_pays}</p>
-                                    </div>
-                                </div>
+    if (variant === 'clay') {
+        return <ProfileClayView {...viewProps} />;
+    }
 
-                                <div className="mt-8 pt-6 border-t border-slate-100">
-                                    <p className="text-center text-[10px] uppercase font-black text-slate-400 tracking-widest mb-4">Your Signature</p>
-                                    <div className="bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-slate-200 flex justify-center items-center">
-                                        {agreement.signature_url ? (
-                                            <img
-                                                src={agreement.signature_url}
-                                                alt="My Signature"
-                                                className="max-h-24 mix-blend-multiply drop-shadow-sm"
-                                            />
-                                        ) : (
-                                            <p className="text-slate-300 italic py-4">Signature pending</p>
-                                        )}
-                                    </div>
-                                    <p className="text-center text-[10px] text-slate-300 mt-2 italic font-medium">Signed on {new Date(agreement.signed_at).toLocaleDateString()}</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="py-20 text-center space-y-4">
-                                <div className="w-16 h-16 bg-slate-100 rounded-full mx-auto flex items-center justify-center text-slate-300">
-                                    <FileText size={32} />
-                                </div>
-                                <p className="text-slate-400 font-bold">No Service Agreement found.</p>
-                                <p className="text-sm text-slate-400 px-10">Sign the agreement on the Level Map to unlock all worlds!</p>
-                            </div>
-                        )}
-                    </motion.div>
-
-                    {/* Activity Log / Session History */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="md:col-span-3"
-                    >
-                        <TimeLogsViewer userId={user.id} />
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="md:col-span-3 bg-white/80 backdrop-blur-md rounded-[2.5rem] p-8 shadow-xl border-4 border-white"
-                    >
-                        <h2 className="text-xl font-black text-[#00695C] uppercase italic mb-6 border-b-2 border-slate-100 pb-2 flex items-center gap-2">
-                            <FileText size={22} /> Paid Invoices
-                        </h2>
-
-                        {invoiceLoading ? (
-                            <p className="text-slate-400 font-bold">Loading invoices...</p>
-                        ) : paidInvoices.length === 0 ? (
-                            <p className="text-slate-400 font-bold">No paid invoices yet.</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {paidInvoices.map((inv) => (
-                                    <div key={inv.id} className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                                        <div>
-                                            <p className="font-black text-slate-700">{inv.invoice_number}</p>
-                                            <p className="text-sm text-slate-500">Invoice Date {inv.invoice_date} • Paid {inv.paid_at ? new Date(inv.paid_at).toLocaleDateString() : '-'}</p>
-                                            <p className="text-sm font-bold text-[#00695C]">Total ${Number(inv.total || 0).toFixed(2)}</p>
-                                        </div>
-                                        <button
-                                            onClick={() => window.open(`/api/admin/download_invoice.php?id=${inv.id}`, '_blank')}
-                                            className="inline-flex items-center gap-2 bg-[#00695C] text-white px-4 py-2 rounded-lg font-bold text-sm"
-                                        >
-                                            <Download size={16} /> Download PDF
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </motion.div>
-                </div>
-            </div>
-        </div>
-    );
+    return <ProfileClassicView {...viewProps} />;
 };
 
 export default Profile;
+

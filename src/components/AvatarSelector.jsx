@@ -15,7 +15,7 @@ const AvatarSelector = ({ isOpen, onClose, currentAvatar, onSelect, userPoints =
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center p-6">
+                <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-6">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -28,21 +28,21 @@ const AvatarSelector = ({ isOpen, onClose, currentAvatar, onSelect, userPoints =
                         initial={{ scale: 0.9, opacity: 0, rotateX: 20 }}
                         animate={{ scale: 1, opacity: 1, rotateX: 0 }}
                         exit={{ scale: 0.9, opacity: 0, rotateX: 20 }}
-                        className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-[8px] border-white/20 overflow-hidden"
+                        className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-4 sm:border-[8px] border-white/20 overflow-hidden max-h-[92vh] flex flex-col"
                     >
                         {/* Header */}
-                        <div className="p-8 bg-gradient-to-r from-[#522570] to-[#3B1B54] text-white flex justify-between items-center">
+                        <div className="p-4 sm:p-8 bg-gradient-to-r from-[#522570] to-[#3B1B54] text-white flex justify-between items-center">
                             <div>
-                                <h3 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Choose Your Hero</h3>
+                                <h3 className="text-xl sm:text-3xl font-black italic tracking-tighter uppercase leading-none">Choose Your Hero</h3>
                                 <p className="text-sm opacity-60 font-bold mt-2 uppercase tracking-widest">Unlock more as you learn!</p>
                             </div>
-                            <button onClick={onClose} className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
+                            <button onClick={onClose} className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
                                 <X size={24} />
                             </button>
                         </div>
 
                         {/* Avatar Grid */}
-                        <div className="p-10 grid grid-cols-2 md:grid-cols-3 gap-8 max-h-[500px] overflow-y-auto scrollbar-hide bg-gray-50">
+                        <div className="p-4 sm:p-8 grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8 overflow-y-auto scrollbar-hide bg-gray-50 flex-1">
                             {avatars.map((avatar) => {
                                 const isUnlocked = userPoints >= avatar.minPoints;
                                 const isSelected = currentAvatar === avatar.id;
@@ -54,7 +54,7 @@ const AvatarSelector = ({ isOpen, onClose, currentAvatar, onSelect, userPoints =
                                         whileTap={isUnlocked ? { scale: 0.95 } : {}}
                                         onClick={() => isUnlocked && onSelect(avatar.id)}
                                         className={`
-                                            relative aspect-square rounded-[2.5rem] flex flex-col items-center justify-center p-6 transition-all border-4
+                                            relative aspect-square rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col items-center justify-center p-3 sm:p-6 transition-all border-4
                                             ${isSelected
                                                 ? 'bg-[#522570] border-[#3B1B54] shadow-2xl'
                                                 : isUnlocked
@@ -62,7 +62,7 @@ const AvatarSelector = ({ isOpen, onClose, currentAvatar, onSelect, userPoints =
                                                     : 'bg-gray-200 border-transparent grayscale opacity-60'}
                                         `}
                                     >
-                                        <div className="text-7xl mb-4 transform group-hover:scale-110 transition-transform">
+                                        <div className="text-5xl sm:text-7xl mb-2 sm:mb-4 transform group-hover:scale-110 transition-transform">
                                             {avatar.emoji}
                                         </div>
 
@@ -94,14 +94,14 @@ const AvatarSelector = ({ isOpen, onClose, currentAvatar, onSelect, userPoints =
                         </div>
 
                         {/* Footer / Stats */}
-                        <div className="p-8 bg-white border-t-2 border-gray-100 flex justify-between items-center">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-yellow-400 rounded-2xl flex items-center justify-center shadow-lg">
+                        <div className="p-4 sm:p-8 bg-white border-t-2 border-gray-100 flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-400 rounded-2xl flex items-center justify-center shadow-lg">
                                     <Star size={24} fill="#3B1B54" className="text-[#3B1B54]" />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-[#3B1B54] uppercase tracking-widest opacity-40 leading-none">Your Total XP</p>
-                                    <p className="text-2xl font-black text-[#522570] italic tracking-tighter">{userPoints} XP</p>
+                                    <p className="text-xl sm:text-2xl font-black text-[#522570] italic tracking-tighter">{userPoints} XP</p>
                                 </div>
                             </div>
 
@@ -109,7 +109,7 @@ const AvatarSelector = ({ isOpen, onClose, currentAvatar, onSelect, userPoints =
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={onClose}
-                                className="bg-[#3B1B54] text-white px-10 py-4 rounded-2xl font-black text-lg italic tracking-tighter uppercase shadow-xl"
+                                className="bg-[#3B1B54] text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl font-black text-base sm:text-lg italic tracking-tighter uppercase shadow-xl w-full sm:w-auto"
                             >
                                 Done!
                             </motion.button>
