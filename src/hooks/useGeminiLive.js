@@ -153,14 +153,24 @@ export const useGeminiLive = (options = '') => {
                             streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
                             if (!inputAudioContextRef.current) return;
 
+                            await inputAudioContextRef.current.audioWorklet.addModule('/gemini-recorder.worklet.js');
+
                             inputSourceRef.current = inputAudioContextRef.current.createMediaStreamSource(streamRef.current);
-                            processorRef.current = inputAudioContextRef.current.createScriptProcessor(4096, 1, 1);
-                            processorRef.current.onaudioprocess = (event) => {
+                            processorRef.current = new window.AudioWorkletNode(inputAudioContextRef.current, 'gemini-recorder-worklet');
+
+                            processorRef.current.port.onmessage = (event) => {
                                 if (isMutedRef.current) return;
-                                const inputData = event.inputBuffer.getChannelData(0);
+                                const inputData = event.data;
                                 const audioData = createBlob(inputData);
                                 sessionPromise
-                                    .then((session) => session.sendRealtimeInput({ media: audioData }))
+                                    .then((session) => {
+                                        // Ignore send attempt if we are closing
+                                        try {
+                                            session.sendRealtimeInput({ media: audioData });
+                                        } catch (sendErr) {
+                                            // Silently catch WebSocket CLOSE errors
+                                        }
+                                    })
                                     .catch(() => {});
                             };
 
