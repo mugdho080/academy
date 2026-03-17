@@ -152,8 +152,9 @@ export const useGeminiLive = (options = '') => {
                         try {
                             streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
                             if (!inputAudioContextRef.current) return;
-
                             await inputAudioContextRef.current.audioWorklet.addModule('/gemini-recorder.worklet.js');
+
+                            if (!inputAudioContextRef.current) return;
 
                             inputSourceRef.current = inputAudioContextRef.current.createMediaStreamSource(streamRef.current);
                             processorRef.current = new window.AudioWorkletNode(inputAudioContextRef.current, 'gemini-recorder-worklet');
