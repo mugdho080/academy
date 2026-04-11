@@ -4,15 +4,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node node_modules/vite/bin/vite.js",
     "dev:server": "cd server && npm run dev",
-    "dev:all": "concurrently \"vite\" \"cd server && npm run dev\"",
-    "build": "npx vite build && cd server && npm run build",
-    "build:frontend": "vite build",
+    "dev:all": "concurrently \"node node_modules/vite/bin/vite.js\" \"cd server && npm run dev\"",
+    "build": "node node_modules/vite/bin/vite.js build && cd server && npm install --include=dev && npm run build",
+    "build:frontend": "node node_modules/vite/bin/vite.js build",
     "build:server": "cd server && npm install && npm run build",
     "start": "node server/dist/index.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "node node_modules/vite/bin/vite.js preview"
   },
   "dependencies": {
     "@google/genai": "^1.41.0",

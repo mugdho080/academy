@@ -115,7 +115,7 @@ admin.get('/invoices/:id', async (c) => {
 
 // ─── POST /api/admin/invoices/generate-draft ─────────────────────────────────
 admin.post('/invoices/generate-draft', async (c) => {
-  const adminId = Number((c.get('user') as JwtPayload).sub)
+  const adminId = Number(((c as { get(key: string): unknown }).get('user') as JwtPayload).sub)
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
   const userId = Number(body.user_id)
   const dateFrom = String(body.date_from ?? '')

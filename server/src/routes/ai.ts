@@ -36,12 +36,9 @@ ai.post('/coach-chat', async (c) => {
   const messages = (body.messages as Array<{ role: string; content: string }>) ?? []
 
   try {
-    const model = genai.getGenerativeModel({
+    const chat = genai.chats.create({
       model: 'gemini-2.0-flash',
-      systemInstruction,
-    })
-
-    const chat = model.startChat({
+      config: { systemInstruction },
       history: messages.slice(0, -1).map((m) => ({
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }],
@@ -49,8 +46,8 @@ ai.post('/coach-chat', async (c) => {
     })
 
     const lastMessage = messages[messages.length - 1]?.content ?? ''
-    const result = await chat.sendMessage(lastMessage)
-    const text = result.response.text()
+    const result = await chat.sendMessage({ message: lastMessage })
+    const text = result.text ?? ''
 
     // Log the coach event
     await query(
@@ -188,9 +185,11 @@ ai.post('/coach-recommendation', async (c) => {
   try {
     const { GoogleGenAI } = await import('@google/genai')
     const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
-    const model = genai.getGenerativeModel({ model: 'gemini-2.0-flash' })
-    const result = await model.generateContent(prompt)
-    const text = result.response.text()
+    const result = await genai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    })
+    const text = result.text ?? ''
 
     let parsed: unknown
     try {
