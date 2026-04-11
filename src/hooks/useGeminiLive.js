@@ -152,7 +152,7 @@ export const useGeminiLive = (options = '') => {
                         try {
                             streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
                             if (!inputAudioContextRef.current) return;
-                            await inputAudioContextRef.current.audioWorklet.addModule('/gemini-recorder.worklet.js');
+                            await inputAudioContextRef.current.audioWorklet.addModule(`${import.meta.env.BASE_URL}gemini-recorder.worklet.js`);
 
                             if (!inputAudioContextRef.current) return;
 
