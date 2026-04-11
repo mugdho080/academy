@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { LogIn, Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { saveAuth } from '../utils/api';
 import SensoryBackground from '../components/SensoryBackground';
 import { useActivityTimer } from '../context/ActivityTimerProvider';
 
@@ -22,7 +23,7 @@ const Login = () => {
         try {
             const response = await axios.post('/api/auth/login', { identifier, password });
             if (response.data.success) {
-                localStorage.setItem('user', JSON.stringify(response.data.user));
+                saveAuth(response.data.token, response.data.user);
 
                 if (response.data.user.role === 'admin') {
                     navigate('/admin/dashboard');

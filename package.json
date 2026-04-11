@@ -5,8 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:all": "concurrently \"vite\" \"cd claw-game && npm run dev\"",
-    "build": "vite build",
+    "dev:server": "cd server && npm run dev",
+    "dev:all": "concurrently \"vite\" \"cd server && npm run dev\"",
+    "build": "vite build && cd server && npm install && npm run build",
+    "build:frontend": "vite build",
+    "build:server": "cd server && npm install && npm run build",
+    "start": "node server/dist/index.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

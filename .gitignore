@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
+server/node_modules/
 dist/
+server/dist/
 dist-ssr/
 *.local
 
@@ -28,3 +30,7 @@ tmp_generate.json
 # Env files
 .env
 .env.*
+!.env.example
+
+# Upload storage (use Railway volumes or R2 in production)
+uploads/

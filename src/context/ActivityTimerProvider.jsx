@@ -8,6 +8,7 @@ import React, {
     useState
 } from 'react';
 import { useLocation } from 'react-router-dom';
+import { apiFetch, getToken } from '../utils/api';
 
 const ActivityTimerContext = createContext(null);
 
@@ -253,10 +254,8 @@ export const ActivityTimerProvider = ({ children }) => {
             const remaining = [];
             for (const payload of queueRef.current) {
                 try {
-                    const response = await fetch('/api/learner/log_delta.php', {
+                    const response = await apiFetch('/api/learner/log-delta', {
                         method: 'POST',
-                        credentials: 'include',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
                     const data = await response.json().catch(() => ({}));
@@ -321,8 +320,11 @@ export const ActivityTimerProvider = ({ children }) => {
         };
 
         if (useBeacon && navigator.sendBeacon) {
+            // sendBeacon can't set headers — include token in URL query param as fallback
+            const token = getToken();
+            const beaconUrl = token ? `/api/learner/log-delta?token=${encodeURIComponent(token)}` : '/api/learner/log-delta';
             const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-            const sent = navigator.sendBeacon('/api/learner/log_delta.php', blob);
+            const sent = navigator.sendBeacon(beaconUrl, blob);
             if (sent) {
                 pendingDeltaSecondsRef.current = Math.max(0, pendingDeltaSecondsRef.current - safeDelta);
                 return true;
@@ -338,10 +340,8 @@ export const ActivityTimerProvider = ({ children }) => {
 
         deltaFlushInFlightRef.current = true;
         try {
-            const response = await fetch('/api/learner/log_delta.php', {
+            const response = await apiFetch('/api/learner/log-delta', {
                 method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             const data = await response.json().catch(() => ({}));
@@ -386,10 +386,8 @@ export const ActivityTimerProvider = ({ children }) => {
 
         const request = (async () => {
             try {
-                const response = await fetch('/api/learner/start_session.php', {
+                const response = await apiFetch('/api/learner/start-session', {
                     method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(targetContext)
                 });
 
@@ -433,28 +431,9 @@ export const ActivityTimerProvider = ({ children }) => {
         if (sid) {
             await flushDelta('logout', { allowZero: true });
             try {
-                await fetch('/api/learner/end_session.php', {
+                await apiFetch('/api/learner/end-session', {
                     method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        session_id: sid,
-                        is_active: false
-                    }),
-                    keepalive: true
-                });
-            } catch (_) {
-                // Best effort only.
-            }
-        }
-
-        if (destroyAuth) {
-            try {
-                await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ session_id: sid }),
+                    body: JSON.stringify({ session_id: sid, is_active: false }),
                     keepalive: true
                 });
             } catch (_) {
@@ -466,8 +445,9 @@ export const ActivityTimerProvider = ({ children }) => {
     }, [clearTrackingState, flushDelta]);
 
     const logoutLearner = useCallback(async () => {
-        await endSession({ destroyAuth: true });
+        await endSession({ destroyAuth: false });
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
     }, [endSession]);
 
     const setCurrentLessonId = useCallback((lessonId) => {
