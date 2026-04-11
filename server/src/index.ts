@@ -28,16 +28,16 @@ app.route('/api/ai', ai)
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
 
 if (process.env.NODE_ENV === 'production') {
-  const serveFrontendAsset = serveStatic({ root: './dist' })
   const serveFrontendIndex = serveStatic({ path: './dist/index.html' })
+  app.use('/assets/*', serveStatic({ root: './dist' }))
+  app.use('/ai_panda.png', serveStatic({ root: './dist' }))
+  app.use('/gemini-recorder.worklet.js', serveStatic({ root: './dist' }))
 
-  app.use('/*', serveFrontendAsset)
-  app.get('/*', async (c, next) => {
-    const path = c.req.path
-    if (path.startsWith('/api/') || path.includes('.')) {
-      await next()
-      return
+  app.get('/*', (c, next) => {
+    if (c.req.path.startsWith('/api/') || c.req.path.includes('.')) {
+      return next()
     }
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate')
     return serveFrontendIndex(c, next)
   })
 }
