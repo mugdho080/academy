@@ -1,9 +1,11 @@
 import { createMiddleware } from 'hono/factory'
 import { SignJWT, jwtVerify } from 'jose'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? 'change-me-in-production'
-)
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required')
+}
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
 export interface JwtPayload {
   sub: string       // user id as string

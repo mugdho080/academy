@@ -10,12 +10,13 @@ import admin from './routes/admin.js'
 import ai from './routes/ai.js'
 
 const app = new Hono()
+const frontendOrigin = process.env.FRONTEND_URL
 
 app.use('*', cors({
-  origin: process.env.FRONTEND_URL ?? '*',
+  origin: frontendOrigin ?? '*',
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
+  credentials: Boolean(frontendOrigin),
 }))
 
 app.use('*', logger())

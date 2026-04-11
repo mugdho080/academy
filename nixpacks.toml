@@ -3,15 +3,14 @@ nixPkgs = ["nodejs_20"]
 
 [phases.install]
 cmds = [
-  "npm install --include=dev",
-  "cd server && npm install --include=dev"
+  "npm ci --include=dev",
+  "npm --prefix server ci --include=dev"
 ]
 
 [phases.build]
 cmds = [
-  "node node_modules/vite/bin/vite.js build",
-  "cd server && node node_modules/typescript/lib/tsc.js"
+  "npm run build"
 ]
 
 [start]
-cmd = "node server/dist/index.js"
+cmd = "npm run start"

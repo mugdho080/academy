@@ -6,6 +6,8 @@ import { Trophy, Gamepad2, ArrowLeft, AlertTriangle } from 'lucide-react';
 import PageContainer from '../components/layout/PageContainer';
 import { useUiVariant } from '../context/UiVariantContext';
 
+const arcadeBaseUrl = import.meta.env.VITE_ARCADE_URL?.trim() || '';
+
 const ClawGamePage = () => {
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
     const [pointsWon, setPointsWon] = useState(null);
@@ -13,8 +15,8 @@ const ClawGamePage = () => {
     const iframeRef = useRef(null);
     const { variant } = useUiVariant('learner');
     const isClay = variant === 'clay';
-
     const arcadeName = (user.name || 'PLY').replace(/[^a-zA-Z]/g, '').substring(0, 3).toUpperCase();
+    const arcadeUrl = arcadeBaseUrl ? `${arcadeBaseUrl.replace(/\/$/, '')}?name=${arcadeName}` : '';
 
     useEffect(() => {
         const handleMessage = async (event) => {
@@ -115,19 +117,31 @@ const ClawGamePage = () => {
                             <div className={`font-bold px-4 sm:px-6 py-3 rounded-[2rem] flex items-center gap-3 text-xs sm:text-sm w-full md:w-auto ${isClay ? 'ui-clay-chip-warning' : 'bg-amber-100/90 backdrop-blur border-2 border-amber-300 text-amber-800 shadow-sm'}`}>
                                 <AlertTriangle className="shrink-0 text-amber-500" size={20} />
                                 <span>
-                                    Game not loading? Run <code className="bg-white/50 px-2 py-1 rounded-lg border border-amber-200 shadow-sm">npm run dev:all</code>.
+                                    The arcade requires <code className="bg-white/50 px-2 py-1 rounded-lg border border-amber-200 shadow-sm">VITE_ARCADE_URL</code> to point at the deployed game service.
                                 </span>
                             </div>
                         </div>
 
                         <div className={`relative flex-1 w-full bg-black rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden min-h-[480px] sm:min-h-[600px] ${isClay ? 'ui-clay-surface' : 'shadow-2xl border-4 sm:border-[6px] border-white'}`}>
-                            <iframe
-                                ref={iframeRef}
-                                src={`http://localhost:3001?name=${arcadeName}`}
-                                className="absolute inset-0 w-full h-full border-0 bg-[#0a0a0a]"
-                                title="Claw Game"
-                                allow="fullscreen"
-                            />
+                            {arcadeUrl ? (
+                                <iframe
+                                    ref={iframeRef}
+                                    src={arcadeUrl}
+                                    className="absolute inset-0 w-full h-full border-0 bg-[#0a0a0a]"
+                                    title="Claw Game"
+                                    allow="fullscreen"
+                                />
+                            ) : (
+                                <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a] p-6 text-center">
+                                    <div className={`max-w-md rounded-[1.5rem] p-6 sm:p-8 ${isClay ? 'ui-clay-overlay-panel' : 'bg-white shadow-2xl'}`}>
+                                        <AlertTriangle className="mx-auto mb-4 text-amber-500" size={36} />
+                                        <h2 className={`text-2xl font-black mb-3 ${isClay ? 'ui-clay-heading' : 'text-slate-800'}`}>Arcade Not Configured</h2>
+                                        <p className={`font-medium ${isClay ? 'ui-clay-text-soft' : 'text-slate-600'}`}>
+                                            Set <code className="rounded bg-slate-100 px-2 py-1">VITE_ARCADE_URL</code> to the live claw game URL before enabling this screen in production.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
 
                             {pointsWon !== null && (
                                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex items-center justify-center p-4 sm:p-6">
