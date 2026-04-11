@@ -2,10 +2,16 @@
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm install", "cd server && npm install"]
+cmds = [
+  "npm install --include=dev",
+  "cd server && npm install --include=dev"
+]
 
 [phases.build]
-cmds = ["npx vite build", "cd server && npx tsc"]
+cmds = [
+  "node node_modules/vite/bin/vite.js build",
+  "cd server && node node_modules/typescript/lib/tsc.js"
+]
 
 [start]
 cmd = "node server/dist/index.js"
