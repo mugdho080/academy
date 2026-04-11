@@ -32,9 +32,9 @@ app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISO
 
 // Serve React frontend in production (built to ../dist)
 if (process.env.NODE_ENV === 'production') {
-  app.use('/*', serveStatic({ root: '../dist' }))
+  app.use('/*', serveStatic({ root: './dist' }))
   // SPA fallback — serve index.html for all non-API routes
-  app.get('/*', serveStatic({ path: '../dist/index.html' }))
+  app.get('/*', serveStatic({ path: './dist/index.html' }))
 }
 
 // 404 fallback (dev only)
