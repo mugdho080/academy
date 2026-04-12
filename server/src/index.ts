@@ -4,7 +4,7 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getDatabaseStatus, initializeDatabase, isDatabaseConfigError } from './db.js'
@@ -20,20 +20,49 @@ const startupDiagnostics = getStartupDiagnostics()
 const serverDistDir = dirname(fileURLToPath(import.meta.url))
 const frontendDistDir = resolve(serverDistDir, '../../dist')
 const frontendIndexPath = resolve(frontendDistDir, 'index.html')
+const frontendAssetsDir = resolve(frontendDistDir, 'assets')
+
+function pickLargestAsset(pattern: RegExp): string | null {
+  if (!existsSync(frontendAssetsDir)) {
+    return null
+  }
+
+  const matches = readdirSync(frontendAssetsDir)
+    .filter((name) => pattern.test(name))
+    .map((name) => ({
+      name,
+      size: statSync(resolve(frontendAssetsDir, name)).size,
+    }))
+    .sort((a, b) => b.size - a.size)
+
+  return matches[0] ? `/assets/${matches[0].name}` : null
+}
 
 function getFrontendAssets() {
   if (!existsSync(frontendIndexPath)) {
-    return { entryScript: null, entryStylesheet: null }
+    return {
+      html: null,
+      entryScript: pickLargestAsset(/^index-.*\.js$/),
+      entryStylesheet: pickLargestAsset(/^index-.*\.css$/),
+    }
   }
 
   const html = readFileSync(frontendIndexPath, 'utf8')
-  const entryScript = html.match(/<script type="module" crossorigin src="([^"]+)"><\/script>/)?.[1] ?? null
-  const entryStylesheet = html.match(/<link rel="stylesheet" crossorigin href="([^"]+)">/)?.[1] ?? null
+  const htmlEntryScript = html.match(/<script type="module" crossorigin src="([^"]+)"><\/script>/)?.[1] ?? null
+  const htmlEntryStylesheet = html.match(/<link rel="stylesheet" crossorigin href="([^"]+)">/)?.[1] ?? null
 
-  return { entryScript, entryStylesheet }
+  const entryScriptPath = htmlEntryScript ? resolveFrontendAssetPath(htmlEntryScript) : null
+  const entryStylesheetPath = htmlEntryStylesheet ? resolveFrontendAssetPath(htmlEntryStylesheet) : null
+
+  const entryScript = entryScriptPath && existsSync(entryScriptPath)
+    ? htmlEntryScript
+    : pickLargestAsset(/^index-.*\.js$/)
+  const entryStylesheet = entryStylesheetPath && existsSync(entryStylesheetPath)
+    ? htmlEntryStylesheet
+    : pickLargestAsset(/^index-.*\.css$/)
+
+  return { html, entryScript, entryStylesheet }
 }
-
-const frontendAssets = getFrontendAssets()
 
 function serveFrontendAsset(filePath: string, contentType: string): Response {
   return new Response(readFileSync(filePath), {
@@ -48,6 +77,35 @@ function serveFrontendAsset(filePath: string, contentType: string): Response {
 function resolveFrontendAssetPath(requestPath: string): string {
   return resolve(frontendDistDir, requestPath.replace(/^\//, ''))
 }
+
+function buildFrontendHtml(frontendAssets: ReturnType<typeof getFrontendAssets>): string | null {
+  if (!frontendAssets.html) {
+    return null
+  }
+
+  let html = frontendAssets.html
+
+  html = html.replace('href="/vite.svg"', 'href="/ai_panda.png"')
+
+  if (frontendAssets.entryScript) {
+    html = html.replace(
+      /<script type="module" crossorigin src="[^"]+"><\/script>/,
+      `<script type="module" crossorigin src="${frontendAssets.entryScript}"></script>`
+    )
+  }
+
+  if (frontendAssets.entryStylesheet) {
+    html = html.replace(
+      /<link rel="stylesheet" crossorigin href="[^"]+">/,
+      `<link rel="stylesheet" crossorigin href="${frontendAssets.entryStylesheet}">`
+    )
+  }
+
+  return html
+}
+
+const frontendAssets = getFrontendAssets()
+const frontendHtml = buildFrontendHtml(frontendAssets)
 
 console.log('Startup diagnostics:', startupDiagnostics)
 console.log('Static asset diagnostics:', {
@@ -81,7 +139,6 @@ app.get('/api/health', (c) => c.json({
 }))
 
 if (process.env.NODE_ENV === 'production') {
-  const serveFrontendIndex = serveStatic({ root: frontendDistDir, path: './index.html' })
   const serveFrontendAssets = serveStatic({ root: frontendDistDir })
 
   app.use('/assets/*', async (c, next) => {
@@ -116,8 +173,16 @@ if (process.env.NODE_ENV === 'production') {
     if (c.req.path.startsWith('/api/') || c.req.path.includes('.')) {
       return next()
     }
-    c.header('Cache-Control', 'no-store, no-cache, must-revalidate')
-    return serveFrontendIndex(c, next)
+    if (!frontendHtml) {
+      return c.json({ error: 'Frontend build not found' }, 500)
+    }
+    return new Response(frontendHtml, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    })
   })
 }
 
