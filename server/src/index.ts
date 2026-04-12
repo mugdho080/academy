@@ -45,6 +45,10 @@ function serveFrontendAsset(filePath: string, contentType: string): Response {
   })
 }
 
+function resolveFrontendAssetPath(requestPath: string): string {
+  return resolve(frontendDistDir, requestPath.replace(/^\//, ''))
+}
+
 console.log('Startup diagnostics:', startupDiagnostics)
 console.log('Static asset diagnostics:', {
   cwd: process.cwd(),
@@ -78,7 +82,33 @@ app.get('/api/health', (c) => c.json({
 
 if (process.env.NODE_ENV === 'production') {
   const serveFrontendIndex = serveStatic({ root: frontendDistDir, path: './index.html' })
-  app.use('/assets/*', serveStatic({ root: frontendDistDir }))
+  const serveFrontendAssets = serveStatic({ root: frontendDistDir })
+
+  app.use('/assets/*', async (c, next) => {
+    const requestedAssetPath = resolveFrontendAssetPath(c.req.path)
+
+    if (requestedAssetPath.startsWith(frontendDistDir) && existsSync(requestedAssetPath)) {
+      return serveFrontendAssets(c, next)
+    }
+
+    if (/^\/assets\/index-[^/]+\.js$/.test(c.req.path) && frontendAssets.entryScript) {
+      const entryScriptPath = resolveFrontendAssetPath(frontendAssets.entryScript)
+      if (existsSync(entryScriptPath)) {
+        console.warn(`Serving current entry script for stale asset request: ${c.req.path}`)
+        return serveFrontendAsset(entryScriptPath, 'text/javascript; charset=utf-8')
+      }
+    }
+
+    if (/^\/assets\/index-[^/]+\.css$/.test(c.req.path) && frontendAssets.entryStylesheet) {
+      const entryStylesheetPath = resolveFrontendAssetPath(frontendAssets.entryStylesheet)
+      if (existsSync(entryStylesheetPath)) {
+        console.warn(`Serving current entry stylesheet for stale asset request: ${c.req.path}`)
+        return serveFrontendAsset(entryStylesheetPath, 'text/css; charset=utf-8')
+      }
+    }
+
+    return c.json({ error: 'Not found' }, 404)
+  })
   app.use('/ai_panda.png', serveStatic({ root: frontendDistDir }))
   app.use('/gemini-recorder.worklet.js', serveStatic({ root: frontendDistDir }))
 
@@ -91,25 +121,7 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-app.notFound((c) => {
-  if (process.env.NODE_ENV === 'production') {
-    if (/^\/assets\/index-[^/]+\.js$/.test(c.req.path) && frontendAssets.entryScript) {
-      const entryScriptPath = resolve(frontendDistDir, `.${frontendAssets.entryScript}`.slice(2))
-      if (existsSync(entryScriptPath)) {
-        return serveFrontendAsset(entryScriptPath, 'text/javascript; charset=utf-8')
-      }
-    }
-
-    if (/^\/assets\/index-[^/]+\.css$/.test(c.req.path) && frontendAssets.entryStylesheet) {
-      const entryStylesheetPath = resolve(frontendDistDir, `.${frontendAssets.entryStylesheet}`.slice(2))
-      if (existsSync(entryStylesheetPath)) {
-        return serveFrontendAsset(entryStylesheetPath, 'text/css; charset=utf-8')
-      }
-    }
-  }
-
-  return c.json({ error: 'Not found' }, 404)
-})
+app.notFound((c) => c.json({ error: 'Not found' }, 404))
 
 app.onError((err, c) => {
   if (err instanceof MissingEnvError) {
