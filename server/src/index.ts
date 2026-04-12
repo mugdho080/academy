@@ -4,6 +4,9 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
+import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { getDatabaseStatus, initializeDatabase, isDatabaseConfigError } from './db.js'
 import { getStartupDiagnostics, MissingEnvError } from './env.js'
 import auth from './routes/auth.js'
@@ -14,8 +17,17 @@ import ai from './routes/ai.js'
 const app = new Hono()
 const frontendOrigin = process.env.FRONTEND_URL
 const startupDiagnostics = getStartupDiagnostics()
+const serverDistDir = dirname(fileURLToPath(import.meta.url))
+const frontendDistDir = resolve(serverDistDir, '../../dist')
+const frontendIndexPath = resolve(frontendDistDir, 'index.html')
 
 console.log('Startup diagnostics:', startupDiagnostics)
+console.log('Static asset diagnostics:', {
+  cwd: process.cwd(),
+  serverDistDir,
+  frontendDistDir,
+  frontendIndexExists: existsSync(frontendIndexPath),
+})
 
 app.use('*', cors({
   origin: frontendOrigin ?? '*',
@@ -38,10 +50,10 @@ app.get('/api/health', (c) => c.json({
 }))
 
 if (process.env.NODE_ENV === 'production') {
-  const serveFrontendIndex = serveStatic({ path: './dist/index.html' })
-  app.use('/assets/*', serveStatic({ root: './dist' }))
-  app.use('/ai_panda.png', serveStatic({ root: './dist' }))
-  app.use('/gemini-recorder.worklet.js', serveStatic({ root: './dist' }))
+  const serveFrontendIndex = serveStatic({ root: frontendDistDir, path: './index.html' })
+  app.use('/assets/*', serveStatic({ root: frontendDistDir }))
+  app.use('/ai_panda.png', serveStatic({ root: frontendDistDir }))
+  app.use('/gemini-recorder.worklet.js', serveStatic({ root: frontendDistDir }))
 
   app.get('/*', (c, next) => {
     if (c.req.path.startsWith('/api/') || c.req.path.includes('.')) {
