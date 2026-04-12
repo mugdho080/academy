@@ -24,6 +24,14 @@ export function clearAuth() {
   localStorage.removeItem('user');
 }
 
+export function withAuthQuery(url) {
+  const token = getToken();
+  if (!token) return url;
+
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}token=${encodeURIComponent(token)}`;
+}
+
 /**
  * Fetch wrapper that automatically adds Authorization: Bearer <token>
  * Mirrors the native fetch signature.

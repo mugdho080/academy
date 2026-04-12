@@ -5,6 +5,7 @@ import { ArrowLeft, Download, Loader2, Save, Upload } from 'lucide-react';
 import ResponsiveTable from '../../components/layout/ResponsiveTable';
 import { useUiVariant } from '../../context/UiVariantContext';
 import ClayToggle from '../../components/clay/ClayToggle';
+import { withAuthQuery } from '../../utils/api';
 
 const todayIso = () => new Date().toISOString().split('T')[0];
 const pastIso = (days) => {
@@ -298,7 +299,7 @@ export default function Invoicing() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                         <button onClick={saveInvoice} className="bg-[#00695C] text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2"><Save size={15} /> Save</button>
                                         <button onClick={makePdf} className="bg-slate-900 text-white px-4 py-2.5 rounded-lg text-sm font-bold">Generate PDF</button>
-                                        <button onClick={() => window.open(`/api/admin/download_invoice.php?id=${detail.invoice.id}`, '_blank')} className="bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2"><Download size={15} /> Download</button>
+                                        <button onClick={() => window.open(withAuthQuery(`/api/admin/download_invoice.php?id=${detail.invoice.id}`), '_blank')} className="bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2"><Download size={15} /> Download</button>
                                         {detail.invoice.status === 'draft' && <button onClick={() => moveStatus('unpaid')} className="bg-amber-500 text-white px-4 py-2.5 rounded-lg text-sm font-bold">Send to Unpaid</button>}
                                         {(detail.invoice.status === 'unpaid' || detail.invoice.status === 'sent' || detail.invoice.status === 'overdue') && <button onClick={() => moveStatus('paid')} className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold">Send to Paid</button>}
                                     </div>

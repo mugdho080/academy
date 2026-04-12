@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import { withAuthQuery } from '../utils/api';
 
 const PING_INTERVAL_MS = 30000; // Ping every 30 seconds
 
@@ -63,7 +64,7 @@ const TimeTracker = () => {
             // Optional: send a final beacon payload on unmount to capture the very last seconds
             if (navigator.sendBeacon) {
                 const data = new Blob([JSON.stringify({ session_id: sessionId })], { type: 'application/json' });
-                navigator.sendBeacon('/api/index.php/learner/ping_session', data);
+                navigator.sendBeacon(withAuthQuery('/api/index.php/learner/ping_session'), data);
             }
         };
     }, [sessionId, isLearner]);

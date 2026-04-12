@@ -22,6 +22,7 @@ import ClaySectionHeader from '../clay/ClaySectionHeader';
 import ClayStatCard from '../clay/ClayStatCard';
 import ClayToggle from '../clay/ClayToggle';
 import TimeLogsViewer from '../TimeLogsViewer';
+import { withAuthQuery } from '../../utils/api';
 
 const ProfileClayView = ({
     variant,
@@ -257,7 +258,7 @@ const ProfileClayView = ({
                                             </p>
                                             <p className="mt-2 text-sm font-black text-[color:var(--clay-text)]">Total ${Number(inv.total || 0).toFixed(2)}</p>
                                         </div>
-                                        <ClayButton type="button" variant="primary" onClick={() => window.open(`/api/admin/download_invoice.php?id=${inv.id}`, '_blank')} className="w-full md:w-auto justify-center inline-flex items-center gap-2">
+                                        <ClayButton type="button" variant="primary" onClick={() => window.open(withAuthQuery(`/api/learner/download_invoice.php?id=${inv.id}`), '_blank')} className="w-full md:w-auto justify-center inline-flex items-center gap-2">
                                             <Download size={16} />
                                             Download PDF
                                         </ClayButton>

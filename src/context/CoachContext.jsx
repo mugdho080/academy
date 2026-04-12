@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useActivityTimer } from './ActivityTimerProvider';
 import { useCoachState } from '../hooks/useCoachState';
 import { useCoachEvents } from '../hooks/useCoachEvents';
+import { withAuthQuery } from '../utils/api';
 import {
     COACH_BUBBLE_COOLDOWN_MS,
     IDLE_TIMEOUT_MS,
@@ -266,7 +267,7 @@ export const CoachProvider = ({ children }) => {
                 payload_json: {}
             };
             const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-            navigator.sendBeacon('/api/ai/log_coach_event.php', blob);
+            navigator.sendBeacon(withAuthQuery('/api/ai/log_coach_event.php'), blob);
         };
 
         window.addEventListener('pagehide', onPageHide);

@@ -751,7 +751,7 @@ const AdminPanel = () => {
                                         <p className="text-center text-sm text-gray-400 mb-2">Signed on {new Date(viewingAgreement.signed_at).toLocaleDateString()}</p>
                                         <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 bg-white flex justify-center">
                                             <img
-                                                src={`/uploads/signatures/${viewingAgreement.signature_data}`}
+                                                src={viewingAgreement.signature_url || `/uploads/signatures/${viewingAgreement.signature_data}`}
                                                 alt="Signature"
                                                 className="max-h-32 mix-blend-multiply"
                                             />

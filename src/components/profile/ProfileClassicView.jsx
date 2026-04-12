@@ -17,6 +17,7 @@ import SensoryBackground from '../SensoryBackground';
 import TimeLogsViewer from '../TimeLogsViewer';
 import PageContainer from '../layout/PageContainer';
 import ClayToggle from '../clay/ClayToggle';
+import { withAuthQuery } from '../../utils/api';
 
 const ProfileClassicView = ({
     variant,
@@ -227,7 +228,7 @@ const ProfileClassicView = ({
                                             <p className="text-sm font-bold text-[#00695C]">Total ${Number(inv.total || 0).toFixed(2)}</p>
                                         </div>
                                         <button
-                                            onClick={() => window.open(`/api/admin/download_invoice.php?id=${inv.id}`, '_blank')}
+                                            onClick={() => window.open(withAuthQuery(`/api/learner/download_invoice.php?id=${inv.id}`), '_blank')}
                                             className="inline-flex items-center justify-center gap-2 bg-[#00695C] text-white px-4 py-2.5 rounded-lg font-bold text-sm w-full sm:w-auto"
                                         >
                                             <Download size={16} /> Download PDF

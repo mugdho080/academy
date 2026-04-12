@@ -73,15 +73,10 @@ const LevelMap = () => {
     };
 
     const handleSignAgreement = async () => {
-        try {
-            await axios.post('/api/admin/update_status.php', { user_id: user.id, status: 'pending' });
-            const updatedUser = { ...user, status: 'pending' };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            setUser(updatedUser);
-            setIsAgreementOpen(false);
-        } catch (err) {
-            alert('Failed to submit agreement');
-        }
+        const updatedUser = { ...user, status: 'pending' };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setIsAgreementOpen(false);
     };
 
     const isUnlocked = (level) => level.is_free || user.status === 'active';

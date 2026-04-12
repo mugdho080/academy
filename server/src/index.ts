@@ -130,6 +130,9 @@ app.route('/api/auth', auth)
 app.route('/api/learner', learner)
 app.route('/api/admin', admin)
 app.route('/api/ai', ai)
+app.route('/api/index.php/learner', learner)
+app.route('/api/index.php/admin', admin)
+app.route('/api/index.php/ai', ai)
 
 app.get('/api/health', (c) => c.json({
   status: getDatabaseStatus() === 'ready' ? 'ok' : 'degraded',

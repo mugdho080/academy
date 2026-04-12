@@ -2,6 +2,7 @@ import React from 'react';
 import { ShieldCheck, AlertCircle, Activity, Download } from 'lucide-react';
 import TimeLogsViewer from '../TimeLogsViewer';
 import ClayToggle from '../clay/ClayToggle';
+import { withAuthQuery } from '../../utils/api';
 
 const ParticipantDetailClassicView = ({
     id,
@@ -96,7 +97,7 @@ const ParticipantDetailClassicView = ({
                                     <p className="text-sm font-bold text-[#00695C]">${Number(inv.total || 0).toFixed(2)}</p>
                                 </div>
                                 <button
-                                    onClick={() => window.open(`/api/admin/download_invoice.php?id=${inv.id}`, '_blank')}
+                                    onClick={() => window.open(withAuthQuery(`/api/admin/download_invoice.php?id=${inv.id}`), '_blank')}
                                     className="inline-flex items-center justify-center gap-2 bg-[#00695C] text-white px-3 py-2.5 rounded-lg text-sm font-bold w-full sm:w-auto"
                                 >
                                     <Download size={14} /> PDF

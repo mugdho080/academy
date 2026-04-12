@@ -10,6 +10,7 @@ import ClayStatCard from '../clay/ClayStatCard';
 import ClayToggle from '../clay/ClayToggle';
 import PageContainer from '../layout/PageContainer';
 import TimeLogsViewer from '../TimeLogsViewer';
+import { withAuthQuery } from '../../utils/api';
 
 const stageTone = (stage) => {
     switch (stage) {
@@ -202,7 +203,7 @@ const ParticipantDetailClayView = ({
                                             </p>
                                             <p className="mt-2 text-sm font-black text-[color:var(--clay-text)]">${Number(inv.total || 0).toFixed(2)}</p>
                                         </div>
-                                        <ClayButton type="button" variant="primary" onClick={() => window.open(`/api/admin/download_invoice.php?id=${inv.id}`, '_blank')} className="w-full md:w-auto inline-flex items-center justify-center gap-2">
+                                        <ClayButton type="button" variant="primary" onClick={() => window.open(withAuthQuery(`/api/admin/download_invoice.php?id=${inv.id}`), '_blank')} className="w-full md:w-auto inline-flex items-center justify-center gap-2">
                                             <Download size={16} />
                                             PDF
                                         </ClayButton>
