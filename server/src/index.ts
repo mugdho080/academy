@@ -4,7 +4,7 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getDatabaseStatus, initializeDatabase, isDatabaseConfigError } from './db.js'
@@ -21,12 +21,38 @@ const serverDistDir = dirname(fileURLToPath(import.meta.url))
 const frontendDistDir = resolve(serverDistDir, '../../dist')
 const frontendIndexPath = resolve(frontendDistDir, 'index.html')
 
+function getFrontendAssets() {
+  if (!existsSync(frontendIndexPath)) {
+    return { entryScript: null, entryStylesheet: null }
+  }
+
+  const html = readFileSync(frontendIndexPath, 'utf8')
+  const entryScript = html.match(/<script type="module" crossorigin src="([^"]+)"><\/script>/)?.[1] ?? null
+  const entryStylesheet = html.match(/<link rel="stylesheet" crossorigin href="([^"]+)">/)?.[1] ?? null
+
+  return { entryScript, entryStylesheet }
+}
+
+const frontendAssets = getFrontendAssets()
+
+function serveFrontendAsset(filePath: string, contentType: string): Response {
+  return new Response(readFileSync(filePath), {
+    status: 200,
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  })
+}
+
 console.log('Startup diagnostics:', startupDiagnostics)
 console.log('Static asset diagnostics:', {
   cwd: process.cwd(),
   serverDistDir,
   frontendDistDir,
   frontendIndexExists: existsSync(frontendIndexPath),
+  frontendEntryScript: frontendAssets.entryScript,
+  frontendEntryStylesheet: frontendAssets.entryStylesheet,
 })
 
 app.use('*', cors({
@@ -44,9 +70,10 @@ app.route('/api/admin', admin)
 app.route('/api/ai', ai)
 
 app.get('/api/health', (c) => c.json({
-  status: getDatabaseStatus() === 'configured' ? 'ok' : 'degraded',
+  status: getDatabaseStatus() === 'ready' ? 'ok' : 'degraded',
   timestamp: new Date().toISOString(),
   diagnostics: startupDiagnostics,
+  database: getDatabaseStatus(),
 }))
 
 if (process.env.NODE_ENV === 'production') {
@@ -64,7 +91,25 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-app.notFound((c) => c.json({ error: 'Not found' }, 404))
+app.notFound((c) => {
+  if (process.env.NODE_ENV === 'production') {
+    if (/^\/assets\/index-[^/]+\.js$/.test(c.req.path) && frontendAssets.entryScript) {
+      const entryScriptPath = resolve(frontendDistDir, `.${frontendAssets.entryScript}`.slice(2))
+      if (existsSync(entryScriptPath)) {
+        return serveFrontendAsset(entryScriptPath, 'text/javascript; charset=utf-8')
+      }
+    }
+
+    if (/^\/assets\/index-[^/]+\.css$/.test(c.req.path) && frontendAssets.entryStylesheet) {
+      const entryStylesheetPath = resolve(frontendDistDir, `.${frontendAssets.entryStylesheet}`.slice(2))
+      if (existsSync(entryStylesheetPath)) {
+        return serveFrontendAsset(entryStylesheetPath, 'text/css; charset=utf-8')
+      }
+    }
+  }
+
+  return c.json({ error: 'Not found' }, 404)
+})
 
 app.onError((err, c) => {
   if (err instanceof MissingEnvError) {

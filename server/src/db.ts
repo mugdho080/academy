@@ -4,9 +4,21 @@ import { MissingEnvError, requireEnv } from './env.js'
 const { Pool } = pg
 
 let pool: pg.Pool | null = null
+let databaseStatus: 'missing' | 'ready' | 'error' = process.env.DATABASE_URL?.trim() ? 'error' : 'missing'
+
+function normalizeConnectionString(connectionString: string): string {
+  const hasCompatFlag = /(?:^|[?&])uselibpqcompat=/i.test(connectionString)
+  const usesLegacySslAlias = /(?:^|[?&])sslmode=(?:prefer|require|verify-ca)(?:&|$)/i.test(connectionString)
+
+  if (!hasCompatFlag && usesLegacySslAlias) {
+    return `${connectionString}${connectionString.includes('?') ? '&' : '?'}uselibpqcompat=true`
+  }
+
+  return connectionString
+}
 
 function createPool(): pg.Pool {
-  const connectionString = requireEnv('DATABASE_URL')
+  const connectionString = normalizeConnectionString(requireEnv('DATABASE_URL'))
   const nextPool = new Pool({
     connectionString,
     ssl: { rejectUnauthorized: false },
@@ -30,16 +42,22 @@ export function getPool(): pg.Pool {
 }
 
 export async function initializeDatabase(): Promise<void> {
-  const client = await getPool().connect()
   try {
-    await client.query('SELECT 1')
-  } finally {
-    client.release()
+    const client = await getPool().connect()
+    try {
+      await client.query('SELECT 1')
+      databaseStatus = 'ready'
+    } finally {
+      client.release()
+    }
+  } catch (err) {
+    databaseStatus = err instanceof MissingEnvError ? 'missing' : 'error'
+    throw err
   }
 }
 
-export function getDatabaseStatus(): 'configured' | 'missing' {
-  return process.env.DATABASE_URL?.trim() ? 'configured' : 'missing'
+export function getDatabaseStatus(): 'missing' | 'ready' | 'error' {
+  return databaseStatus
 }
 
 /** Run a query and return rows */
