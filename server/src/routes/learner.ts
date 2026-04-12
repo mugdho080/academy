@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { requireAuth } from '../middleware.js'
 import type { JwtPayload } from '../middleware.js'
 import { query, queryOne, withTransaction } from '../db.js'
+import { isMissingEnvError } from '../env.js'
 import type { PoolClient } from 'pg'
 
 const learner = new Hono()
@@ -142,6 +143,9 @@ learner.post('/start-session', async (c) => {
 
     return c.json({ success: true, session_id: result.sessionId, session: result.session, context: ctx })
   } catch (err) {
+    if (isMissingEnvError(err)) {
+      throw err
+    }
     console.error('start-session error:', err)
     return c.json({ error: 'Failed to start session' }, 500)
   }
@@ -235,6 +239,9 @@ learner.post('/log-delta', async (c) => {
     }
     return c.json(result)
   } catch (err) {
+    if (isMissingEnvError(err)) {
+      throw err
+    }
     console.error('log-delta error:', err)
     return c.json({ error: 'Failed to log delta' }, 500)
   }

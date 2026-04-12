@@ -1,11 +1,10 @@
 import { createMiddleware } from 'hono/factory'
 import { SignJWT, jwtVerify } from 'jose'
+import { requireEnv } from './env.js'
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required')
+function getJwtSecret(): Uint8Array {
+  return new TextEncoder().encode(requireEnv('JWT_SECRET'))
 }
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
 export interface JwtPayload {
   sub: string       // user id as string
@@ -19,11 +18,11 @@ export async function signToken(payload: JwtPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(JWT_SECRET)
+    .sign(getJwtSecret())
 }
 
 export async function verifyToken(token: string): Promise<JwtPayload> {
-  const { payload } = await jwtVerify(token, JWT_SECRET)
+  const { payload } = await jwtVerify(token, getJwtSecret())
   return payload as unknown as JwtPayload
 }
 

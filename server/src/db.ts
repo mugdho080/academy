@@ -1,29 +1,53 @@
 import pg from 'pg'
+import { MissingEnvError, requireEnv } from './env.js'
 
 const { Pool } = pg
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is required')
+let pool: pg.Pool | null = null
+
+function createPool(): pg.Pool {
+  const connectionString = requireEnv('DATABASE_URL')
+  const nextPool = new Pool({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+  })
+
+  nextPool.on('error', (err) => {
+    console.error('Unexpected error on idle Postgres client', err)
+  })
+
+  return nextPool
 }
 
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
-})
+export function getPool(): pg.Pool {
+  if (!pool) {
+    pool = createPool()
+  }
+  return pool
+}
 
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle Postgres client', err)
-})
+export async function initializeDatabase(): Promise<void> {
+  const client = await getPool().connect()
+  try {
+    await client.query('SELECT 1')
+  } finally {
+    client.release()
+  }
+}
+
+export function getDatabaseStatus(): 'configured' | 'missing' {
+  return process.env.DATABASE_URL?.trim() ? 'configured' : 'missing'
+}
 
 /** Run a query and return rows */
 export async function query<T = Record<string, unknown>>(
   sql: string,
   params?: unknown[]
 ): Promise<T[]> {
-  const { rows } = await pool.query(sql, params)
+  const { rows } = await getPool().query(sql, params)
   return rows as T[]
 }
 
@@ -40,7 +64,7 @@ export async function queryOne<T = Record<string, unknown>>(
 export async function withTransaction<T>(
   fn: (client: pg.PoolClient) => Promise<T>
 ): Promise<T> {
-  const client = await pool.connect()
+  const client = await getPool().connect()
   try {
     await client.query('BEGIN')
     const result = await fn(client)
@@ -52,4 +76,8 @@ export async function withTransaction<T>(
   } finally {
     client.release()
   }
+}
+
+export function isDatabaseConfigError(err: unknown): err is MissingEnvError {
+  return err instanceof MissingEnvError && err.variable === 'DATABASE_URL'
 }

@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { requireAuth } from '../middleware.js'
 import type { JwtPayload } from '../middleware.js'
 import { query, queryOne, withTransaction } from '../db.js'
+import { isMissingEnvError } from '../env.js'
 
 const ai = new Hono()
 ai.use('*', requireAuth)
@@ -69,6 +70,9 @@ ai.post('/coach-chat', async (c) => {
 
     return c.json({ success: true, response: text })
   } catch (err) {
+    if (isMissingEnvError(err)) {
+      throw err
+    }
     console.error('Coach chat error:', err)
     return c.json({ error: 'AI request failed' }, 500)
   }
@@ -215,6 +219,9 @@ ai.post('/coach-recommendation', async (c) => {
 
     return c.json({ success: true, recommendation: parsed, id: recId[0]?.id })
   } catch (err) {
+    if (isMissingEnvError(err)) {
+      throw err
+    }
     console.error('Recommendation error:', err)
     return c.json({ error: 'Failed to generate recommendation' }, 500)
   }

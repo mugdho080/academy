@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import bcrypt from 'bcryptjs'
 import { query, queryOne } from '../db.js'
+import { isMissingEnvError } from '../env.js'
 import { signToken } from '../middleware.js'
 
 const auth = new Hono()
@@ -86,6 +87,9 @@ auth.post('/signup', async (c) => {
 
     return c.json({ success: true, message: 'Account created. Please wait for approval.' })
   } catch (err: unknown) {
+    if (isMissingEnvError(err)) {
+      throw err
+    }
     const pg = err as { code?: string }
     if (pg.code === '23505') {
       return c.json({ error: 'Email or NDIS number already exists' }, 409)

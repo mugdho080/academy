@@ -70,3 +70,5 @@ Optional:
 - The production entry path is always `server/dist/index.js` via `npm run start`.
 - Frontend assets are served by the backend in production; Railway is not serving `dist/` as a separate static site.
 - `JWT_SECRET` is required at startup; there is no production fallback secret.
+- The server now logs a startup diagnostic showing whether `DATABASE_URL`, `JWT_SECRET`, and `GEMINI_API_KEY` are present, plus whether it detects a Railway runtime.
+- If `DATABASE_URL` is missing, the server stays up in degraded mode so `/` and `/api/health` still respond, and API calls that need the database return a clear `503` configuration error.
