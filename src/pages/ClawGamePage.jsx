@@ -4,7 +4,6 @@ import axios from 'axios';
 import confetti from 'canvas-confetti';
 import { Trophy, Gamepad2, ArrowLeft, AlertTriangle } from 'lucide-react';
 import PageContainer from '../components/layout/PageContainer';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const arcadeBaseUrl = import.meta.env.VITE_ARCADE_URL?.trim() || '';
 
@@ -13,8 +12,7 @@ const ClawGamePage = () => {
     const [pointsWon, setPointsWon] = useState(null);
     const [activeGame, setActiveGame] = useState(null);
     const iframeRef = useRef(null);
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
     const arcadeName = (user.name || 'PLY').replace(/[^a-zA-Z]/g, '').substring(0, 3).toUpperCase();
     const arcadeUrl = arcadeBaseUrl ? `${arcadeBaseUrl.replace(/\/$/, '')}?name=${arcadeName}` : '';
 

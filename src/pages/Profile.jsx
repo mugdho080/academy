@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
 import { useCoach } from '../context/CoachContext';
-import { useUiVariant } from '../context/UiVariantContext';
 import ProfileClassicView from '../components/profile/ProfileClassicView';
-import ProfileClayView from '../components/profile/ProfileClayView';
 
 const Profile = () => {
     const [agreement, setAgreement] = useState(null);
@@ -16,7 +14,6 @@ const Profile = () => {
     const [aboutText, setAboutText] = useState(user?.about_me || '');
     const [uploadingImage, setUploadingImage] = useState(false);
     const { emitCoachEvent } = useCoach();
-    const { variant, setVariant } = useUiVariant('learner');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -113,8 +110,6 @@ const Profile = () => {
     };
 
     const viewProps = {
-        variant,
-        setVariant,
         agreement,
         paidInvoices,
         invoiceLoading,
@@ -129,10 +124,6 @@ const Profile = () => {
         handleImageUpload,
         saveAboutMe
     };
-
-    if (variant === 'clay') {
-        return <ProfileClayView {...viewProps} />;
-    }
 
     return <ProfileClassicView {...viewProps} />;
 };

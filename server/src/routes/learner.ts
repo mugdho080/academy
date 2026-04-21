@@ -79,6 +79,60 @@ function validateContext(body: Record<string, unknown>) {
   }
 }
 
+type UserProfileColumns = {
+  hasProfileImageUrl: boolean
+  hasAboutMe: boolean
+}
+
+let userProfileColumnsPromise: Promise<UserProfileColumns> | null = null
+
+async function getUserProfileColumns(): Promise<UserProfileColumns> {
+  if (!userProfileColumnsPromise) {
+    userProfileColumnsPromise = (async () => {
+      const rows = await query<{ column_name: string }>(
+        `SELECT column_name
+         FROM information_schema.columns
+         WHERE table_schema = 'public'
+           AND table_name = 'users'
+           AND column_name IN ('profile_image_url', 'about_me')`
+      ).catch(() => [])
+
+      const names = new Set(rows.map((row) => String(row.column_name)))
+      return {
+        hasProfileImageUrl: names.has('profile_image_url'),
+        hasAboutMe: names.has('about_me'),
+      }
+    })()
+  }
+
+  return userProfileColumnsPromise
+}
+
+async function selectUserForProfile(uid: number) {
+  const columns = await getUserProfileColumns()
+  const optionalFields = [
+    columns.hasProfileImageUrl ? 'profile_image_url' : 'NULL::text AS profile_image_url',
+    columns.hasAboutMe ? 'about_me' : 'NULL::text AS about_me',
+  ]
+
+  return queryOne<Record<string, unknown>>(
+    `SELECT id, name, email, ndis_number, role, status, points, ${optionalFields.join(', ')}
+     FROM users
+     WHERE id = $1`,
+    [uid]
+  )
+}
+
+async function updateUserOptionalProfileFields(uid: number, body: Record<string, unknown>) {
+  const columns = await getUserProfileColumns()
+
+  if (body.about_me !== undefined && columns.hasAboutMe) {
+    await query('UPDATE users SET about_me = $1 WHERE id = $2', [String(body.about_me ?? ''), uid])
+  }
+
+  return columns
+}
+
 async function getCurrentPointTotal(uid: number): Promise<number> {
   const points = await queryOne<{ total_points: number }>(
     'SELECT total_points FROM user_points WHERE user_id = $1',
@@ -650,10 +704,7 @@ learner.get('/invoices', async (c) => {
 learner.get('/profile', async (c) => {
   const uid = userId(c)
   const [user, profile] = await Promise.all([
-    queryOne(
-      'SELECT id, name, email, ndis_number, role, status, points, profile_image_url, about_me FROM users WHERE id = $1',
-      [uid]
-    ),
+    selectUserForProfile(uid),
     queryOne('SELECT * FROM learner_profiles WHERE user_id = $1', [uid]),
   ])
   return c.json({ success: true, user, profile })
@@ -664,9 +715,7 @@ learner.patch('/profile', async (c) => {
   const uid = userId(c)
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
 
-  if (body.about_me !== undefined) {
-    await query('UPDATE users SET about_me = $1 WHERE id = $2', [body.about_me, uid])
-  }
+  await updateUserOptionalProfileFields(uid, body)
 
   const profileFields = ['age_band', 'sensory_mode', 'preferred_tone',
     'preferred_session_length_minutes', 'support_intensity', 'coach_enabled', 'voice_enabled']
@@ -936,10 +985,7 @@ learner.post('/mark_lesson_completed.php', async (c) => {
 learner.post('/update_user_progress.php', async (c) => {
   const uid = userId(c)
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
-  const user = await queryOne(
-    'SELECT id, name, email, ndis_number, role, status, points, profile_image_url, about_me FROM users WHERE id = $1',
-    [uid]
-  )
+  const user = await selectUserForProfile(uid)
 
   return c.json({
     success: true,
@@ -953,10 +999,7 @@ learner.post('/update_user_progress.php', async (c) => {
 learner.get('/fetch_user_profile.php', async (c) => {
   const requestedUserId = Number(c.req.query('user_id') ?? 0)
   const uid = resolveRequestedUserId(c, requestedUserId)
-  const user = await queryOne(
-    'SELECT id, name, email, ndis_number, role, status, points, profile_image_url, about_me FROM users WHERE id = $1',
-    [uid]
-  )
+  const user = await selectUserForProfile(uid)
   return c.json({ success: true, user })
 })
 
@@ -1061,22 +1104,21 @@ learner.post('/upload_profile_image.php', async (c) => {
     return c.json({ error: upload.error }, 400)
   }
 
+  const columns = await getUserProfileColumns()
+  if (!columns.hasProfileImageUrl) {
+    return c.json({ error: 'Profile image uploads are not available until the latest database migration is applied.' }, 503)
+  }
+
   await query('UPDATE users SET profile_image_url = $1 WHERE id = $2', [upload.dataUrl, uid])
-  const user = await queryOne(
-    'SELECT id, name, email, ndis_number, role, status, points, profile_image_url, about_me FROM users WHERE id = $1',
-    [uid]
-  )
+  const user = await selectUserForProfile(uid)
   return c.json({ success: true, user })
 })
 
 learner.post('/update_profile_text.php', async (c) => {
   const uid = userId(c)
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
-  await query('UPDATE users SET about_me = $1 WHERE id = $2', [String(body.about_me ?? ''), uid])
-  const user = await queryOne(
-    'SELECT id, name, email, ndis_number, role, status, points, profile_image_url, about_me FROM users WHERE id = $1',
-    [uid]
-  )
+  await updateUserOptionalProfileFields(uid, body)
+  const user = await selectUserForProfile(uid)
   return c.json({ success: true, user })
 })
 

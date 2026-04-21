@@ -6,6 +6,45 @@ import { signToken } from '../middleware.js'
 
 const auth = new Hono()
 
+let userProfileColumnsPromise: Promise<{ hasProfileImageUrl: boolean; hasAboutMe: boolean }> | null = null
+
+async function getUserProfileColumns() {
+  if (!userProfileColumnsPromise) {
+    userProfileColumnsPromise = (async () => {
+      const rows = await query<{ column_name: string }>(
+        `SELECT column_name
+         FROM information_schema.columns
+         WHERE table_schema = 'public'
+           AND table_name = 'users'
+           AND column_name IN ('profile_image_url', 'about_me')`
+      ).catch(() => [])
+
+      const names = new Set(rows.map((row) => String(row.column_name)))
+      return {
+        hasProfileImageUrl: names.has('profile_image_url'),
+        hasAboutMe: names.has('about_me'),
+      }
+    })()
+  }
+
+  return userProfileColumnsPromise
+}
+
+async function selectUserForSession(id: number) {
+  const columns = await getUserProfileColumns()
+  const optionalFields = [
+    columns.hasProfileImageUrl ? 'profile_image_url' : 'NULL::text AS profile_image_url',
+    columns.hasAboutMe ? 'about_me' : 'NULL::text AS about_me',
+  ]
+
+  return queryOne(
+    `SELECT id, name, email, ndis_number, role, status, points, ${optionalFields.join(', ')}
+     FROM users
+     WHERE id = $1`,
+    [id]
+  )
+}
+
 // POST /api/auth/login
 auth.post('/login', async (c) => {
   const body = await c.req.json().catch(() => null)
@@ -108,10 +147,7 @@ auth.get('/me', async (c) => {
   try {
     const { verifyToken } = await import('../middleware.js')
     const payload = await verifyToken(token)
-    const user = await queryOne(
-      'SELECT id, name, email, ndis_number, role, status, points, profile_image_url, about_me FROM users WHERE id = $1',
-      [Number(payload.sub)]
-    )
+    const user = await selectUserForSession(Number(payload.sub))
     if (!user) return c.json({ error: 'User not found' }, 404)
     return c.json({ success: true, user })
   } catch {

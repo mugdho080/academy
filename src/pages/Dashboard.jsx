@@ -8,7 +8,6 @@ import AvatarSelector from '../components/AvatarSelector';
 import { useCoach } from '../context/CoachContext';
 import PageContainer from '../components/layout/PageContainer';
 import ActionGroup from '../components/layout/ActionGroup';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const quotes = [
     'You are capable of amazing things.',
@@ -43,8 +42,7 @@ const Dashboard = () => {
         emitCoachEvent,
         setPanelOpen
     } = useCoach();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     useEffect(() => {
         const timer = setInterval(() => {

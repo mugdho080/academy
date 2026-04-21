@@ -6,8 +6,6 @@ import axios from 'axios';
 
 import CRMProfileModal from './admin/CRMProfileModal';
 import ResponsiveTable from '../components/layout/ResponsiveTable';
-import { useUiVariant } from '../context/UiVariantContext';
-import ClayToggle from '../components/clay/ClayToggle';
 
 const AdminPanel = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -26,8 +24,7 @@ const AdminPanel = () => {
     const [importingJson, setImportingJson] = useState(false); // boolean for modal
     const [jsonInput, setJsonInput] = useState('');
     const [adminNavOpen, setAdminNavOpen] = useState(false);
-    const { variant, setVariant } = useUiVariant('admin');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     const navigate = useNavigate();
 
@@ -251,18 +248,6 @@ const AdminPanel = () => {
                         <FileText size={20} /> Invoicing
                     </button>
                 </nav>
-
-                <ClayToggle
-                    label="Admin pages"
-                    value={variant}
-                    onChange={setVariant}
-                    options={[
-                        { label: 'Classic', value: 'classic' },
-                        { label: 'Clay', value: 'clay' }
-                    ]}
-                    appearance={isClay ? 'clay' : 'classic'}
-                    compact={true}
-                />
 
                 <button
                     onClick={async () => {

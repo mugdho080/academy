@@ -35,7 +35,7 @@ const formatDateTime = (value) => {
     return date.toLocaleString();
 };
 
-const TimeLogsViewer = ({ userId, isAdminView = false, variant = 'classic', className = '' }) => {
+const TimeLogsViewer = ({ userId, isAdminView = false, className = '' }) => {
     const [startDate, setStartDate] = useState(thirtyDaysAgoIso());
     const [endDate, setEndDate] = useState(todayIso());
     const [loading, setLoading] = useState(false);
@@ -123,7 +123,7 @@ const TimeLogsViewer = ({ userId, isAdminView = false, variant = 'classic', clas
         URL.revokeObjectURL(url);
     };
 
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     const rootClassName = isClay
         ? `clay-card p-4 sm:p-6 md:p-8 mt-0 mb-0 space-y-5 sm:space-y-6 ${className}`

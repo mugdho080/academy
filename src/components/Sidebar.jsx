@@ -10,15 +10,12 @@ import {
     Gamepad2
 } from 'lucide-react';
 import { useActivityTimer } from '../context/ActivityTimerProvider';
-import { useUiVariant } from '../context/UiVariantContext';
-import ClayToggle from './clay/ClayToggle';
 
 const Sidebar = ({ className = '', onNavigate }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { logoutLearner } = useActivityTimer();
-    const { variant, setVariant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     const menuItems = [
         { icon: <Map size={24} />, text: 'My World Map', path: '/dashboard' },
@@ -107,18 +104,6 @@ const Sidebar = ({ className = '', onNavigate }) => {
             </nav>
 
             <div className={`mt-auto space-y-3 pt-5 ${isClay ? 'border-t border-white/50' : 'border-t border-white/10'}`}>
-                <ClayToggle
-                    label="Learner pages"
-                    value={variant}
-                    onChange={setVariant}
-                    options={[
-                        { label: 'Classic', value: 'classic' },
-                        { label: 'Clay', value: 'clay' }
-                    ]}
-                    appearance={isClay ? 'clay' : 'classic'}
-                    compact={true}
-                />
-
                 <button className={`flex items-center gap-4 w-full p-2 rounded-xl transition-colors text-sm font-bold ${isClay ? 'text-[color:var(--clay-text-soft)] hover:bg-white/35 hover:text-[color:var(--clay-text)]' : 'hover:bg-white/5 text-teal-200 hover:text-white'}`}>
                     <Settings size={18} />
                     Settings

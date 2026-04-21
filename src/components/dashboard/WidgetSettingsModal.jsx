@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useUiVariant } from '../../context/UiVariantContext';
 
 function deepClone(value) {
   return JSON.parse(JSON.stringify(value ?? {}));
@@ -32,8 +31,7 @@ function getByPath(target, path, fallback = '') {
 
 export default function WidgetSettingsModal({ widget, currentSettings = {}, open = false, onSave, onClose }) {
   const [draft, setDraft] = useState({});
-  const { variant } = useUiVariant('admin');
-  const isClay = variant === 'clay';
+    const isClay = false;
 
   const fields = useMemo(() => widget?.settings_schema?.fields || [], [widget]);
 

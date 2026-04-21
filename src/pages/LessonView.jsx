@@ -10,7 +10,6 @@ import { useActivityTimer } from '../context/ActivityTimerProvider';
 import { useCoach } from '../context/CoachContext';
 import PageContainer from '../components/layout/PageContainer';
 import ActionGroup from '../components/layout/ActionGroup';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const splitIntoSentences = (text) => {
     if (!text) return [];
@@ -34,8 +33,7 @@ const LessonView = () => {
 
     const { setCurrentLessonId } = useActivityTimer();
     const { emitCoachEvent, requestCoachMessage, state: coachState, recommendation, profile } = useCoach();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     const contentScrollerRef = React.useRef(null);
     const lastScrollLeftRef = React.useRef(0);

@@ -8,15 +8,13 @@ import RecentWinsTimeline from '../components/achievements/RecentWinsTimeline';
 import ChapterMasteryGrid from '../components/achievements/ChapterMasteryGrid';
 import PandaAchievementCard from '../components/achievements/PandaAchievementCard';
 import PageContainer from '../components/layout/PageContainer';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const Achievements = () => {
     const [summary, setSummary] = useState(null);
     const [badges, setBadges] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     useEffect(() => {
         const load = async () => {

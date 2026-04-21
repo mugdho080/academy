@@ -1,11 +1,9 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const SensoryBackground = () => {
     const reduceMotion = useReducedMotion();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     const calmTransition = reduceMotion
         ? { duration: 0 }

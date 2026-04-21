@@ -1,12 +1,10 @@
 import React from 'react';
 import AnimatedPanda from './AnimatedPanda';
 import { useCoach } from '../context/CoachContext';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const PandaCoachBubble = () => {
     const { bubbleVisible, dismissBubble, panelOpen, setPanelOpen, message } = useCoach();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     if (!bubbleVisible || panelOpen || !message?.message) return null;
 

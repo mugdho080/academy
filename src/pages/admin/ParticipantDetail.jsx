@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import ParticipantDetailClassicView from '../../components/participant/ParticipantDetailClassicView';
-import ParticipantDetailClayView from '../../components/participant/ParticipantDetailClayView';
-import { useUiVariant } from '../../context/UiVariantContext';
 
 export default function ParticipantDetail() {
     const { id } = useParams();
@@ -11,7 +9,6 @@ export default function ParticipantDetail() {
     const [invoices, setInvoices] = useState([]);
     const [coachAnalytics, setCoachAnalytics] = useState(null);
     const [progressData, setProgressData] = useState([]);
-    const { variant, setVariant } = useUiVariant('admin');
 
     useEffect(() => {
         axios.get(`/api/admin/participant_stage.php?id=${id || 1}`)
@@ -60,14 +57,8 @@ export default function ParticipantDetail() {
         invoices,
         coachAnalytics,
         progressData,
-        variant,
-        setVariant,
         getStageColor
     };
-
-    if (variant === 'clay') {
-        return <ParticipantDetailClayView {...viewProps} />;
-    }
 
     return <ParticipantDetailClassicView {...viewProps} />;
 }

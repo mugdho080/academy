@@ -3,7 +3,6 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import SidebarLayout from './components/SidebarLayout';
 import { ActivityTimerProvider } from './context/ActivityTimerProvider';
 import { CoachProvider } from './context/CoachContext';
-import { UiVariantProvider } from './context/UiVariantContext';
 
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
@@ -25,31 +24,29 @@ function App() {
         <Router>
             <ActivityTimerProvider>
                 <CoachProvider>
-                    <UiVariantProvider>
-                        <Suspense fallback={<div className="min-h-screen safe-mobile-height flex items-center justify-center bg-[#e0f7fa] text-[#00695C] font-black">Loading...</div>}>
-                            <Routes>
-                                <Route path="/login" element={<Login />} />
-                                <Route path="/signup" element={<Signup />} />
-                                <Route path="/admin" element={<AdminPanel />} />
-                                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                                <Route path="/admin/participant/:id" element={<ParticipantDetail />} />
-                                <Route path="/admin/invoicing" element={<Invoicing />} />
-                                <Route path="/admin/company-settings" element={<Invoicing />} />
+                    <Suspense fallback={<div className="min-h-screen safe-mobile-height flex items-center justify-center bg-[#e0f7fa] text-[#00695C] font-black">Loading...</div>}>
+                        <Routes>
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/signup" element={<Signup />} />
+                            <Route path="/admin" element={<AdminPanel />} />
+                            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                            <Route path="/admin/participant/:id" element={<ParticipantDetail />} />
+                            <Route path="/admin/invoicing" element={<Invoicing />} />
+                            <Route path="/admin/company-settings" element={<Invoicing />} />
 
-                                {/* Learner Routes wrapped in SidebarLayout */}
-                                <Route path="/dashboard" element={<SidebarLayout><Dashboard /></SidebarLayout>} />
-                                <Route path="/chapter/:chapterId" element={<SidebarLayout><LevelMap /></SidebarLayout>} />
-                                <Route path="/level/:levelId" element={<SidebarLayout><LevelDashboard /></SidebarLayout>} />
-                                <Route path="/ai-friend" element={<SidebarLayout><AIFriendPage /></SidebarLayout>} />
-                                <Route path="/achievements" element={<SidebarLayout><Achievements /></SidebarLayout>} />
-                                <Route path="/profile" element={<SidebarLayout><Profile /></SidebarLayout>} />
-                                <Route path="/arcade" element={<SidebarLayout><ClawGamePage /></SidebarLayout>} />
-                                <Route path="/lesson/:levelId" element={<SidebarLayout><LessonView /></SidebarLayout>} />
+                            {/* Learner Routes wrapped in SidebarLayout */}
+                            <Route path="/dashboard" element={<SidebarLayout><Dashboard /></SidebarLayout>} />
+                            <Route path="/chapter/:chapterId" element={<SidebarLayout><LevelMap /></SidebarLayout>} />
+                            <Route path="/level/:levelId" element={<SidebarLayout><LevelDashboard /></SidebarLayout>} />
+                            <Route path="/ai-friend" element={<SidebarLayout><AIFriendPage /></SidebarLayout>} />
+                            <Route path="/achievements" element={<SidebarLayout><Achievements /></SidebarLayout>} />
+                            <Route path="/profile" element={<SidebarLayout><Profile /></SidebarLayout>} />
+                            <Route path="/arcade" element={<SidebarLayout><ClawGamePage /></SidebarLayout>} />
+                            <Route path="/lesson/:levelId" element={<SidebarLayout><LessonView /></SidebarLayout>} />
 
-                                <Route path="/" element={<Navigate to="/login" replace />} />
-                            </Routes>
-                        </Suspense>
-                    </UiVariantProvider>
+                            <Route path="/" element={<Navigate to="/login" replace />} />
+                        </Routes>
+                    </Suspense>
                 </CoachProvider>
             </ActivityTimerProvider>
         </Router>

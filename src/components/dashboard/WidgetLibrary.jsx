@@ -10,7 +10,6 @@ import {
   Search,
   Wallet
 } from 'lucide-react';
-import { useUiVariant } from '../../context/UiVariantContext';
 
 const CATEGORY_OPTIONS = [
   'All',
@@ -41,8 +40,7 @@ const CATEGORY_ICON = {
 export default function WidgetLibrary({ open, widgets = [], activeWidgetKeys = [], onAdd, onClose }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
-  const { variant } = useUiVariant('admin');
-  const isClay = variant === 'clay';
+    const isClay = false;
 
   const filteredWidgets = useMemo(() => {
     return widgets.filter((widget) => {

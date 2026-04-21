@@ -3,8 +3,6 @@ import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, Loader2, Save, Upload } from 'lucide-react';
 import ResponsiveTable from '../../components/layout/ResponsiveTable';
-import { useUiVariant } from '../../context/UiVariantContext';
-import ClayToggle from '../../components/clay/ClayToggle';
 import { withAuthQuery } from '../../utils/api';
 
 const todayIso = () => new Date().toISOString().split('T')[0];
@@ -20,8 +18,7 @@ const tabs = ['create', 'draft', 'unpaid', 'paid', 'company'];
 export default function Invoicing() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { variant, setVariant } = useUiVariant('admin');
-    const isClay = variant === 'clay';
+    const isClay = false;
     const [tab, setTab] = useState(location.pathname === '/admin/company-settings' ? 'company' : 'create');
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
@@ -197,16 +194,6 @@ export default function Invoicing() {
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-2 items-center">
-                        <ClayToggle
-                            label="Admin pages"
-                            value={variant}
-                            onChange={setVariant}
-                            options={[
-                                { label: 'Classic', value: 'classic' },
-                                { label: 'Clay', value: 'clay' }
-                            ]}
-                            appearance={isClay ? 'clay' : 'classic'}
-                        />
                         {busy && <div className={`text-sm flex items-center gap-2 ${isClay ? 'ui-clay-text-soft' : 'text-slate-500'}`}><Loader2 size={14} className="animate-spin" /> Processing</div>}
                     </div>
                 </div>

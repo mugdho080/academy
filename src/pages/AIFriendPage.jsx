@@ -5,7 +5,6 @@ import { Mic, MicOff, Volume2, VolumeX, ArrowLeft, MessageCircle } from 'lucide-
 import { motion, AnimatePresence } from 'framer-motion';
 import AICharacter from '../components/AICharacter';
 import SensoryBackground from '../components/SensoryBackground';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const AIFriendPage = () => {
     const navigate = useNavigate();
@@ -16,8 +15,7 @@ const AIFriendPage = () => {
         ageBand: 'age_20_40',
         maxWords: 60
     });
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
     const toggleConnection = () => {
         if (isConnected) disconnect();
         else connect();

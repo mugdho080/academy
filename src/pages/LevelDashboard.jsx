@@ -6,7 +6,6 @@ import SensoryBackground from '../components/SensoryBackground';
 import { motion } from 'framer-motion';
 import { useCoach } from '../context/CoachContext';
 import PageContainer from '../components/layout/PageContainer';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const LevelDashboard = () => {
     const { levelId } = useParams();
@@ -15,8 +14,7 @@ const LevelDashboard = () => {
     const [loading, setLoading] = useState(true);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const { emitCoachEvent } = useCoach();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     useEffect(() => {
         const fetchContent = async () => {

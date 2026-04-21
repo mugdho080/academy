@@ -1,7 +1,6 @@
 import React from 'react';
 import { ShieldCheck, AlertCircle, Activity, Download } from 'lucide-react';
 import TimeLogsViewer from '../TimeLogsViewer';
-import ClayToggle from '../clay/ClayToggle';
 import { withAuthQuery } from '../../utils/api';
 
 const ParticipantDetailClassicView = ({
@@ -10,23 +9,10 @@ const ParticipantDetailClassicView = ({
     invoices,
     coachAnalytics,
     progressData,
-    variant,
-    setVariant,
     getStageColor
 }) => {
     return (
         <div className="p-3 sm:p-5 lg:p-8 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
-            <ClayToggle
-                appearance="classic"
-                label="Admin participant profile appearance"
-                value={variant}
-                onChange={setVariant}
-                options={[
-                    { label: 'Classic', value: 'classic' },
-                    { label: 'Clay', value: 'clay' }
-                ]}
-            />
-
             <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-black text-gray-800 tracking-tight">Participant Record</h1>

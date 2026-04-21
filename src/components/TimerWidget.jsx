@@ -2,7 +2,6 @@ import React from 'react';
 import { useActivityTimer } from '../context/ActivityTimerProvider';
 import { Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const formatTime = (totalSeconds) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -18,8 +17,7 @@ const formatTime = (totalSeconds) => {
 
 const TimerWidget = () => {
     const { localActiveSeconds, isActive, currentContext } = useActivityTimer();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     const contextLabel = currentContext?.context_type
         ? currentContext.context_type.charAt(0).toUpperCase() + currentContext.context_type.slice(1)

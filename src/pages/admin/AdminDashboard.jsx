@@ -20,8 +20,6 @@ import {
   normalizeLayoutJson,
   removeWidgetFromLayout
 } from '../../components/dashboard/dashboardUtils';
-import { useUiVariant } from '../../context/UiVariantContext';
-import ClayToggle from '../../components/clay/ClayToggle';
 
 function parseStoredUser() {
   try {
@@ -46,8 +44,7 @@ const DASHBOARD_API = {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [user] = useState(() => parseStoredUser());
-  const { variant, setVariant } = useUiVariant('admin');
-  const isClay = variant === 'clay';
+  const isClay = false;
   const [widgets, setWidgets] = useState([]);
   const [presets, setPresets] = useState([]);
   const [dashboardName, setDashboardName] = useState(localStorage.getItem('admin_dashboard_view') || DEFAULT_VIEW);
@@ -403,16 +400,6 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <ClayToggle
-                label="Admin pages"
-                value={variant}
-                onChange={setVariant}
-                options={[
-                  { label: 'Classic', value: 'classic' },
-                  { label: 'Clay', value: 'clay' }
-                ]}
-                appearance={isClay ? 'clay' : 'classic'}
-              />
               <button type="button" onClick={refreshAll} className={`px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 ${isClay ? 'ui-clay-button-secondary' : 'border border-slate-200 bg-white text-slate-700'}`}>
                 <RefreshCcw size={14} />
                 Refresh Data

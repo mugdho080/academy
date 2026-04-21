@@ -3,12 +3,10 @@ import { X, Volume2, VolumeX } from 'lucide-react';
 import AnimatedPanda from './AnimatedPanda';
 import PandaCoachNavigator from './PandaCoachNavigator';
 import { useCoach } from '../context/CoachContext';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const PandaCoachPanel = () => {
     const { panelOpen, setPanelOpen, message, profile, routeContext } = useCoach();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     if (!panelOpen) return null;
 

@@ -3,13 +3,11 @@ import { Mic, MicOff, Volume2, VolumeX, X, MessageCircle } from 'lucide-react';
 import { useGeminiLive } from '../hooks/useGeminiLive';
 import AnimatedPanda from './AnimatedPanda';
 import { useCoach } from '../context/CoachContext';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const AIFriend = ({ context, floating = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const { message, state, profile, setPanelOpen } = useCoach();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     const contextPrompt = useMemo(() => {
         if (!context) return '';

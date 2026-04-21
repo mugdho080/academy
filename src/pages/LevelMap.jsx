@@ -5,7 +5,6 @@ import { Lock, Search } from 'lucide-react';
 import axios from 'axios';
 import ServiceAgreementModal from '../components/ServiceAgreementModal';
 import { useCoach } from '../context/CoachContext';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const levelPositions = [
     { top: '1250px', left: '150px' },
@@ -29,8 +28,7 @@ const LevelMap = () => {
     const [isAgreementOpen, setIsAgreementOpen] = useState(false);
     const [chapterTitle, setChapterTitle] = useState('World');
     const { emitCoachEvent, requestCoachMessage } = useCoach();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     const mapContainerRef = React.useRef(null);
 

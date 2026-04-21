@@ -16,12 +16,9 @@ import {
 import SensoryBackground from '../SensoryBackground';
 import TimeLogsViewer from '../TimeLogsViewer';
 import PageContainer from '../layout/PageContainer';
-import ClayToggle from '../clay/ClayToggle';
 import { withAuthQuery } from '../../utils/api';
 
 const ProfileClassicView = ({
-    variant,
-    setVariant,
     agreement,
     paidInvoices,
     invoiceLoading,
@@ -41,19 +38,6 @@ const ProfileClassicView = ({
             <SensoryBackground />
 
             <PageContainer className="relative z-10 pb-24 lg:pb-10">
-                <div className="mb-5">
-                    <ClayToggle
-                        appearance="classic"
-                        label="Learner profile appearance"
-                        value={variant}
-                        onChange={setVariant}
-                        options={[
-                            { label: 'Classic', value: 'classic' },
-                            { label: 'Clay', value: 'clay' }
-                        ]}
-                    />
-                </div>
-
                 <header className="mb-6 md:mb-8 text-center">
                     <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 group">
                         {user.profile_image_url ? (

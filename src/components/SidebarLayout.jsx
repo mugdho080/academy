@@ -5,13 +5,11 @@ import Sidebar from './Sidebar';
 import TimerWidget from './TimerWidget';
 import PandaCoachBubble from './PandaCoachBubble';
 import PandaCoachPanel from './PandaCoachPanel';
-import { useUiVariant } from '../context/UiVariantContext';
 
 const SidebarLayout = ({ children }) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const location = useLocation();
-    const { variant } = useUiVariant('learner');
-    const isClay = variant === 'clay';
+    const isClay = false;
 
     useEffect(() => {
         setDrawerOpen(false);
