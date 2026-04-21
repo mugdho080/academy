@@ -2,6 +2,9 @@ import { Hono } from 'hono'
 import { requireAuth, requireAdmin } from '../middleware.js'
 import { query, queryOne, withTransaction } from '../db.js'
 import type { JwtPayload } from '../middleware.js'
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const admin = new Hono()
 admin.use('*', requireAuth, requireAdmin)
@@ -15,6 +18,218 @@ const EMPTY_LAYOUT = {
 const DEFAULT_PRESETS = [
   { preset_key: 'default_admin_view', preset_name: 'Default Admin View' },
 ]
+
+const DEFAULT_WIDGETS = [
+  {
+    widget_key: 'total_learners',
+    title: 'Total Learners',
+    description: 'Current learner volume and approval mix.',
+    category: 'Overview',
+    default_w: 4,
+    default_h: 4,
+    min_w: 2,
+    min_h: 2,
+    component_name: 'total_learners',
+    icon: 'Users',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'new_signups',
+    title: 'New Signups',
+    description: 'New learner registrations this week.',
+    category: 'Overview',
+    default_w: 4,
+    default_h: 4,
+    min_w: 2,
+    min_h: 2,
+    component_name: 'new_signups',
+    icon: 'UserPlus',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'pending_service_agreements',
+    title: 'Pending Agreements',
+    description: 'Learners waiting on agreement review or activation.',
+    category: 'Compliance',
+    default_w: 4,
+    default_h: 6,
+    min_w: 2,
+    min_h: 3,
+    component_name: 'pending_service_agreements',
+    icon: 'FileWarning',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'draft_invoices',
+    title: 'Draft Invoices',
+    description: 'Draft invoice count and value.',
+    category: 'Finance',
+    default_w: 3,
+    default_h: 4,
+    min_w: 2,
+    min_h: 2,
+    component_name: 'draft_invoices',
+    icon: 'FileText',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'unpaid_invoices',
+    title: 'Unpaid Invoices',
+    description: 'Outstanding invoice count and overdue totals.',
+    category: 'Finance',
+    default_w: 3,
+    default_h: 4,
+    min_w: 2,
+    min_h: 2,
+    component_name: 'unpaid_invoices',
+    icon: 'Wallet',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'paid_invoices',
+    title: 'Paid Invoices',
+    description: 'Invoices paid this month.',
+    category: 'Finance',
+    default_w: 3,
+    default_h: 4,
+    min_w: 2,
+    min_h: 2,
+    component_name: 'paid_invoices',
+    icon: 'BadgeCheck',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'learner_quick_search',
+    title: 'Learner Quick Search',
+    description: 'Open learner records quickly by name or NDIS number.',
+    category: 'Learners',
+    default_w: 6,
+    default_h: 6,
+    min_w: 3,
+    min_h: 3,
+    component_name: 'learner_quick_search',
+    icon: 'Search',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'recently_active_users',
+    title: 'Recently Active Learners',
+    description: 'Most recently active learners across the platform.',
+    category: 'Engagement',
+    default_w: 6,
+    default_h: 6,
+    min_w: 3,
+    min_h: 3,
+    component_name: 'recently_active_users',
+    icon: 'Clock3',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'quick_actions',
+    title: 'Quick Actions',
+    description: 'Jump to common admin workflows.',
+    category: 'Utilities',
+    default_w: 6,
+    default_h: 4,
+    min_w: 3,
+    min_h: 2,
+    component_name: 'quick_actions',
+    icon: 'Rocket',
+    configurable: false,
+    settings_schema: { fields: [] },
+  },
+  {
+    widget_key: 'notes_reminders',
+    title: 'Notes & Reminders',
+    description: 'Private dashboard notes saved in your layout.',
+    category: 'Utilities',
+    default_w: 6,
+    default_h: 5,
+    min_w: 3,
+    min_h: 3,
+    component_name: 'notes_reminders',
+    icon: 'NotebookTabs',
+    configurable: true,
+    settings_schema: {
+      fields: [
+        {
+          key: 'note',
+          label: 'Reminder Notes',
+          type: 'textarea',
+          default: '',
+        },
+      ],
+    },
+  },
+]
+
+const DEFAULT_LAYOUT_JSON = {
+  widgets: [
+    'total_learners',
+    'new_signups',
+    'pending_service_agreements',
+    'draft_invoices',
+    'unpaid_invoices',
+    'paid_invoices',
+    'learner_quick_search',
+    'recently_active_users',
+    'quick_actions',
+    'notes_reminders',
+  ],
+  layouts: {
+    lg: [
+      { i: 'total_learners', x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'new_signups', x: 4, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'pending_service_agreements', x: 8, y: 0, w: 4, h: 6, minW: 2, minH: 3 },
+      { i: 'draft_invoices', x: 0, y: 4, w: 3, h: 4, minW: 2, minH: 2 },
+      { i: 'unpaid_invoices', x: 3, y: 4, w: 3, h: 4, minW: 2, minH: 2 },
+      { i: 'paid_invoices', x: 6, y: 4, w: 3, h: 4, minW: 2, minH: 2 },
+      { i: 'learner_quick_search', x: 0, y: 8, w: 6, h: 6, minW: 3, minH: 3 },
+      { i: 'recently_active_users', x: 6, y: 8, w: 6, h: 6, minW: 3, minH: 3 },
+      { i: 'quick_actions', x: 0, y: 14, w: 6, h: 4, minW: 3, minH: 2 },
+      { i: 'notes_reminders', x: 6, y: 14, w: 6, h: 5, minW: 3, minH: 3 },
+    ],
+    md: [
+      { i: 'total_learners', x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'new_signups', x: 4, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'pending_service_agreements', x: 0, y: 4, w: 8, h: 6, minW: 2, minH: 3 },
+      { i: 'draft_invoices', x: 0, y: 10, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'unpaid_invoices', x: 4, y: 10, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'paid_invoices', x: 0, y: 14, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'learner_quick_search', x: 0, y: 18, w: 8, h: 6, minW: 3, minH: 3 },
+      { i: 'recently_active_users', x: 0, y: 24, w: 8, h: 6, minW: 3, minH: 3 },
+      { i: 'quick_actions', x: 0, y: 30, w: 8, h: 4, minW: 3, minH: 2 },
+      { i: 'notes_reminders', x: 0, y: 34, w: 8, h: 5, minW: 3, minH: 3 },
+    ],
+    sm: [
+      { i: 'total_learners', x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'new_signups', x: 0, y: 4, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'pending_service_agreements', x: 0, y: 8, w: 4, h: 6, minW: 2, minH: 3 },
+      { i: 'draft_invoices', x: 0, y: 14, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'unpaid_invoices', x: 0, y: 18, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'paid_invoices', x: 0, y: 22, w: 4, h: 4, minW: 2, minH: 2 },
+      { i: 'learner_quick_search', x: 0, y: 26, w: 4, h: 6, minW: 3, minH: 3 },
+      { i: 'recently_active_users', x: 0, y: 32, w: 4, h: 6, minW: 3, minH: 3 },
+      { i: 'quick_actions', x: 0, y: 38, w: 4, h: 4, minW: 3, minH: 2 },
+      { i: 'notes_reminders', x: 0, y: 42, w: 4, h: 5, minW: 3, minH: 3 },
+    ],
+  },
+  widget_settings: {
+    notes_reminders: {
+      note: '',
+    },
+  },
+}
+
+const contentSeedPath = resolve(dirname(fileURLToPath(import.meta.url)), '../../../contents/final_v3_content.json')
 
 async function buildLegacyTimeSummary(targetUserId: number, start: string, end: string) {
   const [sessions, dailyTotals, contextRows, chapterRows, levelRows, lessonRows] = await Promise.all([
@@ -169,6 +384,220 @@ async function buildInvoicePreview(userIds: number[], dateFrom: string, dateTo: 
   })
 }
 
+function parseJsonSafe<T>(value: unknown, fallback: T): T {
+  if (value === null || value === undefined) return fallback
+  if (typeof value !== 'string') return value as T
+  try {
+    return JSON.parse(value) as T
+  } catch {
+    return fallback
+  }
+}
+
+async function readUploadAsDataUrl(
+  bodyValue: FormDataEntryValue | null,
+  allowedTypes: string[],
+  maxBytes: number
+) {
+  if (!(bodyValue instanceof File)) {
+    return { error: 'No file uploaded' as const }
+  }
+
+  if (!allowedTypes.includes(bodyValue.type)) {
+    return { error: 'Unsupported file type' as const }
+  }
+
+  const bytes = bodyValue.size ?? 0
+  if (bytes <= 0 || bytes > maxBytes) {
+    return { error: `File must be between 1 byte and ${Math.floor(maxBytes / 1024 / 1024)}MB` as const }
+  }
+
+  const buffer = Buffer.from(await bodyValue.arrayBuffer())
+  return {
+    dataUrl: `data:${bodyValue.type};base64,${buffer.toString('base64')}`,
+  }
+}
+
+async function buildContentTree() {
+  const [chapters, levels, lessons, quizzes] = await Promise.all([
+    query<Record<string, unknown>>(
+      'SELECT id, title, emoji, order_index FROM chapters ORDER BY order_index, id'
+    ),
+    query<Record<string, unknown>>(
+      'SELECT id, chapter_id, title, video_url, is_free, order_index FROM levels ORDER BY chapter_id, order_index, id'
+    ),
+    query<Record<string, unknown>>(
+      'SELECT id, level_id, title, content, order_index FROM lessons ORDER BY level_id, order_index, id'
+    ),
+    query<Record<string, unknown>>(
+      'SELECT id, lesson_id, question, options, correct_answer FROM quizzes ORDER BY lesson_id, id'
+    ),
+  ])
+
+  const quizzesByLesson = new Map<number, Array<Record<string, unknown>>>()
+  for (const quiz of quizzes) {
+    const lessonId = Number(quiz.lesson_id)
+    const list = quizzesByLesson.get(lessonId) ?? []
+    list.push({
+      ...quiz,
+      options: Array.isArray(quiz.options) ? quiz.options : parseJsonSafe<string[]>(quiz.options, []),
+      correct_answer: Number(quiz.correct_answer ?? 0),
+    })
+    quizzesByLesson.set(lessonId, list)
+  }
+
+  const lessonsByLevel = new Map<number, Array<Record<string, unknown>>>()
+  for (const lesson of lessons) {
+    const levelId = Number(lesson.level_id)
+    const list = lessonsByLevel.get(levelId) ?? []
+    list.push({
+      ...lesson,
+      quizzes: quizzesByLesson.get(Number(lesson.id)) ?? [],
+    })
+    lessonsByLevel.set(levelId, list)
+  }
+
+  const levelsByChapter = new Map<number, Array<Record<string, unknown>>>()
+  for (const level of levels) {
+    const chapterId = Number(level.chapter_id)
+    const list = levelsByChapter.get(chapterId) ?? []
+    list.push({
+      ...level,
+      is_free: Boolean(level.is_free),
+      lessons: lessonsByLevel.get(Number(level.id)) ?? [],
+    })
+    levelsByChapter.set(chapterId, list)
+  }
+
+  return chapters.map((chapter) => ({
+    ...chapter,
+    levels: levelsByChapter.get(Number(chapter.id)) ?? [],
+  }))
+}
+
+function loadSeedContent() {
+  if (!existsSync(contentSeedPath)) {
+    throw new Error(`Seed content file not found at ${contentSeedPath}`)
+  }
+  return parseJsonSafe<Record<string, unknown>>(readFileSync(contentSeedPath, 'utf8'), {})
+}
+
+async function importCurriculumDocument(document: Record<string, unknown>) {
+  const chapters = Array.isArray(document.chapters) ? document.chapters : []
+
+  return withTransaction(async (client) => {
+    await client.query('DELETE FROM progress')
+    await client.query('DELETE FROM completed_quizzes')
+    await client.query('DELETE FROM completed_lessons')
+    await client.query('DELETE FROM completed_levels')
+    await client.query('DELETE FROM completed_chapters')
+    await client.query('DELETE FROM chapter_mastery')
+    await client.query('DELETE FROM quiz_attempts')
+    await client.query('DELETE FROM quizzes')
+    await client.query('DELETE FROM lessons')
+    await client.query('DELETE FROM levels')
+    await client.query('DELETE FROM chapters')
+
+    let importedChapters = 0
+    let importedLevels = 0
+    let importedLessons = 0
+    let importedQuizzes = 0
+
+    for (const chapterEntry of chapters as Array<Record<string, unknown>>) {
+      const chapterRows = await client.query<{ id: number }>(
+        `INSERT INTO chapters (title, emoji, order_index)
+         VALUES ($1, $2, $3)
+         RETURNING id`,
+        [
+          String(chapterEntry.chapter_title ?? chapterEntry.title ?? `Chapter ${importedChapters + 1}`),
+          String(chapterEntry.chapter_icon ?? chapterEntry.emoji ?? '📚'),
+          Number(chapterEntry.module_number ?? chapterEntry.order_index ?? importedChapters),
+        ]
+      )
+      importedChapters += 1
+      const chapterId = chapterRows.rows[0].id
+      const levelEntries = Array.isArray(chapterEntry.levels) ? chapterEntry.levels : []
+
+      for (const levelEntry of levelEntries as Array<Record<string, unknown>>) {
+        const levelRows = await client.query<{ id: number }>(
+          `INSERT INTO levels (chapter_id, title, video_url, is_free, order_index)
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING id`,
+          [
+            chapterId,
+            String(levelEntry.level_title ?? levelEntry.title ?? `Level ${importedLevels + 1}`),
+            levelEntry.youtube_url ?? levelEntry.video_url ?? null,
+            Boolean(levelEntry.is_free ?? false),
+            Number(levelEntry.level_number ?? levelEntry.order_index ?? importedLevels),
+          ]
+        )
+        importedLevels += 1
+        const levelId = levelRows.rows[0].id
+        const lessonEntries = Array.isArray(levelEntry.lessons) ? levelEntry.lessons : []
+
+        for (const lessonEntry of lessonEntries as Array<Record<string, unknown>>) {
+          const lessonContent = lessonEntry.lesson_body ?? lessonEntry.structured_content ?? lessonEntry.content ?? ''
+          const lessonRows = await client.query<{ id: number }>(
+            `INSERT INTO lessons (level_id, title, content, order_index)
+             VALUES ($1, $2, $3, $4)
+             RETURNING id`,
+            [
+              levelId,
+              String(lessonEntry.lesson_title ?? lessonEntry.title ?? `Lesson ${importedLessons + 1}`),
+              typeof lessonContent === 'string' ? lessonContent : JSON.stringify(lessonContent),
+              Number(lessonEntry.lesson_number ?? lessonEntry.order_index ?? importedLessons),
+            ]
+          )
+          importedLessons += 1
+          const lessonId = lessonRows.rows[0].id
+          const quizGroups = Array.isArray(lessonEntry.quizzes) ? lessonEntry.quizzes : []
+
+          for (const quizGroup of quizGroups as Array<Record<string, unknown>>) {
+            const questions = Array.isArray(quizGroup.questions) ? quizGroup.questions : []
+            for (const question of questions as Array<Record<string, unknown>>) {
+              await client.query(
+                `INSERT INTO quizzes (lesson_id, question, options, correct_answer)
+                 VALUES ($1, $2, $3::jsonb, $4)`,
+                [
+                  lessonId,
+                  String(question.prompt ?? question.question ?? 'Untitled question'),
+                  JSON.stringify(Array.isArray(question.options) ? question.options : []),
+                  Number(question.correct_index ?? question.correct_answer ?? 0),
+                ]
+              )
+              importedQuizzes += 1
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      chapters: importedChapters,
+      levels: importedLevels,
+      lessons: importedLessons,
+      quizzes: importedQuizzes,
+    }
+  })
+}
+
+function normalizeWidgetRecord(row: Record<string, unknown>) {
+  return {
+    widget_key: String(row.widget_key),
+    title: String(row.title),
+    description: row.description ? String(row.description) : '',
+    category: String(row.category),
+    default_w: Number(row.default_w ?? 3),
+    default_h: Number(row.default_h ?? 4),
+    min_w: Number(row.min_w ?? 2),
+    min_h: Number(row.min_h ?? 2),
+    component_name: String(row.component_name ?? row.widget_key),
+    icon: row.icon ? String(row.icon) : null,
+    configurable: Boolean(parseJsonSafe(row.settings_schema_json, { fields: [] })?.fields?.length),
+    settings_schema: parseJsonSafe(row.settings_schema_json, { fields: [] }),
+  }
+}
+
 // Legacy PHP compatibility routes used by older admin screens.
 admin.get('/fetch_users', async (c) => {
   const users = await query(
@@ -182,13 +611,163 @@ admin.get('/fetch_users', async (c) => {
   return c.json(users)
 })
 
-admin.get('/fetch_content', (c) => c.json([]))
+admin.get('/fetch_content', async (c) => {
+  const content = await buildContentTree()
+  return c.json(content)
+})
 
-admin.post('/save_content', (c) => c.json({ success: true }))
+admin.post('/save_content', async (c) => {
+  const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
+  const type = String(body.type ?? '')
 
-admin.post('/import_content', (c) => c.json({ success: true, imported: 0 }))
+  if (!['chapter', 'level', 'lesson', 'quiz'].includes(type)) {
+    return c.json({ error: 'Invalid content type' }, 400)
+  }
 
-admin.post('/add_level_json', (c) => c.json({ success: true }))
+  if (type === 'chapter') {
+    const id = Number(body.id ?? 0)
+    const title = String(body.title ?? '').trim()
+    if (!title) return c.json({ error: 'Chapter title required' }, 400)
+    const emoji = String(body.emoji ?? '📚')
+    const orderIndex = Number(body.order_index ?? 0)
+
+    const sql = id
+      ? `UPDATE chapters SET title = $1, emoji = $2, order_index = $3 WHERE id = $4 RETURNING *`
+      : `INSERT INTO chapters (title, emoji, order_index) VALUES ($1, $2, $3) RETURNING *`
+    const params = id ? [title, emoji, orderIndex, id] : [title, emoji, orderIndex]
+    const rows = await query<Record<string, unknown>>(sql, params)
+    return c.json({ success: true, item: rows[0] ?? null })
+  }
+
+  if (type === 'level') {
+    const id = Number(body.id ?? 0)
+    const chapterId = Number(body.chapter_id ?? 0)
+    const title = String(body.title ?? '').trim()
+    if (!chapterId || !title) {
+      return c.json({ error: 'chapter_id and title required' }, 400)
+    }
+    const videoUrl = body.video_url ? String(body.video_url) : null
+    const isFree = body.is_free === true || body.is_free === 1 || body.is_free === '1'
+    const orderIndex = Number(body.order_index ?? 0)
+
+    const sql = id
+      ? `UPDATE levels SET chapter_id = $1, title = $2, video_url = $3, is_free = $4, order_index = $5 WHERE id = $6 RETURNING *`
+      : `INSERT INTO levels (chapter_id, title, video_url, is_free, order_index) VALUES ($1, $2, $3, $4, $5) RETURNING *`
+    const params = id
+      ? [chapterId, title, videoUrl, isFree, orderIndex, id]
+      : [chapterId, title, videoUrl, isFree, orderIndex]
+    const rows = await query<Record<string, unknown>>(sql, params)
+    return c.json({ success: true, item: rows[0] ?? null })
+  }
+
+  if (type === 'lesson') {
+    const id = Number(body.id ?? 0)
+    const levelId = Number(body.level_id ?? 0)
+    const title = String(body.title ?? '').trim()
+    if (!levelId || !title) {
+      return c.json({ error: 'level_id and title required' }, 400)
+    }
+    const content = String(body.content ?? '')
+    const orderIndex = Number(body.order_index ?? 0)
+
+    const sql = id
+      ? `UPDATE lessons SET level_id = $1, title = $2, content = $3, order_index = $4 WHERE id = $5 RETURNING *`
+      : `INSERT INTO lessons (level_id, title, content, order_index) VALUES ($1, $2, $3, $4) RETURNING *`
+    const params = id
+      ? [levelId, title, content, orderIndex, id]
+      : [levelId, title, content, orderIndex]
+    const rows = await query<Record<string, unknown>>(sql, params)
+    return c.json({ success: true, item: rows[0] ?? null })
+  }
+
+  const lessonId = Number(body.lesson_id ?? 0)
+  const question = String(body.question ?? '').trim()
+  const options = Array.isArray(body.options) ? body.options.map(String) : []
+  const correctAnswer = Number(body.correct_answer ?? 0)
+  if (!lessonId || !question || options.length === 0) {
+    return c.json({ error: 'lesson_id, question and options required' }, 400)
+  }
+
+  const id = Number(body.id ?? 0)
+  const sql = id
+    ? `UPDATE quizzes SET lesson_id = $1, question = $2, options = $3::jsonb, correct_answer = $4 WHERE id = $5 RETURNING *`
+    : `INSERT INTO quizzes (lesson_id, question, options, correct_answer) VALUES ($1, $2, $3::jsonb, $4) RETURNING *`
+  const params = id
+    ? [lessonId, question, JSON.stringify(options), correctAnswer, id]
+    : [lessonId, question, JSON.stringify(options), correctAnswer]
+  const rows = await query<Record<string, unknown>>(sql, params)
+  return c.json({ success: true, item: rows[0] ?? null })
+})
+
+admin.post('/import_content', async (c) => {
+  const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
+  const document = body.document && typeof body.document === 'object'
+    ? body.document as Record<string, unknown>
+    : loadSeedContent()
+
+  const imported = await importCurriculumDocument(document)
+  return c.json({ success: true, imported })
+})
+
+admin.post('/add_level_json', async (c) => {
+  const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
+  const chapterId = Number(body.chapter_id ?? 0)
+  const level = body.level as Record<string, unknown> | undefined
+  if (!chapterId || !level) {
+    return c.json({ error: 'chapter_id and level required' }, 400)
+  }
+
+  const result = await withTransaction(async (client) => {
+    const levelRows = await client.query<{ id: number }>(
+      `INSERT INTO levels (chapter_id, title, video_url, is_free, order_index)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id`,
+      [
+        chapterId,
+        String(level.level_title ?? level.title ?? 'New Level'),
+        level.youtube_url ?? level.video_url ?? null,
+        Boolean(level.is_free ?? false),
+        Number(level.level_number ?? level.order_index ?? 0),
+      ]
+    )
+    const levelId = levelRows.rows[0].id
+    let lessons = 0
+    let quizzes = 0
+    for (const lesson of (Array.isArray(level.lessons) ? level.lessons : []) as Array<Record<string, unknown>>) {
+      const lessonRows = await client.query<{ id: number }>(
+        `INSERT INTO lessons (level_id, title, content, order_index)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
+          levelId,
+          String(lesson.lesson_title ?? lesson.title ?? 'Untitled Lesson'),
+          typeof lesson.lesson_body === 'string' ? lesson.lesson_body : JSON.stringify(lesson.lesson_body ?? lesson.content ?? ''),
+          Number(lesson.lesson_number ?? lesson.order_index ?? lessons),
+        ]
+      )
+      lessons += 1
+      const lessonId = lessonRows.rows[0].id
+      for (const quizGroup of (Array.isArray(lesson.quizzes) ? lesson.quizzes : []) as Array<Record<string, unknown>>) {
+        for (const question of (Array.isArray(quizGroup.questions) ? quizGroup.questions : []) as Array<Record<string, unknown>>) {
+          await client.query(
+            `INSERT INTO quizzes (lesson_id, question, options, correct_answer)
+             VALUES ($1, $2, $3::jsonb, $4)`,
+            [
+              lessonId,
+              String(question.prompt ?? question.question ?? 'Untitled question'),
+              JSON.stringify(Array.isArray(question.options) ? question.options : []),
+              Number(question.correct_index ?? question.correct_answer ?? 0),
+            ]
+          )
+          quizzes += 1
+        }
+      }
+    }
+    return { chapters: 0, levels: 1, lessons, quizzes, level_id: levelId }
+  })
+
+  return c.json({ success: true, imported: result })
+})
 
 admin.post('/update_status', async (c) => {
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
@@ -242,7 +821,9 @@ admin.get('/get_widget_library.php', async (c) => {
      ORDER BY category, title`
   ).catch(() => [])
 
-  return c.json({ widgets })
+  return c.json({
+    widgets: widgets.length > 0 ? widgets.map(normalizeWidgetRecord) : DEFAULT_WIDGETS,
+  })
 })
 
 admin.get('/get_dashboard_presets.php', async (c) => {
@@ -271,7 +852,7 @@ admin.get('/get_dashboard_layout.php', async (c) => {
   )
 
   return c.json({
-    layout_json: layout?.layout_json ? JSON.parse(layout.layout_json) : EMPTY_LAYOUT,
+    layout_json: layout?.layout_json ? JSON.parse(layout.layout_json) : DEFAULT_LAYOUT_JSON,
   })
 })
 
@@ -314,7 +895,7 @@ admin.post('/load_dashboard_preset.php', async (c) => {
   )
 
   return c.json({
-    layout_json: preset?.layout_json ? JSON.parse(preset.layout_json) : EMPTY_LAYOUT,
+    layout_json: preset?.layout_json ? JSON.parse(preset.layout_json) : DEFAULT_LAYOUT_JSON,
   })
 })
 
@@ -322,6 +903,122 @@ admin.post('/get_dashboard_data.php', async (c) => {
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
   const widgetKeys = Array.isArray(body.widget_keys) ? body.widget_keys.map(String) : []
   const payload: Record<string, unknown> = {}
+
+  if (widgetKeys.includes('total_learners')) {
+    payload.total_learners = {
+      metrics: await query(
+        `SELECT * FROM (
+           VALUES
+             ('Total', (SELECT COUNT(*)::int FROM users WHERE role = 'learner')),
+             ('Active', (SELECT COUNT(*)::int FROM users WHERE role = 'learner' AND status = 'active')),
+             ('Pending', (SELECT COUNT(*)::int FROM users WHERE role = 'learner' AND status = 'pending')),
+             ('Locked', (SELECT COUNT(*)::int FROM users WHERE role = 'learner' AND status = 'locked'))
+         ) AS metrics(label, value)`
+      ),
+    }
+  }
+  if (widgetKeys.includes('new_signups')) {
+    payload.new_signups = await queryOne(
+      `SELECT
+         COUNT(*) FILTER (WHERE role = 'learner' AND created_at >= NOW() - INTERVAL '7 days') AS current,
+         COUNT(*) FILTER (WHERE role = 'learner' AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days') AS previous,
+         CASE
+           WHEN COUNT(*) FILTER (WHERE role = 'learner' AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days') = 0 THEN
+             CASE WHEN COUNT(*) FILTER (WHERE role = 'learner' AND created_at >= NOW() - INTERVAL '7 days') > 0 THEN 100 ELSE 0 END
+           ELSE
+             (
+               (
+                 COUNT(*) FILTER (WHERE role = 'learner' AND created_at >= NOW() - INTERVAL '7 days')::numeric
+                 - COUNT(*) FILTER (WHERE role = 'learner' AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days')::numeric
+               )
+               / COUNT(*) FILTER (WHERE role = 'learner' AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days')::numeric
+             ) * 100
+         END AS delta_pct
+       FROM users`
+    )
+  }
+  if (widgetKeys.includes('pending_service_agreements')) {
+    payload.pending_service_agreements = {
+      items: await query(
+        `SELECT u.id AS user_id, u.name, u.ndis_number, u.status
+         FROM users u
+         WHERE u.role = 'learner' AND u.status IN ('pending', 'locked')
+         ORDER BY u.created_at DESC
+         LIMIT 8`
+      ),
+    }
+  }
+  if (widgetKeys.includes('learner_quick_search')) {
+    payload.learner_quick_search = {
+      items: await query(
+        `SELECT id AS user_id, name, ndis_number
+         FROM users
+         WHERE role = 'learner'
+         ORDER BY name
+         LIMIT 200`
+      ),
+    }
+  }
+  if (widgetKeys.includes('recently_active_users')) {
+    payload.recently_active_users = {
+      items: await query(
+        `SELECT u.id AS user_id, u.name, u.ndis_number,
+                COALESCE(MAX(s.last_ping_at), MAX(s.login_at), u.created_at) AS last_active_at,
+                COALESCE('/dashboard', '/dashboard') AS last_visited_page,
+                CASE
+                  WHEN COALESCE(MAX(s.last_ping_at), MAX(s.login_at)) IS NULL THEN 'No tracked activity'
+                  ELSE CONCAT(
+                    GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (NOW() - COALESCE(MAX(s.last_ping_at), MAX(s.login_at)))) / 3600))::int,
+                    'h ago'
+                  )
+                END AS last_active_label
+         FROM users u
+         LEFT JOIN sessions s ON s.user_id = u.id
+         WHERE u.role = 'learner'
+         GROUP BY u.id, u.name, u.ndis_number, u.created_at
+         ORDER BY COALESCE(MAX(s.last_ping_at), MAX(s.login_at), u.created_at) DESC
+         LIMIT 8`
+      ),
+    }
+  }
+  if (widgetKeys.includes('draft_invoices')) {
+    payload.draft_invoices = await queryOne(
+      `SELECT COUNT(*) AS count, COALESCE(SUM(total_amount), 0) AS total_amount
+       FROM invoices
+       WHERE status = 'draft'`
+    )
+  }
+  if (widgetKeys.includes('unpaid_invoices')) {
+    payload.unpaid_invoices = await queryOne(
+      `SELECT
+         COUNT(*) FILTER (WHERE status IN ('unpaid', 'sent', 'overdue')) AS count,
+         COUNT(*) FILTER (WHERE status = 'overdue' OR due_date < CURRENT_DATE) AS overdue_count,
+         COALESCE(SUM(total_amount) FILTER (WHERE status IN ('unpaid', 'sent', 'overdue')), 0) AS total_amount
+       FROM invoices`
+    )
+  }
+  if (widgetKeys.includes('paid_invoices')) {
+    payload.paid_invoices = await queryOne(
+      `SELECT COUNT(*) AS count, COALESCE(SUM(total_amount), 0) AS total_amount
+       FROM invoices
+       WHERE status = 'paid'
+         AND COALESCE(payment_date::date, paid_at::date, invoice_date) >= date_trunc('month', CURRENT_DATE)::date`
+    )
+  }
+  if (widgetKeys.includes('quick_actions')) {
+    payload.quick_actions = {
+      actions: [
+        { label: 'Review learners', route: '/admin', type: 'secondary' },
+        { label: 'Open invoicing', route: '/admin/invoicing', type: 'secondary' },
+        { label: 'Open dashboard', route: '/admin/dashboard', type: 'primary' },
+      ],
+    }
+  }
+  if (widgetKeys.includes('notes_reminders')) {
+    payload.notes_reminders = {
+      note: String(((body.widget_settings as Record<string, unknown> | undefined)?.notes_reminders as Record<string, unknown> | undefined)?.note ?? ''),
+    }
+  }
 
   if (widgetKeys.includes('learner_stats')) {
     payload.learner_stats = await queryOne(
@@ -831,6 +1528,28 @@ admin.post('/company_settings.php', async (c) => {
 })
 
 admin.post('/upload_company_logo.php', async (c) => {
+  const body = await c.req.parseBody().catch(() => null)
+  const upload = await readUploadAsDataUrl(
+    body?.logo instanceof File ? body.logo : null,
+    ['image/png', 'image/jpeg', 'image/webp'],
+    2 * 1024 * 1024
+  )
+  if ('error' in upload) {
+    return c.json({ error: upload.error }, 400)
+  }
+
+  const existing = await queryOne<{ id: number }>('SELECT id FROM company_settings LIMIT 1')
+  if (existing) {
+    await query('UPDATE company_settings SET logo_path = $1 WHERE id = $2', [upload.dataUrl, existing.id])
+  } else {
+    await query(
+      `INSERT INTO company_settings (
+         company_name, logo_path, abn, bsb, bank_account_number
+       ) VALUES ($1, $2, $3, $4, $5)`,
+      ['Goodwill Care Academy', upload.dataUrl, '00000000000', '000-000', '00000000']
+    )
+  }
+
   return c.json({ success: true, settings: await getCompanySettingsRecord() })
 })
 

@@ -14,6 +14,41 @@ function userId(c: { get(k: string): unknown }): number {
   return Number((c.get('user') as JwtPayload).sub)
 }
 
+function isAdmin(c: { get(k: string): unknown }): boolean {
+  return String((c.get('user') as JwtPayload).role ?? '') === 'admin'
+}
+
+function resolveRequestedUserId(c: { get(k: string): unknown }, requestedUserId: number): number {
+  if (requestedUserId > 0 && isAdmin(c)) {
+    return requestedUserId
+  }
+  return userId(c)
+}
+
+async function readUploadAsDataUrl(
+  bodyValue: FormDataEntryValue | null,
+  allowedTypes: string[],
+  maxBytes: number
+) {
+  if (!(bodyValue instanceof File)) {
+    return { error: 'No file uploaded' as const }
+  }
+
+  if (!allowedTypes.includes(bodyValue.type)) {
+    return { error: 'Unsupported file type' as const }
+  }
+
+  const bytes = bodyValue.size ?? 0
+  if (bytes <= 0 || bytes > maxBytes) {
+    return { error: `File must be between 1 byte and ${Math.floor(maxBytes / 1024 / 1024)}MB` as const }
+  }
+
+  const buffer = Buffer.from(await bodyValue.arrayBuffer())
+  return {
+    dataUrl: `data:${bodyValue.type};base64,${buffer.toString('base64')}`,
+  }
+}
+
 function nowUtc(): string {
   return new Date().toISOString()
 }
@@ -750,7 +785,7 @@ learner.get('/chapters.php', async (c) => {
 
 learner.get('/get_chapter_progress.php', async (c) => {
   const requestedUserId = Number(c.req.query('user_id') ?? 0)
-  const uid = requestedUserId || userId(c)
+  const uid = resolveRequestedUserId(c, requestedUserId)
 
   const [chapters, lessonCounts, completedCounts] = await Promise.all([
     query<{ id: number; title: string; emoji: string; order_index: number }>(
@@ -799,7 +834,7 @@ learner.get('/get_chapter_progress.php', async (c) => {
 learner.get('/fetch_level_content.php', async (c) => {
   const levelId = Number(c.req.query('level_id'))
   const requestedUserId = Number(c.req.query('user_id') ?? 0)
-  const uid = requestedUserId || userId(c)
+  const uid = resolveRequestedUserId(c, requestedUserId)
   if (!levelId) {
     return c.json({ error: 'level_id required' }, 400)
   }
@@ -838,7 +873,7 @@ learner.get('/fetch_level_content.php', async (c) => {
     level,
     lessons: lessons.map((lesson: Record<string, unknown>) => ({
       ...lesson,
-      structured_content: lesson.structured_content ?? null,
+      structured_content: lesson.structured_content ?? lesson.content ?? null,
       quizzes: Array.isArray(lesson.quizzes) ? lesson.quizzes : [],
     })),
     completed_lessons: completedLessons.map((row) => row.lesson_id),
@@ -917,7 +952,7 @@ learner.post('/update_user_progress.php', async (c) => {
 
 learner.get('/fetch_user_profile.php', async (c) => {
   const requestedUserId = Number(c.req.query('user_id') ?? 0)
-  const uid = requestedUserId || userId(c)
+  const uid = resolveRequestedUserId(c, requestedUserId)
   const user = await queryOne(
     'SELECT id, name, email, ndis_number, role, status, points, profile_image_url, about_me FROM users WHERE id = $1',
     [uid]
@@ -927,7 +962,7 @@ learner.get('/fetch_user_profile.php', async (c) => {
 
 learner.get('/fetch_my_agreement.php', async (c) => {
   const requestedUserId = Number(c.req.query('user_id') ?? 0)
-  const uid = requestedUserId || userId(c)
+  const uid = resolveRequestedUserId(c, requestedUserId)
   const agreement = await queryOne<Record<string, unknown>>(
     'SELECT * FROM service_agreements WHERE user_id = $1 ORDER BY signed_at DESC LIMIT 1',
     [uid]
@@ -1016,6 +1051,17 @@ learner.get('/download_invoice.php', async (c) => {
 
 learner.post('/upload_profile_image.php', async (c) => {
   const uid = userId(c)
+  const body = await c.req.parseBody().catch(() => null)
+  const upload = await readUploadAsDataUrl(
+    body?.profile_image instanceof File ? body.profile_image : null,
+    ['image/png', 'image/jpeg', 'image/webp'],
+    2 * 1024 * 1024
+  )
+  if ('error' in upload) {
+    return c.json({ error: upload.error }, 400)
+  }
+
+  await query('UPDATE users SET profile_image_url = $1 WHERE id = $2', [upload.dataUrl, uid])
   const user = await queryOne(
     'SELECT id, name, email, ndis_number, role, status, points, profile_image_url, about_me FROM users WHERE id = $1',
     [uid]
@@ -1052,7 +1098,7 @@ learner.post('/update_points.php', async (c) => {
 
 learner.get('/get_time_summary.php', async (c) => {
   const requestedUserId = Number(c.req.query('user_id') ?? 0)
-  const uid = requestedUserId || userId(c)
+  const uid = resolveRequestedUserId(c, requestedUserId)
   const start = c.req.query('start') ?? new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10)
   const end = c.req.query('end') ?? todayIso()
   return c.json(await buildLegacyTimeSummary(uid, start, end))

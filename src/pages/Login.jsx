@@ -106,9 +106,9 @@ const Login = () => {
                 </form>
 
                 <div className="mt-8 text-center space-y-4">
-                    <Link to="/forgot-password" title="Forgot Password" className="block text-primary-dark font-semibold hover:underline decoration-2 h-auto w-auto">
-                        I forgot my password
-                    </Link>
+                    <p className="block text-primary-dark/70 font-semibold">
+                        Password resets are handled by an administrator.
+                    </p>
                     <div className="h-px bg-gray-100 w-full"></div>
                     <p className="text-gray-600">
                         New here? {' '}

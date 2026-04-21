@@ -119,4 +119,8 @@ auth.get('/me', async (c) => {
   }
 })
 
+auth.post('/logout', async (c) => {
+  return c.json({ success: true })
+})
+
 export default auth
