@@ -31,6 +31,26 @@ const AdminPanel = () => {
 
     const navigate = useNavigate();
 
+    const normalizeQuizOptions = (options) => {
+        if (Array.isArray(options)) {
+            return options.map((opt) => String(opt ?? ''));
+        }
+        if (typeof options === 'string') {
+            const trimmed = options.trim();
+            if (!trimmed) return ['', '', ''];
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (Array.isArray(parsed)) {
+                    return parsed.map((opt) => String(opt ?? ''));
+                }
+            } catch (_) {
+                return trimmed.split(',').map((opt) => opt.trim()).filter(Boolean);
+            }
+            return [trimmed];
+        }
+        return ['', '', ''];
+    };
+
     const handleViewAgreement = async (userId) => {
         setViewingAgreement('loading');
         try {
@@ -83,7 +103,10 @@ const AdminPanel = () => {
 
     const handleSaveContent = async (type, item) => {
         try {
-            await axios.post('/api/admin/save_content', { ...item, type });
+            const payload = type === 'quiz'
+                ? { ...item, options: normalizeQuizOptions(item.options) }
+                : item;
+            await axios.post('/api/admin/save_content', { ...payload, type });
             setEditingItem(null);
             fetchData(); // Refresh tree
         } catch (err) {
@@ -554,7 +577,7 @@ const AdminPanel = () => {
                                                     <div>
                                                         <h3 className="font-bold text-gray-800 mb-2">Q{idx + 1}: {quiz.question}</h3>
                                                         <div className="flex flex-wrap gap-2 text-sm">
-                                                            {JSON.parse(quiz.options).map((opt, i) => (
+                                                            {normalizeQuizOptions(quiz.options).map((opt, i) => (
                                                                 <span key={i} className={`px-2 py-1 rounded-md border ${i === quiz.correct_answer ? 'bg-green-100 border-green-200 text-green-700' : 'bg-gray-50 border-gray-100 text-gray-500'}`}>
                                                                     {opt}
                                                                 </span>
@@ -613,7 +636,7 @@ const AdminPanel = () => {
                                 {editingItem.type === 'quiz' && (
                                     <>
                                         <input type="text" placeholder="Question" className="w-full px-4 py-3 bg-gray-50 rounded-xl" value={editingItem.data.question} onChange={(e) => setEditingItem({ ...editingItem, data: { ...editingItem.data, question: e.target.value } })} />
-                                        {(Array.isArray(editingItem.data.options) ? editingItem.data.options : JSON.parse(editingItem.data.options || '["","",""]')).map((opt, i) => (
+                                        {normalizeQuizOptions(editingItem.data.options).map((opt, i) => (
                                             <div key={i} className="flex gap-2 items-center">
                                                 <input
                                                     type="radio"
@@ -627,7 +650,7 @@ const AdminPanel = () => {
                                                     className="w-full px-4 py-2 bg-gray-50 rounded-xl"
                                                     value={opt}
                                                     onChange={(e) => {
-                                                        const newOpts = [...(Array.isArray(editingItem.data.options) ? editingItem.data.options : JSON.parse(editingItem.data.options))];
+                                                        const newOpts = [...normalizeQuizOptions(editingItem.data.options)];
                                                         newOpts[i] = e.target.value;
                                                         setEditingItem({ ...editingItem, data: { ...editingItem.data, options: newOpts } });
                                                     }}
