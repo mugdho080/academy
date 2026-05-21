@@ -1,0 +1,26 @@
+{
+  "side": "workspace",
+  "semantic_id": "ndis-lms",
+  "source_path": "/Users/moofasa/academy",
+  "source_artifact": null,
+  "first_commit_sha": "f62589ee43a9b65c1a697b9f8f6cc8f037fb8ec7",
+  "head_sha": "f2d07e1591bebb1586f2044fb7d3a52892599299",
+  "head_tree_sha": "95614c7536c07677b1aefbc33d417e0c9ac26e1f",
+  "head_commit_date": "2026-04-13T00:35:21+10:00",
+  "branches": [
+    "main"
+  ],
+  "tags": [],
+  "remote_urls": [
+    "https://github.com/mugdho080/academy.git"
+  ],
+  "package_names": {
+    "package.json": "ndis-lms"
+  },
+  "content_hash": "sha256:93169c7effb516b2ede806673500a9945ee5e56aee69b31e24ec494b923e1080",
+  "structural_hash": "sha256:398713712744161a0fba056568096e55b4dc5efac13af64c15f4b310b9e8088d",
+  "is_empty": false,
+  "has_uncommitted": true,
+  "size_bytes": 34516992,
+  "fingerprinted_at": "2026-05-15T17:49:50Z"
+}
