@@ -482,21 +482,37 @@ function loadSeedContent() {
   return parseJsonSafe<Record<string, unknown>>(readFileSync(contentSeedPath, 'utf8'), {})
 }
 
-async function importCurriculumDocument(document: Record<string, unknown>) {
+interface ImportCurriculumOptions {
+  /**
+   * When `true`, every learner progress / completion / quiz-attempt row and
+   * the entire chapter / level / lesson / quiz tree is deleted before the
+   * import runs. This wipes learner history and is destructive. Default is
+   * `false` (additive import — see below).
+   */
+  reset?: boolean
+}
+
+async function importCurriculumDocument(
+  document: Record<string, unknown>,
+  options: ImportCurriculumOptions = {}
+) {
   const chapters = Array.isArray(document.chapters) ? document.chapters : []
+  const reset = Boolean(options.reset)
 
   return withTransaction(async (client) => {
-    await client.query('DELETE FROM progress')
-    await client.query('DELETE FROM completed_quizzes')
-    await client.query('DELETE FROM completed_lessons')
-    await client.query('DELETE FROM completed_levels')
-    await client.query('DELETE FROM completed_chapters')
-    await client.query('DELETE FROM chapter_mastery')
-    await client.query('DELETE FROM quiz_attempts')
-    await client.query('DELETE FROM quizzes')
-    await client.query('DELETE FROM lessons')
-    await client.query('DELETE FROM levels')
-    await client.query('DELETE FROM chapters')
+    if (reset) {
+      await client.query('DELETE FROM progress')
+      await client.query('DELETE FROM completed_quizzes')
+      await client.query('DELETE FROM completed_lessons')
+      await client.query('DELETE FROM completed_levels')
+      await client.query('DELETE FROM completed_chapters')
+      await client.query('DELETE FROM chapter_mastery')
+      await client.query('DELETE FROM quiz_attempts')
+      await client.query('DELETE FROM quizzes')
+      await client.query('DELETE FROM lessons')
+      await client.query('DELETE FROM levels')
+      await client.query('DELETE FROM chapters')
+    }
 
     let importedChapters = 0
     let importedLevels = 0
@@ -699,14 +715,47 @@ admin.post('/save_content', async (c) => {
   return c.json({ success: true, item: rows[0] ?? null })
 })
 
+/**
+ * POST /api/admin/import_content
+ *
+ * Default behaviour is now an **additive** upsert: chapters / levels /
+ * lessons / quizzes are appended; learner progress, completions, and quiz
+ * attempts are preserved.
+ *
+ * Destructive reset is opt-in. To wipe and re-seed the entire curriculum
+ * the body must include BOTH:
+ *
+ *     { "mode": "reset", "confirm": "RESET_CURRICULUM" }
+ *
+ * Missing or mistyped `confirm` is rejected with HTTP 400 so an admin
+ * cannot accidentally wipe learner history via a stale client.
+ */
 admin.post('/import_content', async (c) => {
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
   const document = body.document && typeof body.document === 'object'
     ? body.document as Record<string, unknown>
     : loadSeedContent()
 
-  const imported = await importCurriculumDocument(document)
-  return c.json({ success: true, imported })
+  const mode = typeof body.mode === 'string' ? body.mode : 'append'
+  const confirm = typeof body.confirm === 'string' ? body.confirm : ''
+
+  let reset = false
+  if (mode === 'reset') {
+    if (confirm !== 'RESET_CURRICULUM') {
+      return c.json({
+        error: 'Destructive curriculum reset requires confirm = "RESET_CURRICULUM".',
+        hint: 'Send { mode: "reset", confirm: "RESET_CURRICULUM" } or omit mode for additive import.',
+      }, 400)
+    }
+    reset = true
+  } else if (mode !== 'append') {
+    return c.json({
+      error: `Unknown mode "${mode}". Use "append" (default) or "reset".`,
+    }, 400)
+  }
+
+  const imported = await importCurriculumDocument(document, { reset })
+  return c.json({ success: true, mode: reset ? 'reset' : 'append', imported })
 })
 
 admin.post('/add_level_json', async (c) => {

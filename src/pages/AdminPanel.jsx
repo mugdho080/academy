@@ -114,22 +114,42 @@ const AdminPanel = () => {
     };
 
     const handleImportContent = async () => {
-        if (!window.confirm("⚠️ WARNING: This will DELETE all existing content and import the new JSON data. Are you sure?")) return;
+        // Default = additive. The admin must explicitly opt into the
+        // destructive reset path, which wipes learner progress and quiz
+        // history. The server enforces the same contract.
+        const wantReset = window.confirm(
+            "Curriculum import\n\n" +
+            "OK = RESET (wipe ALL existing curriculum and ALL learner progress, then re-seed)\n" +
+            "Cancel = Append (default - add chapters/levels/lessons/quizzes from JSON, keep progress)"
+        );
+
+        let body = { mode: 'append' };
+        if (wantReset) {
+            const typed = window.prompt(
+                "Type RESET_CURRICULUM (all caps) to confirm wiping the curriculum AND learner progress. Leave blank to abort."
+            );
+            if (typed !== 'RESET_CURRICULUM') {
+                alert("Reset aborted - confirmation phrase did not match.");
+                return;
+            }
+            body = { mode: 'reset', confirm: 'RESET_CURRICULUM' };
+        }
+
         setLoading(true);
         try {
-            const res = await axios.post('/api/admin/import_content');
+            const res = await axios.post('/api/admin/import_content', body);
             if (res.data.success) {
-                alert("✅ Content Imported Successfully!");
+                alert(`Content imported successfully (mode: ${res.data.mode || body.mode}).`);
                 fetchData();
                 setSelectedChapter(null);
                 setSelectedLevel(null);
                 setSelectedLesson(null);
             } else {
-                alert("❌ Import Failed: " + (res.data.error || "Unknown Error"));
+                alert("Import failed: " + (res.data.error || "Unknown error"));
             }
         } catch (err) {
             console.error("Import Error:", err);
-            alert("❌ Import Error: " + (err.response?.data?.error || err.message));
+            alert("Import error: " + (err.response?.data?.error || err.message));
         } finally {
             setLoading(false);
         }
