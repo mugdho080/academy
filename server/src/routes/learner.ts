@@ -1122,17 +1122,46 @@ learner.post('/update_profile_text.php', async (c) => {
   return c.json({ success: true, user })
 })
 
+/**
+ * Maximum points a learner can be awarded from a single client request.
+ *
+ * The only legitimate caller is the in-app claw game (see
+ * src/pages/ClawGamePage.jsx). Scores there are small single-digit values
+ * per pull, so this cap is conservative without breaking the existing UX.
+ * Anything beyond it is treated as an abuse attempt and rejected with a
+ * warning log.
+ *
+ * A per-day-per-user cap is intentionally deferred — it requires a
+ * `point_awards` audit table that does not yet exist. Tracked in
+ * docs/AUDIT_REMEDIATION_PLAN.md sprint 2.
+ */
+const MAX_POINTS_PER_AWARD = 50
+
 learner.post('/update_points.php', async (c) => {
   const uid = userId(c)
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
-  const awarded = Number(body.points ?? 0)
+  const requested = Number(body.points ?? 0)
 
-  await query('UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2', [awarded, uid])
+  if (!Number.isFinite(requested) || !Number.isInteger(requested) || requested <= 0) {
+    return c.json({ error: 'points must be a positive integer' }, 400)
+  }
+
+  if (requested > MAX_POINTS_PER_AWARD) {
+    console.warn('update_points rejected: per-request cap exceeded', {
+      user_id: uid,
+      requested,
+      cap: MAX_POINTS_PER_AWARD,
+      source_type: typeof body.source_type === 'string' ? body.source_type : null,
+    })
+    return c.json({ error: `points exceeds per-request cap of ${MAX_POINTS_PER_AWARD}` }, 400)
+  }
+
+  await query('UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2', [requested, uid])
   await query(
     `INSERT INTO user_points (user_id, total_points)
      VALUES ($1, $2)
      ON CONFLICT (user_id) DO UPDATE SET total_points = user_points.total_points + $2`,
-    [uid, awarded]
+    [uid, requested]
   )
 
   return c.json({ success: true, total_points: await getCurrentPointTotal(uid) })
