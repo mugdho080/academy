@@ -10,6 +10,8 @@
     "build": "npm run build:frontend && npm run build:server",
     "build:frontend": "node node_modules/vite/bin/vite.js build",
     "build:server": "npm --prefix server run build",
+    "typecheck": "npm --prefix server run typecheck",
+    "ci": "npm run typecheck && npm run build",
     "start": "npm --prefix server run start"
   },
   "dependencies": {

@@ -8,7 +8,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getDatabaseStatus, initializeDatabase, isDatabaseConfigError } from './db.js'
-import { getStartupDiagnostics, MissingEnvError } from './env.js'
+import { assertProductionEnv, getStartupDiagnostics, isProduction, MissingEnvError } from './env.js'
 import auth from './routes/auth.js'
 import learner from './routes/learner.js'
 import admin from './routes/admin.js'
@@ -17,6 +17,37 @@ import ai from './routes/ai.js'
 const app = new Hono()
 const frontendOrigin = process.env.FRONTEND_URL
 const startupDiagnostics = getStartupDiagnostics()
+
+if (isProduction() && (!frontendOrigin || frontendOrigin === '*')) {
+  console.error('Refusing to start: FRONTEND_URL must be an explicit origin in production', {
+    frontendUrlConfigured: Boolean(frontendOrigin),
+    runningInRailway: startupDiagnostics.runningInRailway,
+  })
+  throw new Error('FRONTEND_URL must be an explicit origin in production (wildcard "*" is rejected).')
+}
+
+/**
+ * Parse the comma-separated FRONTEND_URL list once at startup.
+ *
+ * - Empty / unset in development → allow any origin (`*`) without credentials.
+ * - Single value in production → use that origin and enable credentials.
+ * - Comma-separated values → reflect the request origin if it is in the
+ *   allowlist; otherwise refuse.
+ */
+const allowedOrigins: ReadonlyArray<string> = frontendOrigin
+  ? frontendOrigin.split(',').map((value) => value.trim()).filter(Boolean)
+  : []
+
+function resolveCorsOrigin(requestOrigin: string): string | null {
+  if (allowedOrigins.length === 0) {
+    return isProduction() ? null : '*'
+  }
+  if (allowedOrigins.length === 1) {
+    return allowedOrigins[0]
+  }
+  return allowedOrigins.includes(requestOrigin) ? requestOrigin : null
+}
+
 const serverDistDir = dirname(fileURLToPath(import.meta.url))
 const frontendDistDir = resolve(serverDistDir, '../../dist')
 const frontendIndexPath = resolve(frontendDistDir, 'index.html')
@@ -118,10 +149,10 @@ console.log('Static asset diagnostics:', {
 })
 
 app.use('*', cors({
-  origin: frontendOrigin ?? '*',
+  origin: (requestOrigin) => resolveCorsOrigin(requestOrigin ?? ''),
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: Boolean(frontendOrigin),
+  credentials: allowedOrigins.length > 0,
 }))
 
 app.use('*', logger())
@@ -133,6 +164,21 @@ app.route('/api/ai', ai)
 app.route('/api/index.php/learner', learner)
 app.route('/api/index.php/admin', admin)
 app.route('/api/index.php/ai', ai)
+
+app.get('/api/live', (c) => c.json({
+  status: 'ok',
+  timestamp: new Date().toISOString(),
+}))
+
+app.get('/api/ready', (c) => {
+  const ready = getDatabaseStatus() === 'ready'
+  return c.json({
+    status: ready ? 'ok' : 'degraded',
+    timestamp: new Date().toISOString(),
+    diagnostics: startupDiagnostics,
+    database: getDatabaseStatus(),
+  }, ready ? 200 : 503)
+})
 
 app.get('/api/health', (c) => c.json({
   status: getDatabaseStatus() === 'ready' ? 'ok' : 'degraded',
@@ -211,6 +257,19 @@ const port = Number(process.env.PORT ?? 3001)
 
 async function startServer() {
   try {
+    assertProductionEnv()
+  } catch (err) {
+    if (err instanceof MissingEnvError) {
+      console.error('Refusing to start: missing required production env', {
+        missing: err.variable,
+        nodeEnv: startupDiagnostics.nodeEnv,
+        runningInRailway: startupDiagnostics.runningInRailway,
+      })
+    }
+    throw err
+  }
+
+  try {
     await initializeDatabase()
     console.log('Database connection established')
   } catch (err) {
@@ -220,8 +279,14 @@ async function startServer() {
         nodeEnv: startupDiagnostics.nodeEnv,
         runningInRailway: startupDiagnostics.runningInRailway,
       })
+      if (isProduction()) {
+        throw err
+      }
     } else {
       console.error('Database initialization failed; starting in degraded mode', err)
+      if (isProduction()) {
+        throw err
+      }
     }
   }
 
