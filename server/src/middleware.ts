@@ -26,13 +26,50 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
   return payload as unknown as JwtPayload
 }
 
+/**
+ * Endpoints where the access token may be supplied as a `?token=` query param.
+ *
+ * This fallback exists only because two browser APIs cannot send custom
+ * headers: `navigator.sendBeacon` (for fire-and-forget telemetry on
+ * page-hide) and `window.open` (for file downloads that need to render in
+ * a new browser tab).
+ *
+ * Restricting the allowlist keeps the access token out of access logs,
+ * browser history, and `Referer` headers for every other endpoint. This is
+ * a transitional control — Sprint 2 will replace the query-token fallback
+ * with short-lived one-time nonces.
+ *
+ * `startsWith` matches are used for download endpoints that take a
+ * resource id in the path/query.
+ */
+const QUERY_TOKEN_EXACT_PATHS = new Set<string>([
+  '/api/learner/log-delta',
+  '/api/index.php/learner/log-delta',
+])
+
+const QUERY_TOKEN_PREFIX_PATHS: ReadonlyArray<string> = [
+  '/api/ai/log_coach_event.php',
+  '/api/index.php/learner/ping_session',
+  '/api/learner/ping_session',
+  '/api/learner/download_invoice.php',
+  '/api/index.php/learner/download_invoice.php',
+  '/api/admin/download_invoice.php',
+  '/api/index.php/admin/download_invoice.php',
+]
+
+function isQueryTokenAllowed(path: string): boolean {
+  if (QUERY_TOKEN_EXACT_PATHS.has(path)) {
+    return true
+  }
+  return QUERY_TOKEN_PREFIX_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}?`) || path.startsWith(`${prefix}/`))
+}
+
 /** Middleware: require valid JWT. Attaches user to c.var.user */
 export const requireAuth = createMiddleware(async (c, next) => {
   const auth = c.req.header('Authorization')
-  // Also support ?token= query param for sendBeacon compatibility
-  const token = auth?.startsWith('Bearer ')
-    ? auth.slice(7)
-    : (c.req.query('token') ?? null)
+  const headerToken = auth?.startsWith('Bearer ') ? auth.slice(7) : null
+  const queryToken = isQueryTokenAllowed(c.req.path) ? c.req.query('token') ?? null : null
+  const token = headerToken ?? queryToken
 
   if (!token) {
     return c.json({ error: 'Unauthorized' }, 401)
