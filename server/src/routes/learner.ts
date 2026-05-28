@@ -607,14 +607,26 @@ learner.post('/submit-quiz', async (c) => {
   const uid = userId(c)
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
   const quizId = Number(body.quiz_id)
-  const answer = Number(body.answer)
-  if (!quizId) return c.json({ error: 'quiz_id required' }, 400)
+  const rawAnswer = body.answer
+  if (!quizId || !Number.isFinite(quizId) || quizId <= 0) {
+    return c.json({ error: 'quiz_id required' }, 400)
+  }
 
-  const quiz = await queryOne<{ correct_answer: number; lesson_id: number }>(
-    'SELECT correct_answer, lesson_id FROM quizzes WHERE id = $1',
+  const answer = Number(rawAnswer)
+  if (!Number.isFinite(answer) || !Number.isInteger(answer) || answer < 0) {
+    return c.json({ error: 'answer must be a non-negative integer index' }, 400)
+  }
+
+  const quiz = await queryOne<{ correct_answer: number; lesson_id: number; options: unknown }>(
+    'SELECT correct_answer, lesson_id, options FROM quizzes WHERE id = $1',
     [quizId]
   )
   if (!quiz) return c.json({ error: 'Quiz not found' }, 404)
+
+  const options = Array.isArray(quiz.options) ? quiz.options : []
+  if (options.length > 0 && answer >= options.length) {
+    return c.json({ error: 'answer is out of range for this quiz' }, 400)
+  }
 
   const isCorrect = answer === quiz.correct_answer
 
