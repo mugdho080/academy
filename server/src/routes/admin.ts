@@ -769,6 +769,37 @@ admin.post('/add_level_json', async (c) => {
   return c.json({ success: true, imported: result })
 })
 
+admin.post('/delete_level', async (c) => {
+  const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
+  const levelId = Number(body.level_id ?? 0)
+  if (!levelId) {
+    return c.json({ error: 'level_id required' }, 400)
+  }
+
+  try {
+    const result = await withTransaction(async (client) => {
+      const levelRows = await client.query<{ id: number }>(
+        `SELECT id FROM levels WHERE id = $1`,
+        [levelId]
+      )
+      if (levelRows.rows.length === 0) {
+        return { error: 'Level not found', statusCode: 404 }
+      }
+
+      await client.query(`DELETE FROM levels WHERE id = $1`, [levelId])
+      return { success: true }
+    })
+
+    if (result.statusCode === 404) {
+      return c.json({ error: result.error }, 404)
+    }
+    return c.json(result)
+  } catch (err) {
+    console.error('Delete level error:', err)
+    return c.json({ error: 'Failed to delete level' }, 500)
+  }
+})
+
 admin.post('/update_status', async (c) => {
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
   const id = Number(body.user_id)

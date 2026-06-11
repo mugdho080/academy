@@ -174,6 +174,32 @@ const AdminPanel = () => {
         }
     };
 
+    const handleDeleteLevel = async (level) => {
+        if (!window.confirm(`⚠️ WARNING: Deleting "${level.title}" will permanently remove this level and ALL lessons and quizzes under it. This cannot be undone. Are you sure?`)) {
+            return;
+        }
+
+        try {
+            const res = await axios.post('/api/admin/delete_level', {
+                level_id: level.id
+            });
+
+            if (res.data.success) {
+                alert("✅ Level deleted successfully!");
+                if (selectedLevel?.id === level.id) {
+                    setSelectedLevel(null);
+                }
+                fetchData();
+            } else {
+                alert("❌ Error: " + (res.data.error || "Unknown Error"));
+            }
+        } catch (err) {
+            console.error("Delete Error:", err);
+            const msg = err.response?.data?.error || err.message || "Unknown error";
+            alert("❌ Failed to delete level: " + msg);
+        }
+    };
+
 
     const formatTime = (totalSeconds) => {
         if (!totalSeconds) return "0m";
@@ -512,12 +538,24 @@ const AdminPanel = () => {
                                                     <p className="text-gray-500 text-sm mt-1">{level.lessons?.length || 0} Lessons</p>
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); setEditingItem({ type: 'level', data: level }); }}
-                                                className="p-3 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100"
-                                            >
-                                                <Edit2 size={18} />
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDeleteLevel(level); }}
+                                                    className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
+                                                    title="Delete level"
+                                                    aria-label={`Delete level ${level.title}`}
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setEditingItem({ type: 'level', data: level }); }}
+                                                    className="p-3 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100"
+                                                    title="Edit level"
+                                                    aria-label={`Edit level ${level.title}`}
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
+                                            </div>
                                         </motion.div>
                                     ))}
 
