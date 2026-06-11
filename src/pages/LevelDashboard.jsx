@@ -83,23 +83,6 @@ const LevelDashboard = () => {
             </div>
 
             <PageContainer className="relative z-10 pb-24 lg:pb-10">
-                {level.video_url && (
-                    <div className={`rounded-[2rem] sm:rounded-[3rem] p-4 sm:p-8 lg:p-10 mb-6 relative overflow-hidden ${isClay ? 'ui-clay-surface' : 'bg-white shadow-2xl border-4 border-[#00695C]/10'}`}>
-                        <h3 className={`text-lg sm:text-xl font-black mb-4 italic ${isClay ? 'text-[#21A7F1]' : 'text-[#00897B]'}`}>📺 Level Overview</h3>
-                        <div className="relative w-full bg-black rounded-xl overflow-hidden" style={{ paddingBottom: '56.25%' }}>
-                            <iframe
-                                className="absolute inset-0 w-full h-full"
-                                src={level.video_url.includes('youtube.com') || level.video_url.includes('youtu.be')
-                                    ? level.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')
-                                    : level.video_url}
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                title="Level Overview Video"
-                            ></iframe>
-                        </div>
-                    </div>
-                )}
                 <div className={`rounded-[2rem] sm:rounded-[3rem] p-4 sm:p-8 lg:p-10 min-h-[60vh] relative overflow-hidden ${isClay ? 'ui-clay-surface' : 'bg-white shadow-2xl border-4 border-[#00695C]/10'}`}>
                     <div className={`absolute inset-0 opacity-5 [background-size:24px_24px] ${isClay ? 'bg-[radial-gradient(circle_at_center,#21A7F1_2px,transparent_2px)]' : 'bg-[radial-gradient(circle_at_center,#00695C_2px,transparent_2px)]'}`}></div>
 

@@ -360,7 +360,11 @@ const LessonView = () => {
                         <div className={`w-full max-w-4xl mx-auto aspect-video rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden relative bg-black ${isClay ? 'ui-clay-surface' : 'shadow-2xl border-4 sm:border-[6px] border-white'}`}>
                             <iframe
                                 className="w-full h-full"
-                                src={levelData.level.video_url}
+                                src={
+                                    levelData.level.video_url.includes('youtube.com') || levelData.level.video_url.includes('youtu.be')
+                                        ? levelData.level.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')
+                                        : levelData.level.video_url
+                                }
                                 title="Lesson Video"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
