@@ -769,6 +769,37 @@ admin.post('/add_level_json', async (c) => {
   return c.json({ success: true, imported: result })
 })
 
+admin.post('/delete_chapter', async (c) => {
+  const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
+  const chapterId = Number(body.chapter_id ?? 0)
+  if (!chapterId) {
+    return c.json({ error: 'chapter_id required' }, 400)
+  }
+
+  try {
+    const result = await withTransaction(async (client) => {
+      const chapterRows = await client.query<{ id: number }>(
+        `SELECT id FROM chapters WHERE id = $1`,
+        [chapterId]
+      )
+      if (chapterRows.rows.length === 0) {
+        return { error: 'Chapter not found', statusCode: 404 }
+      }
+
+      await client.query(`DELETE FROM chapters WHERE id = $1`, [chapterId])
+      return { success: true }
+    })
+
+    if (result.statusCode === 404) {
+      return c.json({ error: result.error }, 404)
+    }
+    return c.json(result)
+  } catch (err) {
+    console.error('Delete chapter error:', err)
+    return c.json({ error: 'Failed to delete chapter' }, 500)
+  }
+})
+
 admin.post('/delete_level', async (c) => {
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
   const levelId = Number(body.level_id ?? 0)

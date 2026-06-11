@@ -174,6 +174,34 @@ const AdminPanel = () => {
         }
     };
 
+    const handleDeleteChapter = async (chapter) => {
+        if (!window.confirm(`⚠️ WARNING: Deleting "${chapter.title}" will permanently remove this chapter and ALL its levels, lessons, and quizzes. This cannot be undone. Are you sure?`)) {
+            return;
+        }
+
+        try {
+            const res = await axios.post('/api/admin/delete_chapter', {
+                chapter_id: chapter.id
+            });
+
+            if (res.data.success) {
+                alert("✅ Chapter deleted successfully!");
+                if (selectedChapter?.id === chapter.id) {
+                    setSelectedChapter(null);
+                    setSelectedLevel(null);
+                    setSelectedLesson(null);
+                }
+                fetchData();
+            } else {
+                alert("❌ Error: " + (res.data.error || "Unknown Error"));
+            }
+        } catch (err) {
+            console.error("Delete Error:", err);
+            const msg = err.response?.data?.error || err.message || "Unknown error";
+            alert("❌ Failed to delete chapter: " + msg);
+        }
+    };
+
     const handleDeleteLevel = async (level) => {
         if (!window.confirm(`⚠️ WARNING: Deleting "${level.title}" will permanently remove this level and ALL lessons and quizzes under it. This cannot be undone. Are you sure?`)) {
             return;
@@ -510,12 +538,24 @@ const AdminPanel = () => {
                                                         <p className="text-gray-500">{chapter.levels?.length || 0} Levels</p>
                                                     </div>
                                                 </div>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); setEditingItem({ type: 'chapter', data: chapter }); }}
-                                                    className="p-3 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 z-10"
-                                                >
-                                                    <Edit2 size={18} />
-                                                </button>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleDeleteChapter(chapter); }}
+                                                        className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors z-10"
+                                                        title="Delete chapter"
+                                                        aria-label={`Delete chapter ${chapter.title}`}
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setEditingItem({ type: 'chapter', data: chapter }); }}
+                                                        className="p-3 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 z-10"
+                                                        title="Edit chapter"
+                                                        aria-label={`Edit chapter ${chapter.title}`}
+                                                    >
+                                                        <Edit2 size={18} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </motion.div>
                                     ))}
