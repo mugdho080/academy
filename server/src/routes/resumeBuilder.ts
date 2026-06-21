@@ -40,27 +40,35 @@ async function upsertSession(uid: number, session: any) {
 // 1. Start a new session (or resume existing)
 resumeBuilder.post('/start', async (c) => {
   const uid = userId(c);
-  let session = await getSession(uid);
-  if (!session) {
-    session = {
-      answers: {},
-      draft_resume: {},
-      current_step: 'welcome',
-    };
-    await upsertSession(uid, session);
+  try {
+    let session = await getSession(uid);
+    if (!session) {
+      session = {
+        answers: {},
+        draft_resume: {},
+        current_step: 'welcome',
+      };
+      await upsertSession(uid, session);
+    }
+
+    return c.json({
+      success: true,
+      session,
+      reply: "Hi! I'm Panda. I can help you build your resume.",
+      next_question: "Would you like to start?",
+      quickReplies: ["Yes, start", "What is a resume?"],
+      next_step: session.current_step,
+      draft: typeof session.draft_resume === 'string' ? JSON.parse(session.draft_resume) : session.draft_resume,
+      is_ready_to_preview: false
+    });
+  } catch (err) {
+    console.error('[resume-builder /start]', err);
+    return c.json({
+      success: false,
+      error: 'RESUME_BUILDER_UNAVAILABLE',
+      message: 'Panda Resume Builder is not ready yet. Please ask an admin to check the server setup.',
+    }, 500);
   }
-  
-  // Return the session AND an initial message if they are just starting
-  return c.json({ 
-    success: true,
-    session,
-    reply: "Hi! I'm Panda. I can help you build your resume.",
-    next_question: "Would you like to start?",
-    quickReplies: ["Yes, start", "What is a resume?"],
-    next_step: session.current_step,
-    draft: typeof session.draft_resume === 'string' ? JSON.parse(session.draft_resume) : session.draft_resume,
-    is_ready_to_preview: false
-  });
 });
 
 // 2. Send a message/answer to the current step

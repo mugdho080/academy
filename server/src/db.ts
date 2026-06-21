@@ -54,6 +54,14 @@ export async function initializeDatabase(): Promise<void> {
     databaseStatus = err instanceof MissingEnvError ? 'missing' : 'error'
     throw err
   }
+
+  // Apply any pending SQL migrations from db/migrations/
+  try {
+    const { runMigrations } = await import('./migrate.js')
+    await runMigrations()
+  } catch (err) {
+    console.error('Migration runner failed (non-fatal):', err)
+  }
 }
 
 export function getDatabaseStatus(): 'missing' | 'ready' | 'error' {
