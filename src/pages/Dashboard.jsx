@@ -31,6 +31,7 @@ const Dashboard = () => {
     const [quoteIndex, setQuoteIndex] = useState(0);
     const [chapters, setChapters] = useState([]);
     const [progressData, setProgressData] = useState({});
+    const [gamification, setGamification] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAvatarOpen, setIsAvatarOpen] = useState(false);
     const welcomedRef = useRef(false);
@@ -62,12 +63,16 @@ const Dashboard = () => {
 
     const fetchChapters = async () => {
         try {
-            const [chaptersRes, progressRes] = await Promise.all([
+            const [chaptersRes, progressRes, gamificationRes] = await Promise.all([
                 axios.get('/api/learner/chapters.php'),
-                user.id ? axios.get(`/api/learner/get_chapter_progress.php?user_id=${user.id}`) : Promise.resolve({ data: null })
+                user.id ? axios.get(`/api/learner/get_chapter_progress.php?user_id=${user.id}`) : Promise.resolve({ data: null }),
+                axios.get('/api/learner/gamification/summary').catch(() => ({ data: null }))
             ]);
             
             setChapters(chaptersRes.data);
+            if (gamificationRes.data) {
+                setGamification(gamificationRes.data);
+            }
             
             if (progressRes.data?.success) {
                 const progMap = {};
@@ -107,7 +112,7 @@ const Dashboard = () => {
                 isOpen={isAvatarOpen}
                 onClose={() => setIsAvatarOpen(false)}
                 currentAvatar={user.avatar || 'koala'}
-                userPoints={user.points || 0}
+                userPoints={gamification?.total_xp || 0}
                 onSelect={handleSelectAvatar}
             />
 
@@ -183,16 +188,21 @@ const Dashboard = () => {
                             </div>
                             <div className="min-w-0 text-left">
                                 <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isClay ? 'text-[color:var(--clay-text-soft)]' : 'text-[#00695C] opacity-60'}`}>Your Rank</p>
-                                <h3 className={`text-base sm:text-xl font-black italic tracking-tight uppercase ${isClay ? 'text-[#21A7F1]' : 'text-[#00897B]'}`}>Super Discoverer</h3>
+                                <h3 className={`text-base sm:text-xl font-black italic tracking-tight uppercase ${isClay ? 'text-[#21A7F1]' : 'text-[#00897B]'}`}>
+                                    {gamification?.rank_name || 'Seed Learner 🌱'}
+                                </h3>
                                 <div className={`w-full sm:w-56 h-3 rounded-full mt-2 overflow-hidden relative ${isClay ? 'ui-clay-progress-track border border-white/70' : 'bg-gray-200 border border-[#00695C]/10'}`}>
                                     <motion.div
                                         initial={{ width: 0 }}
-                                        animate={{ width: `${Math.min(100, ((user.points || 0) / 1000) * 100)}%` }}
+                                        animate={{ width: `${Math.min(100, ((gamification?.total_xp || 0) / (gamification?.next_rank_xp || 100)) * 100)}%` }}
                                         className={`h-full ${isClay ? 'ui-clay-progress-bar' : 'bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]'}`}
                                     />
                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                        <span className={`text-[8px] font-black uppercase tracking-widest ${isClay ? 'text-[color:var(--clay-text-soft)]' : 'text-[#00695C] opacity-50'}`}>{user.points || 0} / 1000 XP</span>
+                                        <span className={`text-[8px] font-black uppercase tracking-widest ${isClay ? 'text-[color:var(--clay-text-soft)]' : 'text-[#00695C] opacity-50'}`}>{gamification?.total_xp || 0} XP</span>
                                     </div>
+                                </div>
+                                <div className="mt-2 text-xs font-bold text-yellow-600 flex items-center gap-1">
+                                    <span>🪙</span> {gamification?.current_coins || 0} Star Coins
                                 </div>
                             </div>
                         </motion.button>

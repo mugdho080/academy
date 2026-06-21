@@ -18,6 +18,7 @@ import routineUI from './routes/routineUI.js'
 import resumeBuilder from './routes/resumeBuilder.js'
 import resumeUI from './routes/resumeUI.js'
 import resumeAdmin from './routes/resumeAdmin.js'
+import gamification from './routes/gamification.js'
 
 const app = new Hono()
 const frontendOrigin = process.env.FRONTEND_URL
@@ -139,6 +140,7 @@ app.route('/api/index.php/learner', learner)
 app.route('/api/index.php/admin', admin)
 app.route('/api/index.php/ai', ai)
 app.route('/api/learner/resume-builder', resumeBuilder)
+app.route('/api/learner/gamification', gamification)
 app.route('/api/admin/users', resumeAdmin)
 app.use('/resume', resumeUI)
 

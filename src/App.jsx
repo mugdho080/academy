@@ -12,7 +12,7 @@ const LevelDashboard = lazy(() => import('./pages/LevelDashboard'));
 const LessonView = lazy(() => import('./pages/LessonView'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const AIFriendPage = lazy(() => import('./pages/AIFriendPage'));
-const Achievements = lazy(() => import('./pages/Achievements'));
+const ProgressWorld = lazy(() => import('./pages/ProgressWorld'));
 const Profile = lazy(() => import('./pages/Profile'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const ParticipantDetail = lazy(() => import('./pages/admin/ParticipantDetail'));
@@ -39,7 +39,7 @@ function App() {
                             <Route path="/chapter/:chapterId" element={<SidebarLayout><LevelMap /></SidebarLayout>} />
                             <Route path="/level/:levelId" element={<SidebarLayout><LevelDashboard /></SidebarLayout>} />
                             <Route path="/ai-friend" element={<SidebarLayout><AIFriendPage /></SidebarLayout>} />
-                            <Route path="/achievements" element={<SidebarLayout><Achievements /></SidebarLayout>} />
+                            <Route path="/achievements" element={<SidebarLayout><ProgressWorld /></SidebarLayout>} />
                             <Route path="/profile" element={<SidebarLayout><Profile /></SidebarLayout>} />
                             <Route path="/arcade" element={<SidebarLayout><ClawGamePage /></SidebarLayout>} />
                             <Route path="/lesson/:levelId" element={<SidebarLayout><LessonView /></SidebarLayout>} />

@@ -4,6 +4,7 @@ import type { JwtPayload } from '../middleware.js'
 import { query, queryOne, withTransaction } from '../db.js'
 import { isMissingEnvError } from '../env.js'
 import type { PoolClient } from 'pg'
+import { GamificationService } from '../services/GamificationService.js'
 
 const learner = new Hono()
 learner.use('*', requireAuth)
@@ -599,7 +600,16 @@ learner.post('/mark-lesson-completed', async (c) => {
     [uid, lessonId]
   )
 
-  return c.json({ success: true })
+  const gamificationResult = await GamificationService.awardXpAndCoins(
+    uid,
+    'lesson_completed',
+    'lesson',
+    String(lessonId),
+    10, // XP
+    2   // Coins
+  )
+
+  return c.json({ success: true, gamification: gamificationResult })
 })
 
 // ─── POST /api/learner/submit-quiz ──────────────────────────────────────────
@@ -629,6 +639,17 @@ learner.post('/submit-quiz', async (c) => {
        ON CONFLICT (user_id, quiz_id) DO NOTHING`,
       [uid, quizId, quiz.lesson_id]
     )
+
+    const gamificationResult = await GamificationService.awardXpAndCoins(
+      uid,
+      'quiz_completed',
+      'quiz',
+      String(quizId),
+      15, // XP
+      3   // Coins
+    )
+
+    return c.json({ success: true, is_correct: isCorrect, correct_answer: quiz.correct_answer, gamification: gamificationResult })
   }
 
   return c.json({ success: true, is_correct: isCorrect, correct_answer: quiz.correct_answer })
