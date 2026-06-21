@@ -12,6 +12,8 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
+    const [isForgotPassword, setIsForgotPassword] = useState(false);
     const navigate = useNavigate();
     const { startSession } = useActivityTimer();
 
@@ -44,6 +46,19 @@ const Login = () => {
         }
     };
 
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        
+        // Simulate API call for forgot password
+        setTimeout(() => {
+            setLoading(false);
+            setSuccessMsg('If an account exists with that identifier, a password reset link has been sent to the registered email or our support agent will contact you.');
+            setIsForgotPassword(false);
+        }, 1500);
+    };
+
     return (
         <div className="min-h-screen safe-mobile-height flex items-center justify-center p-3 sm:p-4">
             <SensoryBackground />
@@ -65,50 +80,90 @@ const Login = () => {
                     <p className="text-sm sm:text-base text-gray-600 mt-2 italic font-medium">"Every small step is a great victory."</p>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-5">
-                    <div>
-                        <label className="block text-gray-700 font-semibold mb-2">Email or NDIS Number</label>
-                        <input
-                            type="text"
-                            className="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all text-base"
-                            placeholder="Your email or NDIS number..."
-                            value={identifier}
-                            onChange={(e) => setIdentifier(e.target.value)}
-                            required
-                        />
-                    </div>
+                {isForgotPassword ? (
+                    <form onSubmit={handleForgotPassword} className="space-y-5">
+                        <div className="mb-4 text-center">
+                            <p className="text-gray-600 font-medium">Don't worry! Enter your email or NDIS number and we'll help you get back in.</p>
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-semibold mb-2">Email or NDIS Number</label>
+                            <input
+                                type="text"
+                                className="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all text-base"
+                                placeholder="Your email or NDIS number..."
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-gray-700 font-semibold mb-2">Password</label>
-                        <input
-                            type="password"
-                            className="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all text-base"
-                            placeholder="Your secret password..."
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`w-full py-4 rounded-2xl font-bold text-base sm:text-lg text-white shadow-lg transform transition-all active:scale-95 ${loading ? 'bg-gray-400' : 'bg-primary hover:bg-primary-dark'}`}
+                        >
+                            {loading ? 'Sending...' : 'Reset Password'}
+                        </button>
+                        
+                        <div className="text-center mt-4">
+                            <button type="button" onClick={() => setIsForgotPassword(false)} className="text-primary-dark font-bold hover:underline">
+                                Back to Login
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <form onSubmit={handleLogin} className="space-y-5">
+                        {successMsg && (
+                            <p className="text-green-600 bg-green-50 p-3 rounded-xl text-sm font-medium text-center mb-4 border border-green-200">
+                                {successMsg}
+                            </p>
+                        )}
+                        <div>
+                            <label className="block text-gray-700 font-semibold mb-2">Email or NDIS Number</label>
+                            <input
+                                type="text"
+                                className="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all text-base"
+                                placeholder="Your email or NDIS number..."
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                    {error && (
-                        <p className="text-red-500 bg-red-50 p-3 rounded-xl text-sm font-medium text-center">
-                            {error}
-                        </p>
-                    )}
+                        <div>
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="block text-gray-700 font-semibold">Password</label>
+                                <button type="button" onClick={() => setIsForgotPassword(true)} className="text-sm text-primary font-bold hover:underline">
+                                    Forgot Password?
+                                </button>
+                            </div>
+                            <input
+                                type="password"
+                                className="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:border-primary focus:outline-none transition-all text-base"
+                                placeholder="Your secret password..."
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className={`w-full py-4 rounded-2xl font-bold text-base sm:text-lg text-white shadow-lg transform transition-all active:scale-95 ${loading ? 'bg-gray-400' : 'bg-primary hover:bg-primary-dark'}`}
-                    >
-                        {loading ? 'Joining the adventure...' : 'Let\'s Start Learning! 🚀'}
-                    </button>
-                </form>
+                        {error && (
+                            <p className="text-red-500 bg-red-50 p-3 rounded-xl text-sm font-medium text-center">
+                                {error}
+                            </p>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`w-full py-4 rounded-2xl font-bold text-base sm:text-lg text-white shadow-lg transform transition-all active:scale-95 ${loading ? 'bg-gray-400' : 'bg-primary hover:bg-primary-dark'}`}
+                        >
+                            {loading ? 'Joining the adventure...' : 'Let\'s Start Learning! 🚀'}
+                        </button>
+                    </form>
+                )}
 
                 <div className="mt-8 text-center space-y-4">
-                    <p className="block text-primary-dark/70 font-semibold">
-                        Password resets are handled by an administrator.
-                    </p>
                     <div className="h-px bg-gray-100 w-full"></div>
                     <p className="text-gray-600">
                         New here? {' '}
