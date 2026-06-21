@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume Preview - Panda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/resume/style.css" />
+</head>
+<body>
+  <div class="bg-gradient">
+    <div class="card glass" style="max-width: 800px;">
+      <header class="header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1>📄 Resume Preview</h1>
+          <p class="subtitle">Review your details below</p>
+        </div>
+        <div>
+          <button id="downloadPdfBtn" class="primary-btn">Download PDF</button>
+        </div>
+      </header>
+      <section id="previewContent" style="margin-top: 1.5rem; background: white; padding: 2rem; border-radius: 8px;">
+        <h2 id="resumeName" style="margin-bottom: 0.5rem;">Loading...</h2>
+        <p id="resumeContact" style="color: #666; margin-bottom: 1.5rem;"></p>
+        
+        <div id="resumeSections"></div>
+      </section>
+    </div>
+  </div>
+  <script>
+    // Logic to fetch resume by ID from URL params (e.g. ?id=1)
+    async function loadResume() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const resumeId = urlParams.get('id');
+      if (!resumeId) {
+        document.getElementById('resumeName').textContent = 'No resume ID provided.';
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/api/learner/resumes/${resumeId}`);
+        if (!res.ok) throw new Error('Failed to load resume');
+        const data = await res.json();
+        const resume = data.resume;
+        const draft = typeof resume.resume_data === 'string' ? JSON.parse(resume.resume_data) : resume.resume_data;
+        
+        document.getElementById('resumeName').textContent = draft.personal_name || 'Your Name';
+        document.getElementById('resumeContact').textContent = (draft.contact_details || '') + ' | ' + (draft.target_role || '');
+        
+        const sectionsDiv = document.getElementById('resumeSections');
+        const sections = ['skills', 'experience_details', 'education', 'certificates', 'availability', 'references'];
+        
+        sections.forEach(sec => {
+          if (draft[sec]) {
+            const div = document.createElement('div');
+            div.style.marginBottom = '1.5rem';
+            
+            const h3 = document.createElement('h3');
+            h3.textContent = sec.replace('_', ' ').toUpperCase();
+            h3.style.marginBottom = '0.5rem';
+            h3.style.fontSize = '1rem';
+            
+            const p = document.createElement('p');
+            p.textContent = draft[sec];
+            p.style.whiteSpace = 'pre-wrap';
+            p.style.lineHeight = '1.4';
+            
+            div.appendChild(h3);
+            div.appendChild(p);
+            sectionsDiv.appendChild(div);
+          }
+        });
+        
+        document.getElementById('downloadPdfBtn').onclick = () => {
+          window.location.href = `/api/learner/resume-builder/${resumeId}/pdf?template=${resume.template_key || 'simple'}`;
+        };
+        
+      } catch(e) {
+        console.error(e);
+        document.getElementById('resumeName').textContent = 'Error loading resume.';
+      }
+    }
+    
+    loadResume();
+  </script>
+</body>
+</html>

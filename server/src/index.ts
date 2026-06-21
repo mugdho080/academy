@@ -15,6 +15,9 @@ import admin from './routes/admin.js'
 import ai from './routes/ai.js'
 import routineBuilder from './routes/routineBuilder.js'
 import routineUI from './routes/routineUI.js'
+import resumeBuilder from './routes/resumeBuilder.js'
+import resumeUI from './routes/resumeUI.js'
+import resumeAdmin from './routes/resumeAdmin.js'
 
 const app = new Hono()
 const frontendOrigin = process.env.FRONTEND_URL
@@ -135,8 +138,9 @@ app.route('/api/ai', ai)
 app.route('/api/index.php/learner', learner)
 app.route('/api/index.php/admin', admin)
 app.route('/api/index.php/ai', ai)
-app.route('/api/routineBuilder', routineBuilder)
-app.use('/routine', routineUI)
+app.route('/api/learner/resume-builder', resumeBuilder)
+app.route('/api/admin/users', resumeAdmin)
+app.use('/resume', resumeUI)
 
 app.get('/api/health', (c) => c.json({
   status: getDatabaseStatus() === 'ready' ? 'ok' : 'degraded',
