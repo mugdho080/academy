@@ -1,5 +1,4 @@
-import { Router } from 'express';
-import { generateResumeDraft } from '../ai/resume';
+
 
 // Placeholder AI function – deterministic step machine
 export async function generateResumeDraft(currentStep: string, answer: any, state: any) {

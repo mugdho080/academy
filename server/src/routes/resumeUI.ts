@@ -5,7 +5,6 @@ import { resolve } from 'node:path';
 const router = new Hono();
 
 // Serve static assets for the Resume Builder UI under /resume/*
-const resumePublicDir = resolve(import.meta.dir, '../../../public/modules/resume');
-router.use('/*', serveStatic({ root: resumePublicDir }));
+router.use('/*', serveStatic({ root: './public/modules/resume' }));
 
 export default router;

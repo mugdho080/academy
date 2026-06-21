@@ -5,7 +5,6 @@ import { resolve } from 'node:path';
 const router = new Hono();
 
 // Serve static assets for the Panda Routine Builder UI
-const routinePublicDir = resolve(import.meta.dir, '../../../public/modules/routine');
-router.use('/*', serveStatic({ root: routinePublicDir }));
+router.use('/*', serveStatic({ root: './public/modules/routine' }));
 
 export default router;

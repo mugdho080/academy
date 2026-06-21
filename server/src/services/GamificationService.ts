@@ -1,4 +1,4 @@
-import db from '../db.js';
+import { query, withTransaction } from '../db.js';
 
 export interface GamificationEventResult {
   xpAwarded: number;
@@ -9,9 +9,6 @@ export interface GamificationEventResult {
 }
 
 export class GamificationService {
-  /**
-   * Award XP and Coins to a user if the event hasn't been processed yet.
-   */
   static async awardXpAndCoins(
     userId: number,
     eventType: string,
@@ -22,71 +19,61 @@ export class GamificationService {
     metadata: any = {}
   ): Promise<GamificationEventResult | null> {
     const idempotencyKey = `${eventType}:${userId}:${sourceType}_${sourceId}`;
-    const conn = await db.getConnection();
     
-    try {
-      await conn.beginTransaction();
-
-      // Check for idempotency
-      const [existing] = await conn.query('SELECT id FROM xp_events WHERE idempotency_key = ?', [idempotencyKey]);
-      if ((existing as any[]).length > 0) {
-        await conn.rollback();
+    return await withTransaction(async (client) => {
+      const existing = await client.query('SELECT id FROM xp_events WHERE idempotency_key = $1', [idempotencyKey]);
+      if (existing.rows.length > 0) {
         return null; // Already awarded
       }
 
-      // Record event
-      await conn.query(
-        'INSERT INTO xp_events (user_id, event_type, xp_amount, coin_amount, source_type, source_id, idempotency_key, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      await client.query(
+        'INSERT INTO xp_events (user_id, event_type, xp_amount, coin_amount, source_type, source_id, idempotency_key, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
         [userId, eventType, xpAmount, coinAmount, sourceType, sourceId, idempotencyKey, JSON.stringify(metadata)]
       );
 
-      // Ensure wallet exists
-      const [walletRows] = await conn.query('SELECT total_xp, current_coins, lifetime_coins, current_rank_key FROM user_xp_wallet WHERE user_id = ?', [userId]);
+      const walletRows = await client.query('SELECT total_xp, current_coins, lifetime_coins, current_rank_key FROM user_xp_wallet WHERE user_id = $1', [userId]);
       let currentTotalXp = 0;
       let currentRankKey = 'seed_learner';
       
-      if ((walletRows as any[]).length === 0) {
-        await conn.query('INSERT INTO user_xp_wallet (user_id, total_xp, current_coins, lifetime_coins) VALUES (?, ?, ?, ?)', [userId, xpAmount, coinAmount, coinAmount]);
+      if (walletRows.rows.length === 0) {
+        await client.query('INSERT INTO user_xp_wallet (user_id, total_xp, current_coins, lifetime_coins) VALUES ($1, $2, $3, $4)', [userId, xpAmount, coinAmount, coinAmount]);
         currentTotalXp = xpAmount;
       } else {
-        const wallet = (walletRows as any)[0];
+        const wallet = walletRows.rows[0];
         currentTotalXp = wallet.total_xp + xpAmount;
         currentRankKey = wallet.current_rank_key;
         
-        await conn.query(
-          'UPDATE user_xp_wallet SET total_xp = ?, current_coins = current_coins + ?, lifetime_coins = lifetime_coins + ? WHERE user_id = ?',
+        await client.query(
+          'UPDATE user_xp_wallet SET total_xp = $1, current_coins = current_coins + $2, lifetime_coins = lifetime_coins + $3 WHERE user_id = $4',
           [currentTotalXp, coinAmount, coinAmount, userId]
         );
       }
 
-      // Check Rank
-      const [ranks] = await conn.query('SELECT rank_key FROM rank_definitions WHERE min_xp <= ? ORDER BY min_xp DESC LIMIT 1', [currentTotalXp]);
+      const ranks = await client.query('SELECT rank_key FROM rank_definitions WHERE min_xp <= $1 ORDER BY min_xp DESC LIMIT 1', [currentTotalXp]);
       let newRank: string | undefined = undefined;
-      if ((ranks as any[]).length > 0) {
-        const matchingRank = (ranks as any)[0].rank_key;
+      if (ranks.rows.length > 0) {
+        const matchingRank = ranks.rows[0].rank_key;
         if (matchingRank !== currentRankKey) {
-          await conn.query('UPDATE user_xp_wallet SET current_rank_key = ? WHERE user_id = ?', [matchingRank, userId]);
+          await client.query('UPDATE user_xp_wallet SET current_rank_key = $1 WHERE user_id = $2', [matchingRank, userId]);
           newRank = matchingRank;
         }
       }
 
-      // Check Badges (naive implementation for demo)
       const unlockedBadges: string[] = [];
       if (eventType === 'lesson_completed') {
-        const [badge] = await conn.query('SELECT * FROM user_badges WHERE user_id = ? AND badge_key = "first_step"', [userId]);
-        if ((badge as any[]).length === 0) {
-          await conn.query('INSERT INTO user_badges (user_id, badge_key) VALUES (?, "first_step")', [userId]);
+        const badge = await client.query('SELECT * FROM user_badges WHERE user_id = $1 AND badge_key = $2', [userId, 'first_step']);
+        if (badge.rows.length === 0) {
+          await client.query('INSERT INTO user_badges (user_id, badge_key) VALUES ($1, $2)', [userId, 'first_step']);
           unlockedBadges.push('first_step');
         }
       } else if (eventType === 'quiz_completed') {
-         const [badge] = await conn.query('SELECT * FROM user_badges WHERE user_id = ? AND badge_key = "quiz_star"', [userId]);
-         if ((badge as any[]).length === 0) {
-           await conn.query('INSERT INTO user_badges (user_id, badge_key) VALUES (?, "quiz_star")', [userId]);
+         const badge = await client.query('SELECT * FROM user_badges WHERE user_id = $1 AND badge_key = $2', [userId, 'quiz_star']);
+         if (badge.rows.length === 0) {
+           await client.query('INSERT INTO user_badges (user_id, badge_key) VALUES ($1, $2)', [userId, 'quiz_star']);
            unlockedBadges.push('quiz_star');
          }
       }
 
-      await conn.commit();
       return {
         xpAwarded: xpAmount,
         coinsAwarded: coinAmount,
@@ -94,27 +81,19 @@ export class GamificationService {
         newRank,
         unlockedBadges
       };
-
-    } catch (error) {
-      await conn.rollback();
-      console.error('Error awarding XP/Coins:', error);
-      throw error;
-    } finally {
-      conn.release();
-    }
+    });
   }
 
   static async getSummary(userId: number) {
-    const [rows] = await db.query(`
+    const rows = await query(`
       SELECT w.*, r.name as rank_name, r.icon as rank_icon, r.theme_color,
              (SELECT min_xp FROM rank_definitions WHERE sort_order = (SELECT sort_order FROM rank_definitions WHERE rank_key = w.current_rank_key) + 1 LIMIT 1) as next_rank_xp
       FROM user_xp_wallet w
       LEFT JOIN rank_definitions r ON w.current_rank_key = r.rank_key
-      WHERE w.user_id = ?
+      WHERE w.user_id = $1
     `, [userId]);
     
-    if ((rows as any[]).length === 0) {
-      // Return defaults if no wallet yet
+    if (rows.length === 0) {
       return {
         total_xp: 0,
         current_coins: 0,
@@ -126,6 +105,6 @@ export class GamificationService {
       };
     }
     
-    return (rows as any)[0];
+    return rows[0];
   }
 }

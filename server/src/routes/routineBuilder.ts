@@ -1,171 +1,142 @@
-import { Router, Request, Response } from 'express';
-import { query, validationResult } from 'express-validator';
-import db from '../db'; // assume a MySQL pool wrapper
-import { ensureLearner, ensureAdmin } from '../middleware';
+import { Hono } from 'hono';
+import { query, queryOne, withTransaction } from '../db.js';
+import { requireAuth } from '../middleware.js';
+import type { JwtPayload } from '../middleware.js';
 
-const router = Router();
+const routineBuilder = new Hono();
+routineBuilder.use('*', requireAuth);
 
-// Helper to get session state
-async function getSession(userId: number) {
-  const [rows] = await db.query('SELECT * FROM routine_builder_sessions WHERE user_id = ?', [userId]);
-  return rows[0] || null;
+function userId(c: { get(k: string): unknown }): number {
+  return Number((c.get('user') as JwtPayload).sub);
 }
 
-async function upsertSession(userId: number, state: any) {
-  const existing = await getSession(userId);
+// Session helper functions
+async function getSession(uid: number) {
+  const session = await queryOne('SELECT * FROM routine_builder_sessions WHERE user_id = $1', [uid]);
+  return session || null;
+}
+
+async function upsertSession(uid: number, session: any) {
+  const existing = await getSession(uid);
   if (existing) {
-    await db.query('UPDATE routine_builder_sessions SET state = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?', [JSON.stringify(state), userId]);
+    await query('UPDATE routine_builder_sessions SET answers = $1, draft_routine = $2, current_step = $3, updated_at = CURRENT_TIMESTAMP WHERE user_id = $4', [
+      JSON.stringify(session.answers),
+      JSON.stringify(session.draft_routine),
+      session.current_step,
+      uid,
+    ]);
   } else {
-    await db.query('INSERT INTO routine_builder_sessions (user_id, state) VALUES (?, ?)', [userId, JSON.stringify(state)]);
+    await query('INSERT INTO routine_builder_sessions (user_id, answers, draft_routine, current_step) VALUES ($1,$2,$3,$4)', [
+      uid,
+      JSON.stringify(session.answers),
+      JSON.stringify(session.draft_routine),
+      session.current_step,
+    ]);
   }
 }
 
-// ---------- 1. Start routine builder ----------
-router.post('/ai/start', ensureLearner, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const initialState = {
-    mode: 'routine_builder',
-    step: 'routine_type',
-    answers: {}
-  };
-  await upsertSession(userId, initialState);
-  res.json({ message: 'Routine builder started', next: 'routine_type' });
-});
+// Generate next step for routine builder (Placeholder)
+async function generateRoutineDraft(currentStep: string, answer: any, state: any) {
+  const steps = ['welcome', 'wake_up', 'activity', 'reminders', 'review', 'final'];
+  const idx = steps.indexOf(currentStep);
+  const nextIdx = Math.min(idx + 1, steps.length - 1);
+  const nextStep = steps[nextIdx];
 
-// ---------- 2. Process learner message ----------
-router.post('/ai/message', ensureLearner, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const { answer } = req.body; // plain text answer
-  const session = await getSession(userId);
+  const draftPatch: any = {};
+  draftPatch[currentStep] = answer;
+
+  const replies: { [key: string]: string } = {
+    welcome: 'Hi! Let’s build your routine. What time do you usually wake up?',
+    wake_up: 'Got it. Do you go to school, work, or a day program?',
+    activity: 'Would you like help remembering breakfast, brushing teeth, medicine, or bedtime?',
+    reminders: 'Would you like me to suggest a healthy routine for you based on this?',
+    review: 'Here is your routine preview.',
+    final: 'Your routine is saved and ready!',
+  };
+
+  const reply = replies[currentStep] ?? 'Thanks.';
+  return { nextStep, draftPatch, reply, quickReplies: [] };
+}
+
+routineBuilder.post('/start', async (c) => {
+  const uid = userId(c);
+  let session = await getSession(uid);
   if (!session) {
-    return res.status(400).json({ error: 'No active routine builder session' });
+    session = { answers: {}, draft_routine: {}, current_step: 'welcome' };
+    await upsertSession(uid, session);
   }
-  const state = JSON.parse(session.state as any);
+  return c.json({ message: 'Routine builder session ready', session });
+});
 
-  // Simple deterministic state machine
-  switch (state.step) {
-    case 'routine_type':
-      state.answers.routine_type = answer;
-      state.step = 'wake_time';
-      break;
-    case 'wake_time':
-      state.answers.wake_time = answer;
-      state.step = 'important_tasks';
-      break;
-    case 'important_tasks':
-      // expect comma‑separated list or array from UI
-      state.answers.important_tasks = Array.isArray(answer) ? answer : answer.split(',').map((s: string) => s.trim());
-      state.step = 'suggestion';
-      break;
-    case 'suggestion':
-      state.answers.want_suggestion = answer.toLowerCase() === 'yes';
-      state.step = 'draft_ready';
-      break;
-    default:
-      break;
-  }
+routineBuilder.post('/message', async (c) => {
+  const uid = userId(c);
+  const body = await c.req.json().catch(() => ({})) as any;
+  const answer = body.answer;
+  const session = await getSession(uid) as any;
+  if (!session) return c.json({ error: 'No active session' }, 400);
 
-  await upsertSession(userId, state);
-
-  if (state.step === 'draft_ready') {
-    // Call existing Gemini Panda service – placeholder function
-    const draft = await generateRoutineDraft(state.answers);
-    return res.json({ draft });
-  }
-
-  // Return next question prompt (simple text for now)
-  const prompts: any = {
-    routine_type: 'What kind of routine would you like to build? (morning, full, bedtime, school, healthy)',
-    wake_time: 'What time do you usually wake up?',
-    important_tasks: 'What important things should we include? (list)',
-    suggestion: 'Would you like me to suggest a healthy routine for you? (yes/no)'
+  const parseJson = (val: any) => typeof val === 'string' ? JSON.parse(val) : val;
+  const state = {
+    answers: parseJson(session.answers) || {},
+    draft_routine: parseJson(session.draft_routine) || {},
+    current_step: session.current_step,
   };
-  res.json({ next: state.step, prompt: prompts[state.step] });
+
+  const next = await generateRoutineDraft(state.current_step, answer, state);
+  
+  const newDraft = { ...state.draft_routine, ...next.draftPatch };
+  const newAnswers = { ...state.answers, [state.current_step]: answer };
+
+  const updatedSession = { answers: newAnswers, draft_routine: newDraft, current_step: next.nextStep };
+  await upsertSession(uid, updatedSession);
+
+  return c.json({ reply: next.reply, next_step: next.nextStep, quickReplies: next.quickReplies, draft: newDraft });
 });
 
-// ---------- 3. Save final routine ----------
-router.post('/', ensureLearner, [
-  query('title').isString(),
-  query('type').isString()
-], async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  const userId = (req as any).user.id;
-  const { title, type, items } = req.body; // items is array of objects
-  const conn = await db.getConnection();
+routineBuilder.get('/session', async (c) => {
+  const uid = userId(c);
+  const session = await getSession(uid) as any;
+  if (!session) return c.json({ error: 'No session' }, 404);
+  const parseJson = (val: any) => typeof val === 'string' ? JSON.parse(val) : val;
+  return c.json({ session: {
+    answers: parseJson(session.answers) || {},
+    draft_routine: parseJson(session.draft_routine) || {},
+    current_step: session.current_step,
+  }});
+});
+
+routineBuilder.post('/', async (c) => {
+  const uid = userId(c);
+  const body = await c.req.json().catch(() => ({})) as any;
+  const { title, routine_data } = body;
+  if (!title || !routine_data) return c.json({ error: 'title and routine_data required' }, 400);
+
   try {
-    await conn.beginTransaction();
-    const [routineResult] = await conn.query('INSERT INTO routines (user_id, title, type, created_by) VALUES (?,?,?,?)', [userId, title, type, 'learner']);
-    const routineId = (routineResult as any).insertId;
-    const itemValues = (items as any[]).map((it, idx) => [routineId, idx, it.title, it.description, it.time_of_day, it.icon, it.category, it.is_required ? 1 : 0]);
-    await conn.query('INSERT INTO routine_items (routine_id, order_index, title, description, time_of_day, icon, category, is_required) VALUES ?', [itemValues]);
-    await conn.commit();
-    res.json({ message: 'Routine saved', routineId });
+    const result = await withTransaction(async (client) => {
+      const res = await client.query('INSERT INTO routines (user_id, title, routine_data) VALUES ($1,$2,$3) RETURNING id', [
+        uid, title, JSON.stringify(routine_data)
+      ]);
+      return res.rows[0].id;
+    });
+    return c.json({ message: 'Routine saved', routineId: result });
   } catch (e) {
-    await conn.rollback();
     console.error(e);
-    res.status(500).json({ error: 'Failed to save routine' });
-  } finally {
-    conn.release();
+    return c.json({ error: 'Unable to save routine' }, 500);
   }
 });
 
-// ---------- 4. Check‑in endpoints (simplified) ----------
-router.post('/:id/checkins', ensureLearner, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const routineId = parseInt(req.params.id);
-  const { date, mood, self_rating, reflection } = req.body;
-  const [result] = await db.query('INSERT INTO routine_checkins (routine_id, user_id, checkin_date, mood, self_rating, reflection) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE mood = VALUES(mood), self_rating = VALUES(self_rating), reflection = VALUES(reflection)', [routineId, userId, date, mood, self_rating, reflection]);
-  res.json({ message: 'Check‑in saved' });
+routineBuilder.get('/', async (c) => {
+  const uid = userId(c);
+  const rows = await query('SELECT id, title, created_at, is_active FROM routines WHERE user_id = $1', [uid]);
+  return c.json({ routines: rows });
 });
 
-// ---------- 5. Item completion toggle ----------
-router.patch('/:id/items/:itemId/completion', ensureLearner, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const routineId = parseInt(req.params.id);
-  const itemId = parseInt(req.params.itemId);
-  const { date, completed } = req.body;
-  // Find or create checkin for the date
-  const [rows] = await db.query('SELECT id FROM routine_checkins WHERE routine_id = ? AND checkin_date = ?', [routineId, date]);
-  let checkinId: number;
-  if (rows.length > 0) {
-    checkinId = (rows[0] as any).id;
-  } else {
-    const [ins] = await db.query('INSERT INTO routine_checkins (routine_id, user_id, checkin_date) VALUES (?,?,?)', [routineId, userId, date]);
-    checkinId = (ins as any).insertId;
-  }
-  await db.query('INSERT INTO routine_item_completions (checkin_id, routine_item_id, is_completed) VALUES (?,?,?) ON DUPLICATE KEY UPDATE is_completed = VALUES(is_completed)', [checkinId, itemId, completed ? 1 : 0]);
-  res.json({ message: 'Item completion updated' });
+routineBuilder.get('/:id', async (c) => {
+  const uid = userId(c);
+  const routineId = parseInt(c.req.param('id'));
+  const rows = await query('SELECT * FROM routines WHERE id = $1 AND user_id = $2', [routineId, uid]);
+  if (!rows.length) return c.json({ error: 'Routine not found' }, 404);
+  return c.json({ routine: rows[0] });
 });
 
-// ---------- 6. Admin view (client profile) ----------
-router.get('/admin/clients/:clientId/routines', ensureAdmin, async (req: Request, res: Response) => {
-  const clientId = parseInt(req.params.clientId);
-  const [routines] = await db.query('SELECT * FROM routines WHERE user_id = ?', [clientId]);
-  res.json({ routines });
-});
-
-router.get('/admin/clients/:clientId/routines/summary', ensureAdmin, async (req: Request, res: Response) => {
-  const clientId = parseInt(req.params.clientId);
-  // Simplified summary: completion % for last 7 days
-  const [summary] = await db.query(`
-    SELECT r.id, r.title,
-      ROUND(100 * SUM(ci.completed_items) / (7 * COUNT(ri.id)), 2) AS completion_pct
-    FROM routines r
-    JOIN routine_items ri ON ri.routine_id = r.id
-    LEFT JOIN (
-      SELECT rc.routine_id, rc.checkin_date, COUNT(ric.id) AS completed_items
-      FROM routine_checkins rc
-      JOIN routine_item_completions ric ON ric.checkin_id = rc.id AND ric.is_completed = 1
-      WHERE rc.checkin_date >= CURDATE() - INTERVAL 7 DAY
-      GROUP BY rc.routine_id, rc.checkin_date
-    ) ci ON ci.routine_id = r.id
-    WHERE r.user_id = ?
-    GROUP BY r.id;
-  `, [clientId]);
-  res.json({ summary });
-});
-
-export default router;
+export default routineBuilder;

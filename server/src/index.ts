@@ -142,7 +142,7 @@ app.route('/api/index.php/ai', ai)
 app.route('/api/learner/resume-builder', resumeBuilder)
 app.route('/api/learner/gamification', gamification)
 app.route('/api/admin/users', resumeAdmin)
-app.use('/resume', resumeUI)
+app.route('/resume', resumeUI)
 
 app.get('/api/health', (c) => c.json({
   status: getDatabaseStatus() === 'ready' ? 'ok' : 'degraded',

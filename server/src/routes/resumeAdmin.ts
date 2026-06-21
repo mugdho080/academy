@@ -1,41 +1,51 @@
-import { Router, Request, Response } from 'express';
-import db from '../db';
-import { ensureAdmin } from '../middleware';
+import { Hono } from 'hono';
+import { query } from '../db.js';
+import { requireAuth } from '../middleware.js';
+import type { JwtPayload } from '../middleware.js';
 
-const router = Router();
+const resumeAdmin = new Hono();
+resumeAdmin.use('*', requireAuth);
 
-// 1. List resumes for a specific user (admin view)
-router.get('/:userId/resumes', ensureAdmin, async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.userId);
-  const [rows] = await db.query('SELECT id, title, target_role, template_key, created_at, status FROM resumes WHERE user_id = ?', [userId]);
-  res.json({ resumes: rows });
+function isAdmin(c: { get(k: string): unknown }): boolean {
+  return String((c.get('user') as JwtPayload).role ?? '') === 'admin';
+}
+
+resumeAdmin.get('/:userId/resumes', async (c) => {
+  if (!isAdmin(c)) return c.json({ error: 'Unauthorized' }, 403);
+  const userId = parseInt(c.req.param('userId'));
+  const rows = await query('SELECT id, title, target_role, template_key, created_at, status FROM resumes WHERE user_id = $1', [userId]);
+  return c.json({ resumes: rows });
 });
 
-// 2. View specific resume
-router.get('/:userId/resumes/:resumeId', ensureAdmin, async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.userId);
-  const resumeId = parseInt(req.params.resumeId);
-  const [rows] = await db.query('SELECT * FROM resumes WHERE id = ? AND user_id = ?', [resumeId, userId]);
-  if (!rows.length) return res.status(404).json({ error: 'Resume not found' });
-  res.json({ resume: rows[0] });
+resumeAdmin.get('/:userId/resumes/:resumeId', async (c) => {
+  if (!isAdmin(c)) return c.json({ error: 'Unauthorized' }, 403);
+  const userId = parseInt(c.req.param('userId'));
+  const resumeId = parseInt(c.req.param('resumeId'));
+  const rows = await query('SELECT * FROM resumes WHERE id = $1 AND user_id = $2', [resumeId, userId]);
+  if (!rows.length) return c.json({ error: 'Resume not found' }, 404);
+  return c.json({ resume: rows[0] });
 });
 
-// 3. Admin PDF Download
-router.get('/:userId/resumes/:resumeId/pdf', ensureAdmin, async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.userId);
-  const resumeId = parseInt(req.params.resumeId);
-  const template = req.query.template as string || 'simple';
+resumeAdmin.get('/:userId/resumes/:resumeId/pdf', async (c) => {
+  if (!isAdmin(c)) return new Response('Unauthorized', { status: 403 });
+  const userId = parseInt(c.req.param('userId'));
+  const resumeId = parseInt(c.req.param('resumeId'));
+  const template = c.req.query('template') || 'simple';
   
-  const [rows] = await db.query('SELECT * FROM resumes WHERE id = ? AND user_id = ?', [resumeId, userId]);
-  if (!rows.length) return res.status(404).json({ error: 'Resume not found' });
+  const rows = await query('SELECT * FROM resumes WHERE id = $1 AND user_id = $2', [resumeId, userId]);
+  if (!rows.length) return new Response('Resume not found', { status: 404 });
   
-  const resume = rows[0];
+  const resume = rows[0] as any;
   const { renderResumePdf } = await import('../resume_builder/pdf.js');
-  const pdfBytes = await renderResumePdf(resume.resume_data, template);
   
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="${resume.title}.pdf"`);
-  res.send(Buffer.from(pdfBytes));
+  // parse JSON if it is a string
+  const resumeData = typeof resume.resume_data === 'string' ? JSON.parse(resume.resume_data) : resume.resume_data;
+  const pdfBytes = await renderResumePdf(resumeData, template);
+  
+  return c.body(pdfBytes as any, 200, {
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename="${resume.title}.pdf"`
+  });
 });
 
-export default router;
+export default resumeAdmin;

@@ -1,86 +1,85 @@
-import { Router, Request, Response } from 'express';
-import db from '../db';
-import { ensureLearner } from '../middleware';
-import { GamificationService } from '../services/GamificationService';
+import { Hono } from 'hono';
+import { query, withTransaction } from '../db.js';
+import { requireAuth } from '../middleware.js';
+import type { JwtPayload } from '../middleware.js';
+import { GamificationService } from '../services/GamificationService.js';
 
-const router = Router();
+const gamification = new Hono();
+gamification.use('*', requireAuth);
 
-// 1. Get Summary (XP, Coins, Rank)
-router.get('/summary', ensureLearner, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
+function userId(c: { get(k: string): unknown }): number {
+  return Number((c.get('user') as JwtPayload).sub);
+}
+
+gamification.get('/summary', async (c) => {
+  const uid = userId(c);
   try {
-    const summary = await GamificationService.getSummary(userId);
-    res.json(summary);
+    const summary = await GamificationService.getSummary(uid);
+    return c.json(summary);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to fetch gamification summary' });
+    return c.json({ error: 'Failed to fetch gamification summary' }, 500);
   }
 });
 
-// 2. Get Badges
-router.get('/badges', ensureLearner, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const [userBadges] = await db.query('SELECT badge_key, earned_at FROM user_badges WHERE user_id = ?', [userId]);
-  const [allBadges] = await db.query('SELECT * FROM badge_definitions WHERE is_active = TRUE');
+gamification.get('/badges', async (c) => {
+  const uid = userId(c);
+  const userBadges = await query('SELECT badge_key, earned_at FROM user_badges WHERE user_id = $1', [uid]);
+  const allBadges = await query('SELECT * FROM badge_definitions WHERE is_active = TRUE');
   
-  res.json({
+  return c.json({
     allBadges,
     earnedBadges: userBadges
   });
 });
 
-// 3. Get Shop Items
-router.get('/shop', ensureLearner, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const [shopItems] = await db.query('SELECT * FROM cosmetic_shop_items WHERE is_active = TRUE');
-  const [unlocked] = await db.query('SELECT cosmetic_key FROM user_cosmetics WHERE user_id = ?', [userId]);
+gamification.get('/shop', async (c) => {
+  const uid = userId(c);
+  const shopItems = await query('SELECT * FROM cosmetic_shop_items WHERE is_active = TRUE');
+  const unlocked = await query('SELECT cosmetic_key FROM user_cosmetics WHERE user_id = $1', [uid]);
   
-  res.json({
+  return c.json({
     shopItems,
     unlockedItems: unlocked
   });
 });
 
-// 4. Unlock Shop Item
-router.post('/shop/:itemKey/unlock', ensureLearner, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const itemKey = req.params.itemKey;
+gamification.post('/shop/:itemKey/unlock', async (c) => {
+  const uid = userId(c);
+  const itemKey = c.req.param('itemKey');
   
-  const conn = await db.getConnection();
   try {
-    await conn.beginTransaction();
-    const [items] = await conn.query('SELECT coin_cost FROM cosmetic_shop_items WHERE cosmetic_key = ? AND is_active = TRUE', [itemKey]);
-    if ((items as any[]).length === 0) return res.status(404).json({ error: 'Item not found' });
+    const result = await withTransaction(async (client) => {
+      const items = await client.query('SELECT coin_cost FROM cosmetic_shop_items WHERE cosmetic_key = $1 AND is_active = TRUE', [itemKey]);
+      if (items.rows.length === 0) return { error: 'Item not found', status: 404 };
+      
+      const cost = items.rows[0].coin_cost;
+      const wallets = await client.query('SELECT current_coins FROM user_xp_wallet WHERE user_id = $1 FOR UPDATE', [uid]);
+      const coins = wallets.rows[0]?.current_coins || 0;
+      
+      if (coins < cost) {
+        return { error: 'Not enough coins', status: 400 };
+      }
+      
+      const unlocked = await client.query('SELECT id FROM user_cosmetics WHERE user_id = $1 AND cosmetic_key = $2', [uid, itemKey]);
+      if (unlocked.rows.length > 0) {
+        return { error: 'Item already unlocked', status: 400 };
+      }
+      
+      await client.query('UPDATE user_xp_wallet SET current_coins = current_coins - $1 WHERE user_id = $2', [cost, uid]);
+      await client.query('INSERT INTO user_cosmetics (user_id, cosmetic_key) VALUES ($1, $2)', [uid, itemKey]);
+      
+      return { success: true, newCoinBalance: coins - cost };
+    });
     
-    const cost = (items as any)[0].coin_cost;
-    const [wallets] = await conn.query('SELECT current_coins FROM user_xp_wallet WHERE user_id = ? FOR UPDATE', [userId]);
-    const coins = (wallets as any[])[0]?.current_coins || 0;
-    
-    if (coins < cost) {
-      await conn.rollback();
-      return res.status(400).json({ error: 'Not enough coins' });
+    if (result.error) {
+       return c.json({ error: result.error }, result.status as any);
     }
-    
-    // Check if already unlocked
-    const [unlocked] = await conn.query('SELECT id FROM user_cosmetics WHERE user_id = ? AND cosmetic_key = ?', [userId, itemKey]);
-    if ((unlocked as any[]).length > 0) {
-      await conn.rollback();
-      return res.status(400).json({ error: 'Item already unlocked' });
-    }
-    
-    // Deduct and unlock
-    await conn.query('UPDATE user_xp_wallet SET current_coins = current_coins - ? WHERE user_id = ?', [cost, userId]);
-    await conn.query('INSERT INTO user_cosmetics (user_id, cosmetic_key) VALUES (?, ?)', [userId, itemKey]);
-    
-    await conn.commit();
-    res.json({ success: true, newCoinBalance: coins - cost });
+    return c.json(result);
   } catch (e) {
-    await conn.rollback();
     console.error(e);
-    res.status(500).json({ error: 'Failed to unlock item' });
-  } finally {
-    conn.release();
+    return c.json({ error: 'Failed to unlock item' }, 500);
   }
 });
 
-export default router;
+export default gamification;
