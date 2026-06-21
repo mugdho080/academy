@@ -14,9 +14,7 @@ import learner from './routes/learner.js'
 import admin from './routes/admin.js'
 import ai from './routes/ai.js'
 import routineBuilder from './routes/routineBuilder.js'
-import routineUI from './routes/routineUI.js'
 import resumeBuilder from './routes/resumeBuilder.js'
-import resumeUI from './routes/resumeUI.js'
 import resumeAdmin from './routes/resumeAdmin.js'
 import gamification from './routes/gamification.js'
 
@@ -142,7 +140,6 @@ app.route('/api/index.php/ai', ai)
 app.route('/api/learner/resume-builder', resumeBuilder)
 app.route('/api/learner/gamification', gamification)
 app.route('/api/admin/users', resumeAdmin)
-app.route('/resume', resumeUI)
 
 app.get('/api/health', (c) => c.json({
   status: getDatabaseStatus() === 'ready' ? 'ok' : 'degraded',

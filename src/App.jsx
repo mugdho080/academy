@@ -18,6 +18,8 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const ParticipantDetail = lazy(() => import('./pages/admin/ParticipantDetail'));
 const Invoicing = lazy(() => import('./pages/admin/Invoicing'));
 const ClawGamePage = lazy(() => import('./pages/ClawGamePage'));
+const RoutineBuilder = lazy(() => import('./pages/RoutineBuilder'));
+const ResumeBuilder = lazy(() => import('./pages/ResumeBuilder'));
 
 function App() {
     return (
@@ -43,6 +45,8 @@ function App() {
                             <Route path="/profile" element={<SidebarLayout><Profile /></SidebarLayout>} />
                             <Route path="/arcade" element={<SidebarLayout><ClawGamePage /></SidebarLayout>} />
                             <Route path="/lesson/:levelId" element={<SidebarLayout><LessonView /></SidebarLayout>} />
+                            <Route path="/routine-builder" element={<SidebarLayout><RoutineBuilder /></SidebarLayout>} />
+                            <Route path="/resume-builder" element={<SidebarLayout><ResumeBuilder /></SidebarLayout>} />
 
                             <Route path="/" element={<Navigate to="/login" replace />} />
                         </Routes>

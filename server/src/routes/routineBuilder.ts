@@ -2,6 +2,9 @@ import { Hono } from 'hono';
 import { query, queryOne, withTransaction } from '../db.js';
 import { requireAuth } from '../middleware.js';
 import type { JwtPayload } from '../middleware.js';
+import { Type } from '@google/genai';
+import { generateStructuredPandaResponse } from '../ai/gemini.js';
+import { GamificationService } from '../services/GamificationService.js';
 
 const routineBuilder = new Hono();
 routineBuilder.use('*', requireAuth);
@@ -35,27 +38,49 @@ async function upsertSession(uid: number, session: any) {
   }
 }
 
-// Generate next step for routine builder (Placeholder)
+// Generate next step for routine builder using Gemini
 async function generateRoutineDraft(currentStep: string, answer: any, state: any) {
-  const steps = ['welcome', 'wake_up', 'activity', 'reminders', 'review', 'final'];
-  const idx = steps.indexOf(currentStep);
-  const nextIdx = Math.min(idx + 1, steps.length - 1);
-  const nextStep = steps[nextIdx];
-
-  const draftPatch: any = {};
-  draftPatch[currentStep] = answer;
-
-  const replies: { [key: string]: string } = {
-    welcome: 'Hi! Let’s build your routine. What time do you usually wake up?',
-    wake_up: 'Got it. Do you go to school, work, or a day program?',
-    activity: 'Would you like help remembering breakfast, brushing teeth, medicine, or bedtime?',
-    reminders: 'Would you like me to suggest a healthy routine for you based on this?',
-    review: 'Here is your routine preview.',
-    final: 'Your routine is saved and ready!',
+  const schema = {
+    type: Type.OBJECT,
+    properties: {
+      reply: { type: Type.STRING, description: "Panda's conversational reply to the user's answer." },
+      next_question: { type: Type.STRING, description: "The next question Panda should ask, or null if ready." },
+      quick_replies: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Suggested quick reply buttons." },
+      current_step: { type: Type.STRING, description: "The internal state machine step (e.g. welcome, routine_type, wake_time, activity, preview)." },
+      draft_patch: { type: Type.OBJECT, description: "Any new fields to merge into the draft routine." },
+      is_ready_to_preview: { type: Type.BOOLEAN, description: "True if all necessary questions are answered and the routine is ready." }
+    },
+    required: ["reply", "current_step", "quick_replies", "draft_patch", "is_ready_to_preview"]
   };
 
-  const reply = replies[currentStep] ?? 'Thanks.';
-  return { nextStep, draftPatch, reply, quickReplies: [] };
+  const systemPrompt = `You are Panda, a friendly Academy coach helping a learner build a daily routine.
+Ask one simple question at a time. Use short sentences. Offer quick replies. Produce valid JSON only.
+If the learner says 'I don't know', suggest a simple healthy routine.
+Current step: ${currentStep}.
+Current draft: ${JSON.stringify(state.draft_routine)}
+Learner's previous answers: ${JSON.stringify(state.answers)}
+Learner's latest message: "${answer}"
+Output structured JSON containing your reply, the next question, quick replies, the next step name, and any updates to the draft routine (e.g. adding items with time_of_day, title, icon, etc).`;
+
+  const response = await generateStructuredPandaResponse(systemPrompt, `Learner says: ${answer}`, schema as any);
+  
+  if (!response) {
+    return {
+      nextStep: currentStep,
+      draftPatch: {},
+      reply: "Oops, I got a bit confused! Could you tell me that again?",
+      quickReplies: [],
+      isReady: false
+    };
+  }
+
+  return {
+    nextStep: response.current_step,
+    draftPatch: response.draft_patch,
+    reply: response.reply + (response.next_question ? ' ' + response.next_question : ''),
+    quickReplies: response.quick_replies,
+    isReady: response.is_ready_to_preview
+  };
 }
 
 routineBuilder.post('/start', async (c) => {
@@ -90,7 +115,13 @@ routineBuilder.post('/message', async (c) => {
   const updatedSession = { answers: newAnswers, draft_routine: newDraft, current_step: next.nextStep };
   await upsertSession(uid, updatedSession);
 
-  return c.json({ reply: next.reply, next_step: next.nextStep, quickReplies: next.quickReplies, draft: newDraft });
+  return c.json({ 
+    reply: next.reply, 
+    next_step: next.nextStep, 
+    quickReplies: next.quickReplies, 
+    draft: newDraft,
+    isReady: next.isReady 
+  });
 });
 
 routineBuilder.get('/session', async (c) => {
@@ -118,6 +149,18 @@ routineBuilder.post('/', async (c) => {
       ]);
       return res.rows[0].id;
     });
+    
+    // Wire Gamification XP
+    await GamificationService.awardXpAndCoins(
+      uid,
+      'routine_saved',
+      'routine',
+      String(result),
+      50,
+      10,
+      { title }
+    );
+
     return c.json({ message: 'Routine saved', routineId: result });
   } catch (e) {
     console.error(e);

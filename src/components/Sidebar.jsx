@@ -24,8 +24,8 @@ const Sidebar = ({ className = '', onNavigate }) => {
         { icon: <Trophy size={24} />, text: 'Panda Progress', path: '/achievements' },
         { icon: <Bot size={24} />, text: 'My AI Friend', path: '/ai-friend' },
         { icon: <Gamepad2 size={24} />, text: 'Arcade', path: '/arcade' },
-        { icon: <FileText size={24} />, text: 'Resume Builder', path: '/resume/builder.html', external: true },
-        { icon: <Clock size={24} />, text: 'Routine Builder', path: '/routine/builder.html', external: true },
+        { icon: <FileText size={24} />, text: 'My Resume with Panda', path: '/resume-builder' },
+        { icon: <Clock size={24} />, text: 'My Daily Routine', path: '/routine-builder' },
         { icon: <User size={24} />, text: 'My Profile', path: '/profile' },
     ];
 

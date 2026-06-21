@@ -10,6 +10,7 @@ const ProgressWorld = () => {
     const [shop, setShop] = useState({ shopItems: [], unlockedItems: [] });
     const [activeTab, setActiveTab] = useState('overview');
     const [loading, setLoading] = useState(true);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
     useEffect(() => {
         fetchData();
@@ -41,11 +42,16 @@ const ProgressWorld = () => {
                     ...prev,
                     unlockedItems: [...prev.unlockedItems, { cosmetic_key: itemKey }]
                 }));
-                alert('Unlocked successfully!');
+                showToast('Item unlocked successfully!', 'success');
             }
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to unlock');
+            showToast(err.response?.data?.error || 'Failed to unlock', 'error');
         }
+    };
+
+    const showToast = (message, type) => {
+        setToast({ show: true, message, type });
+        setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
     };
 
     if (loading) return <div className="p-8">Loading your Panda Progress...</div>;
@@ -57,6 +63,22 @@ const ProgressWorld = () => {
         <div className="h-full w-full relative overflow-auto font-sans bg-[#F8FAFC]">
             <SensoryBackground />
             
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toast.show && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -50, x: '-50%' }}
+                        animate={{ opacity: 1, y: 0, x: '-50%' }}
+                        exit={{ opacity: 0, y: -50, x: '-50%' }}
+                        className={`fixed top-6 left-1/2 z-50 px-6 py-3 rounded-full font-black text-sm shadow-xl flex items-center gap-2 ${
+                            toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                        }`}
+                    >
+                        {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <PageContainer className="relative z-10 py-8 space-y-8">
                 <header>
                     <h1 className="text-4xl font-black italic uppercase text-[#3B1B54]">My Panda Progress</h1>

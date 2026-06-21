@@ -3,6 +3,7 @@ import { query, queryOne, withTransaction } from '../db.js';
 import { requireAuth } from '../middleware.js';
 import type { JwtPayload } from '../middleware.js';
 import { generateResumeDraft } from '../ai/resume.js';
+import { GamificationService } from '../services/GamificationService.js';
 
 const resumeBuilder = new Hono();
 resumeBuilder.use('*', requireAuth);
@@ -83,7 +84,13 @@ resumeBuilder.post('/message', async (c) => {
   };
   await upsertSession(uid, updatedSession);
 
-  return c.json({ reply: next.reply, next_step: next.nextStep, quickReplies: next.quickReplies, draft: newDraft });
+  return c.json({ 
+    reply: next.reply, 
+    next_step: next.nextStep, 
+    quickReplies: next.quickReplies, 
+    draft: newDraft,
+    isReady: next.isReady 
+  });
 });
 
 // 3. Get current session data
@@ -117,6 +124,18 @@ resumeBuilder.post('/', async (c) => {
       ]);
       return res.rows[0].id;
     });
+    
+    // Wire Gamification XP
+    await GamificationService.awardXpAndCoins(
+      uid,
+      'resume_saved',
+      'resume',
+      String(result),
+      50,
+      10,
+      { template_key }
+    );
+
     return c.json({ message: 'Resume saved', resumeId: result });
   } catch (e) {
     console.error(e);
