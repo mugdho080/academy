@@ -5,6 +5,9 @@ import { resolve } from 'node:path';
 const router = new Hono();
 
 // Serve static assets for the Resume Builder UI under /resume/*
-router.use('/*', serveStatic({ root: '../public/modules/resume' }));
+router.use('/*', serveStatic({ 
+  root: '../public/modules/resume',
+  rewriteRequestPath: (path) => path.replace(/^\/resume/, '') || '/'
+}));
 
 export default router;
