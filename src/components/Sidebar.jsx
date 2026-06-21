@@ -7,7 +7,9 @@ import {
     User,
     LogOut,
     Settings,
-    Gamepad2
+    Gamepad2,
+    FileText,
+    Clock
 } from 'lucide-react';
 import { useActivityTimer } from '../context/ActivityTimerProvider';
 
@@ -19,9 +21,11 @@ const Sidebar = ({ className = '', onNavigate }) => {
 
     const menuItems = [
         { icon: <Map size={24} />, text: 'My World Map', path: '/dashboard' },
-        { icon: <Trophy size={24} />, text: 'Achievements', path: '/achievements' },
+        { icon: <Trophy size={24} />, text: 'Panda Progress', path: '/achievements' },
         { icon: <Bot size={24} />, text: 'My AI Friend', path: '/ai-friend' },
         { icon: <Gamepad2 size={24} />, text: 'Arcade', path: '/arcade' },
+        { icon: <FileText size={24} />, text: 'Resume Builder', path: '/resume/builder.html', external: true },
+        { icon: <Clock size={24} />, text: 'Routine Builder', path: '/routine/builder.html', external: true },
         { icon: <User size={24} />, text: 'My Profile', path: '/profile' },
     ];
 
@@ -66,7 +70,13 @@ const Sidebar = ({ className = '', onNavigate }) => {
                 {menuItems.map((item, index) => (
                     <button
                         key={index}
-                        onClick={() => item.path !== '#' && goTo(item.path)}
+                        onClick={() => {
+                            if (item.external) {
+                                window.location.href = item.path;
+                            } else if (item.path !== '#') {
+                                goTo(item.path);
+                            }
+                        }}
                         className={`
                             flex items-center gap-4 w-full text-left p-3 sm:p-3.5 rounded-2xl transition-all group relative overflow-hidden
                             ${isActive(item.path)
