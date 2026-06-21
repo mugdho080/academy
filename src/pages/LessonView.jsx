@@ -16,6 +16,16 @@ const splitIntoSentences = (text) => {
     return text.match(/[^.?!]+[.?!]+(?=\s|$)|[^.?!]+/g)?.map((s) => s.trim()).filter(Boolean) || [text];
 };
 
+// Helper to build lesson cards from content string. Supports explicit '---CARD---' delimiter.
+const buildLessonCards = (content) => {
+    if (!content || typeof content !== 'string') return [];
+    if (content.includes('---CARD---')) {
+        return content.split('---CARD---').map((c) => c.trim()).filter(Boolean);
+    }
+    // Fallback to sentence splitting for legacy content.
+    return splitIntoSentences(content);
+};
+
 const LessonView = () => {
     const { levelId } = useParams();
     const navigate = useNavigate();
@@ -103,7 +113,9 @@ const LessonView = () => {
         if (!lesson) return [];
 
         const nextTabs = [];
-        if (lesson.structured_content?.paragraphs) {
+        if (lesson.content) {
+            nextTabs.push(...buildLessonCards(lesson.content));
+        } else if (lesson.structured_content?.paragraphs) {
             lesson.structured_content.paragraphs.forEach((para) => {
                 nextTabs.push(...splitIntoSentences(para));
             });

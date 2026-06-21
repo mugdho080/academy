@@ -741,7 +741,12 @@ admin.post('/add_level_json', async (c) => {
         [
           levelId,
           String(lesson.lesson_title ?? lesson.title ?? 'Untitled Lesson'),
-          typeof lesson.lesson_body === 'string' ? lesson.lesson_body : JSON.stringify(lesson.lesson_body ?? lesson.content ?? ''),
+          // Support explicit lesson_cards array; join with delimiter for storage
+          (Array.isArray(lesson.lesson_cards)
+              ? lesson.lesson_cards.join('---CARD---')
+              : (typeof lesson.lesson_body === 'string'
+                  ? lesson.lesson_body
+                  : JSON.stringify(lesson.lesson_body ?? lesson.content ?? ''))),
           Number(lesson.lesson_number ?? lesson.order_index ?? lessons),
         ]
       )
