@@ -1,5 +1,5 @@
 import { Type } from '@google/genai';
-import { generateStructuredPandaResponse } from './gemini.js';
+import { generatePandaStructuredResponse } from './gemini.js';
 
 export async function generateResumeDraft(currentStep: string, answer: any, state: any) {
   const schema = {
@@ -25,10 +25,17 @@ Learner's previous answers: ${JSON.stringify(state.answers)}
 Learner's latest message: "${answer}"
 Output structured JSON containing your reply, the next question, quick replies, the next step name, and any updates to the draft resume.`;
 
-  const response = await generateStructuredPandaResponse(systemPrompt, `Learner says: ${answer}`, schema as any);
+  const res = await generatePandaStructuredResponse({
+    systemPrompt,
+    userMessage: `Learner says: ${answer}`,
+    schema
+  });
   
-  if (!response) {
+  if (!res.success) {
     return {
+      error: res.error,
+      message: res.message,
+      status: res.status,
       nextStep: currentStep,
       draftPatch: {},
       reply: "Oops, I got a bit confused! Could you tell me that again?",
@@ -37,11 +44,13 @@ Output structured JSON containing your reply, the next question, quick replies, 
     };
   }
 
+  const response = res.data!;
   return {
+    success: true,
     nextStep: response.current_step,
     draftPatch: response.draft_patch,
     reply: response.reply + (response.next_question ? ' ' + response.next_question : ''),
-    quickReplies: response.quick_replies,
+    quickReplies: response.quickReplies,
     isReady: response.is_ready_to_preview
   };
 }

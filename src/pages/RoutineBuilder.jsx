@@ -28,6 +28,16 @@ const RoutineBuilder = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, session?.draft_routine, loading, sending]);
 
+    const getErrorMessage = (err, defaultMsg) => {
+        if (err.response?.status === 401) return 'Please log in again so Panda can help you.';
+        if (err.response?.status === 404) return 'Panda Builder route is missing. Please check deployment.';
+        if (err.response?.status === 503 && err.response?.data?.error === 'AI_NOT_CONFIGURED') {
+            return 'Panda is not ready yet. Please ask an admin to check the AI setup.';
+        }
+        if (err.response?.status === 500) return 'Panda had trouble thinking. Please try again.';
+        return err.response?.data?.message || defaultMsg;
+    };
+
     const startSession = async () => {
         setLoading(true);
         setError('');
@@ -36,22 +46,16 @@ const RoutineBuilder = () => {
             setSession(res.data.session);
             
             // Add initial welcome message from Panda
-            if (res.data.session.current_step === 'welcome') {
-                setMessages([{
-                    id: Date.now(),
-                    sender: 'panda',
-                    text: "Hi! I am Panda. Let's build your daily routine! When do you usually wake up?"
-                }]);
-            } else {
-                setMessages([{
-                    id: Date.now(),
-                    sender: 'panda',
-                    text: "Welcome back! Let's continue building your routine."
-                }]);
-            }
+            setMessages([{
+                id: Date.now(),
+                sender: 'panda',
+                text: res.data.reply,
+                quickReplies: res.data.quickReplies,
+                isReady: res.data.is_ready_to_preview
+            }]);
         } catch (err) {
             console.error('Failed to start session', err);
-            setError('Could not connect to Panda. Please try again later.');
+            setError(getErrorMessage(err, 'Could not connect to Panda. Please try again later.'));
         } finally {
             setLoading(false);
         }
@@ -80,12 +84,12 @@ const RoutineBuilder = () => {
                 sender: 'panda',
                 text: res.data.reply,
                 quickReplies: res.data.quickReplies,
-                isReady: res.data.isReady
+                isReady: res.data.is_ready_to_preview
             }]);
 
         } catch (err) {
             console.error('Failed to send message', err);
-            setError('Panda is having trouble thinking. Please try again.');
+            setError(getErrorMessage(err, 'Panda had trouble thinking. Please try again.'));
         } finally {
             setSending(false);
         }

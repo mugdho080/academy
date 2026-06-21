@@ -3,7 +3,7 @@ import { query, queryOne, withTransaction } from '../db.js';
 import { requireAuth } from '../middleware.js';
 import type { JwtPayload } from '../middleware.js';
 import { Type } from '@google/genai';
-import { generateStructuredPandaResponse } from '../ai/gemini.js';
+import { generatePandaStructuredResponse } from '../ai/gemini.js';
 import { GamificationService } from '../services/GamificationService.js';
 
 const routineBuilder = new Hono();
@@ -62,10 +62,17 @@ Learner's previous answers: ${JSON.stringify(state.answers)}
 Learner's latest message: "${answer}"
 Output structured JSON containing your reply, the next question, quick replies, the next step name, and any updates to the draft routine (e.g. adding items with time_of_day, title, icon, etc).`;
 
-  const response = await generateStructuredPandaResponse(systemPrompt, `Learner says: ${answer}`, schema as any);
+  const res = await generatePandaStructuredResponse({
+    systemPrompt, 
+    userMessage: `Learner says: ${answer}`, 
+    schema: schema as any
+  });
   
-  if (!response) {
+  if (!res.success) {
     return {
+      error: res.error,
+      message: res.message,
+      status: res.status,
       nextStep: currentStep,
       draftPatch: {},
       reply: "Oops, I got a bit confused! Could you tell me that again?",
@@ -74,13 +81,16 @@ Output structured JSON containing your reply, the next question, quick replies, 
     };
   }
 
+  const response = res.data!;
   return {
+    success: true,
     nextStep: response.current_step,
     draftPatch: response.draft_patch,
     reply: response.reply + (response.next_question ? ' ' + response.next_question : ''),
-    quickReplies: response.quick_replies,
+    quickReplies: response.quickReplies,
     isReady: response.is_ready_to_preview
   };
+  
 }
 
 routineBuilder.post('/start', async (c) => {
@@ -90,7 +100,16 @@ routineBuilder.post('/start', async (c) => {
     session = { answers: {}, draft_routine: {}, current_step: 'welcome' };
     await upsertSession(uid, session);
   }
-  return c.json({ message: 'Routine builder session ready', session });
+  return c.json({ 
+    success: true,
+    session,
+    reply: "Hi! I'm Panda. I can help you build your daily routine.",
+    next_question: "Are you ready to begin?",
+    quickReplies: ["Yes, start", "What is a routine?"],
+    next_step: session.current_step,
+    draft: typeof session.draft_routine === 'string' ? JSON.parse(session.draft_routine) : session.draft_routine,
+    is_ready_to_preview: false
+  });
 });
 
 routineBuilder.post('/message', async (c) => {
@@ -109,6 +128,14 @@ routineBuilder.post('/message', async (c) => {
 
   const next = await generateRoutineDraft(state.current_step, answer, state);
   
+  if (!next.success && next.error) {
+    return c.json({
+      success: false,
+      error: next.error,
+      message: next.message || "Panda had trouble thinking. Please try again."
+    }, (next.status as any) || 500);
+  }
+  
   const newDraft = { ...state.draft_routine, ...next.draftPatch };
   const newAnswers = { ...state.answers, [state.current_step]: answer };
 
@@ -116,11 +143,12 @@ routineBuilder.post('/message', async (c) => {
   await upsertSession(uid, updatedSession);
 
   return c.json({ 
+    success: true,
     reply: next.reply, 
     next_step: next.nextStep, 
     quickReplies: next.quickReplies, 
     draft: newDraft,
-    isReady: next.isReady 
+    is_ready_to_preview: next.isReady 
   });
 });
 

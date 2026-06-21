@@ -138,6 +138,7 @@ app.route('/api/index.php/learner', learner)
 app.route('/api/index.php/admin', admin)
 app.route('/api/index.php/ai', ai)
 app.route('/api/learner/resume-builder', resumeBuilder)
+app.route('/api/learner/routine-builder', routineBuilder)
 app.route('/api/learner/gamification', gamification)
 app.route('/api/admin/users', resumeAdmin)
 

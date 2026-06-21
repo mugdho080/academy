@@ -49,7 +49,18 @@ resumeBuilder.post('/start', async (c) => {
     };
     await upsertSession(uid, session);
   }
-  return c.json({ message: 'Resume builder session ready', session });
+  
+  // Return the session AND an initial message if they are just starting
+  return c.json({ 
+    success: true,
+    session,
+    reply: "Hi! I'm Panda. I can help you build your resume.",
+    next_question: "Would you like to start?",
+    quickReplies: ["Yes, start", "What is a resume?"],
+    next_step: session.current_step,
+    draft: typeof session.draft_resume === 'string' ? JSON.parse(session.draft_resume) : session.draft_resume,
+    is_ready_to_preview: false
+  });
 });
 
 // 2. Send a message/answer to the current step
@@ -74,6 +85,14 @@ resumeBuilder.post('/message', async (c) => {
 
   const next = await generateResumeDraft(state.current_step, answer, state);
   
+  if (!next.success && next.error) {
+    return c.json({
+      success: false,
+      error: next.error,
+      message: next.message || "Panda had trouble thinking. Please try again."
+    }, (next.status as any) || 500);
+  }
+  
   const newDraft = { ...state.draft_resume, ...next.draftPatch };
   const newAnswers = { ...state.answers, [state.current_step]: answer };
 
@@ -85,11 +104,12 @@ resumeBuilder.post('/message', async (c) => {
   await upsertSession(uid, updatedSession);
 
   return c.json({ 
+    success: true,
     reply: next.reply, 
     next_step: next.nextStep, 
     quickReplies: next.quickReplies, 
     draft: newDraft,
-    isReady: next.isReady 
+    is_ready_to_preview: next.isReady 
   });
 });
 
