@@ -32,7 +32,7 @@ export async function generatePandaStructuredResponse<T>({
     const ai = new GoogleGenAI({ apiKey });
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: process.env.GEMINI_MODEL?.trim() || 'gemini-2.0-flash',
       contents: userMessage,
       config: {
         systemInstruction: systemPrompt,
@@ -75,6 +75,16 @@ export async function generatePandaStructuredResponse<T>({
     }
   } catch (err) {
     console.error('Gemini API Error:', err);
-    return { success: false, error: 'AI_REQUEST_FAILED', status: 500 };
+    const status = typeof (err as { status?: unknown }).status === 'number'
+      ? (err as { status: number }).status
+      : 500;
+    return {
+      success: false,
+      error: status === 429 ? 'AI_QUOTA_EXCEEDED' : 'AI_REQUEST_FAILED',
+      message: status === 429
+        ? 'Panda reached the AI service, but the current Gemini quota is exhausted. Please try again later or check billing/quota.'
+        : 'Panda had trouble reaching the AI service. Please try again.',
+      status,
+    };
   }
 }

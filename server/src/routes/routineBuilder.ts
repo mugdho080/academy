@@ -4,6 +4,7 @@ import { requireAuth } from '../middleware.js';
 import type { JwtPayload } from '../middleware.js';
 import { Type } from '@google/genai';
 import { generatePandaStructuredResponse } from '../ai/gemini.js';
+import { isRoutineReady, mergeRoutineDraft, normalizeRoutineDraft, normalizeRoutineStep } from '../ai/builderData.js';
 import { GamificationService } from '../services/GamificationService.js';
 
 const routineBuilder = new Hono();
@@ -11,6 +12,64 @@ routineBuilder.use('*', requireAuth);
 
 function userId(c: { get(k: string): unknown }): number {
   return Number((c.get('user') as JwtPayload).sub);
+}
+
+function parseJson(value: unknown) {
+  if (typeof value !== 'string') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+}
+
+function fallbackRoutineDraft(currentStep: string, answer: unknown, state: any) {
+  const text = String(answer ?? '');
+  const timeMatch = text.match(/\b([01]?\d|2[0-3])(?::([0-5]\d))?\s*(am|pm)?\b/i);
+  const time = timeMatch ? timeMatch[0].trim() : undefined;
+  const patch: Record<string, unknown> = {};
+  const step = normalizeRoutineStep(currentStep);
+
+  let nextStep = 'routine_type';
+  let reply = 'Great. What part of your day should this routine help with?';
+  let quickReplies = ['Morning', 'After school', 'Bedtime'];
+
+  if (step === 'welcome' || step === 'routine_type') {
+    patch.routine_type = /bed|night|sleep/i.test(text) ? 'bedtime' : /school|work/i.test(text) ? 'workday' : 'morning';
+    if (time) patch.wake_time = time;
+    patch.items = [
+      { time_of_day: time || '7:00am', title: 'Wake up', description: 'Start the day calmly.', order_index: 0 },
+      { time_of_day: '7:15am', title: 'Get ready', description: 'Wash, dress, and prepare what you need.', order_index: 1 },
+      { time_of_day: '7:45am', title: 'Breakfast', description: 'Eat and drink water before leaving.', order_index: 2 },
+    ];
+    nextStep = 'preview';
+    reply = 'I made a simple starter routine. You can save it now, or tell me one more activity to add.';
+    quickReplies = ['Save it', 'Add exercise', 'Add travel time'];
+  } else {
+    const existingItems = normalizeRoutineDraft(state.draft_routine).items || [];
+    patch.items = [
+      ...existingItems,
+      {
+        time_of_day: time,
+        title: text.trim() || 'New activity',
+        description: 'Added from your message.',
+        order_index: existingItems.length,
+      },
+    ];
+    nextStep = 'preview';
+    reply = 'I added that to your routine. You can save it when it looks right.';
+    quickReplies = ['Save it', 'Add another activity', 'Change time'];
+  }
+
+  const draft = mergeRoutineDraft(state.draft_routine, patch);
+  return {
+    success: true,
+    nextStep,
+    draftPatch: patch,
+    reply,
+    quickReplies,
+    isReady: isRoutineReady(draft, nextStep),
+  };
 }
 
 // Session helper functions
@@ -47,7 +106,10 @@ async function generateRoutineDraft(currentStep: string, answer: any, state: any
       next_question: { type: Type.STRING, description: "The next question Panda should ask, or null if ready." },
       quick_replies: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Suggested quick reply buttons." },
       current_step: { type: Type.STRING, description: "The internal state machine step (e.g. welcome, routine_type, wake_time, activity, preview)." },
-      draft_patch: { type: Type.OBJECT, description: "Any new fields to merge into the draft routine." },
+      draft_patch: {
+        type: Type.OBJECT,
+        description: "Fields to merge into the draft routine. Use only: routine_type, wake_time, bedtime, items. Each item should have time_of_day, title, description, icon, order_index."
+      },
       is_ready_to_preview: { type: Type.BOOLEAN, description: "True if all necessary questions are answered and the routine is ready." }
     },
     required: ["reply", "current_step", "quick_replies", "draft_patch", "is_ready_to_preview"]
@@ -56,6 +118,11 @@ async function generateRoutineDraft(currentStep: string, answer: any, state: any
   const systemPrompt = `You are Panda, a friendly Academy coach helping a learner build a daily routine.
 Ask one simple question at a time. Use short sentences. Offer quick replies. Produce valid JSON only.
 If the learner says 'I don't know', suggest a simple healthy routine.
+Use this draft shape:
+- routine_type: string
+- wake_time: string
+- bedtime: string
+- items: { time_of_day, title, description, icon, order_index }[]
 Current step: ${currentStep}.
 Current draft: ${JSON.stringify(state.draft_routine)}
 Learner's previous answers: ${JSON.stringify(state.answers)}
@@ -69,6 +136,10 @@ Output structured JSON containing your reply, the next question, quick replies, 
   });
   
   if (!res.success) {
+    if (res.error !== 'AI_NOT_CONFIGURED') {
+      return fallbackRoutineDraft(currentStep, answer, state);
+    }
+
     return {
       error: res.error,
       message: res.message,
@@ -84,7 +155,7 @@ Output structured JSON containing your reply, the next question, quick replies, 
   const response = res.data!;
   return {
     success: true,
-    nextStep: response.current_step,
+    nextStep: normalizeRoutineStep(response.current_step),
     draftPatch: response.draft_patch,
     reply: response.reply + (response.next_question ? ' ' + response.next_question : ''),
     quickReplies: response.quickReplies,
@@ -100,15 +171,21 @@ routineBuilder.post('/start', async (c) => {
     session = { answers: {}, draft_routine: {}, current_step: 'welcome' };
     await upsertSession(uid, session);
   }
+  const draft = normalizeRoutineDraft(parseJson((session as any).draft_routine));
+  const step = normalizeRoutineStep((session as any).current_step);
   return c.json({ 
     success: true,
-    session,
+    session: {
+      ...(session as any),
+      current_step: step,
+      draft_routine: draft,
+    },
     reply: "Hi! I'm Panda. I can help you build your daily routine.",
     next_question: "Are you ready to begin?",
     quickReplies: ["Yes, start", "What is a routine?"],
-    next_step: session.current_step,
-    draft: typeof session.draft_routine === 'string' ? JSON.parse(session.draft_routine) : session.draft_routine,
-    is_ready_to_preview: false
+    next_step: step,
+    draft,
+    is_ready_to_preview: isRoutineReady(draft, step)
   });
 });
 
@@ -119,11 +196,10 @@ routineBuilder.post('/message', async (c) => {
   const session = await getSession(uid) as any;
   if (!session) return c.json({ error: 'No active session' }, 400);
 
-  const parseJson = (val: any) => typeof val === 'string' ? JSON.parse(val) : val;
   const state = {
     answers: parseJson(session.answers) || {},
-    draft_routine: parseJson(session.draft_routine) || {},
-    current_step: session.current_step,
+    draft_routine: normalizeRoutineDraft(parseJson(session.draft_routine)),
+    current_step: normalizeRoutineStep(session.current_step),
   };
 
   const next = await generateRoutineDraft(state.current_step, answer, state);
@@ -136,19 +212,20 @@ routineBuilder.post('/message', async (c) => {
     }, (next.status as any) || 500);
   }
   
-  const newDraft = { ...state.draft_routine, ...next.draftPatch };
+  const nextStep = normalizeRoutineStep(next.nextStep);
+  const newDraft = mergeRoutineDraft(state.draft_routine, next.draftPatch);
   const newAnswers = { ...state.answers, [state.current_step]: answer };
 
-  const updatedSession = { answers: newAnswers, draft_routine: newDraft, current_step: next.nextStep };
+  const updatedSession = { answers: newAnswers, draft_routine: newDraft, current_step: nextStep };
   await upsertSession(uid, updatedSession);
 
   return c.json({ 
     success: true,
     reply: next.reply, 
-    next_step: next.nextStep, 
+    next_step: nextStep, 
     quickReplies: next.quickReplies, 
     draft: newDraft,
-    is_ready_to_preview: next.isReady 
+    is_ready_to_preview: Boolean(next.isReady || isRoutineReady(newDraft, nextStep))
   });
 });
 
@@ -156,11 +233,13 @@ routineBuilder.get('/session', async (c) => {
   const uid = userId(c);
   const session = await getSession(uid) as any;
   if (!session) return c.json({ error: 'No session' }, 404);
-  const parseJson = (val: any) => typeof val === 'string' ? JSON.parse(val) : val;
+  const draft = normalizeRoutineDraft(parseJson(session.draft_routine));
+  const step = normalizeRoutineStep(session.current_step);
   return c.json({ session: {
     answers: parseJson(session.answers) || {},
-    draft_routine: parseJson(session.draft_routine) || {},
-    current_step: session.current_step,
+    draft_routine: draft,
+    current_step: step,
+    is_ready_to_preview: isRoutineReady(draft, step),
   }});
 });
 
@@ -168,12 +247,13 @@ routineBuilder.post('/', async (c) => {
   const uid = userId(c);
   const body = await c.req.json().catch(() => ({})) as any;
   const { title, routine_data } = body;
-  if (!title || !routine_data) return c.json({ error: 'title and routine_data required' }, 400);
+  const normalizedRoutine = normalizeRoutineDraft(routine_data);
+  if (!title || !isRoutineReady(normalizedRoutine)) return c.json({ error: 'title and routine_data required' }, 400);
 
   try {
     const result = await withTransaction(async (client) => {
       const res = await client.query('INSERT INTO routines (user_id, title, routine_data) VALUES ($1,$2,$3) RETURNING id', [
-        uid, title, JSON.stringify(routine_data)
+        uid, title, JSON.stringify(normalizedRoutine)
       ]);
       return res.rows[0].id;
     });

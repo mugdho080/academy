@@ -59,19 +59,21 @@ export class GamificationService {
         }
       }
 
+      const badgeByEvent: Record<string, string> = {
+        lesson_completed: 'first_step',
+        quiz_completed: 'quiz_star',
+        resume_saved: 'resume_ready',
+        routine_saved: 'routine_hero',
+      };
+
       const unlockedBadges: string[] = [];
-      if (eventType === 'lesson_completed') {
-        const badge = await client.query('SELECT * FROM user_badges WHERE user_id = $1 AND badge_key = $2', [userId, 'first_step']);
+      const badgeKey = badgeByEvent[eventType];
+      if (badgeKey) {
+        const badge = await client.query('SELECT * FROM user_badges WHERE user_id = $1 AND badge_key = $2', [userId, badgeKey]);
         if (badge.rows.length === 0) {
-          await client.query('INSERT INTO user_badges (user_id, badge_key) VALUES ($1, $2)', [userId, 'first_step']);
-          unlockedBadges.push('first_step');
+          await client.query('INSERT INTO user_badges (user_id, badge_key, metadata) VALUES ($1, $2, $3)', [userId, badgeKey, JSON.stringify(metadata)]);
+          unlockedBadges.push(badgeKey);
         }
-      } else if (eventType === 'quiz_completed') {
-         const badge = await client.query('SELECT * FROM user_badges WHERE user_id = $1 AND badge_key = $2', [userId, 'quiz_star']);
-         if (badge.rows.length === 0) {
-           await client.query('INSERT INTO user_badges (user_id, badge_key) VALUES ($1, $2)', [userId, 'quiz_star']);
-           unlockedBadges.push('quiz_star');
-         }
       }
 
       return {

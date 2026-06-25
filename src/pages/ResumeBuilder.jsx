@@ -34,6 +34,9 @@ const ResumeBuilder = () => {
         if (err.response?.status === 503 && err.response?.data?.error === 'AI_NOT_CONFIGURED') {
             return 'Panda is not ready yet. Please ask an admin to check the AI setup.';
         }
+        if (err.response?.status === 429 || err.response?.data?.error === 'AI_QUOTA_EXCEEDED') {
+            return 'Panda reached the AI service, but the Gemini quota is exhausted. Please try again later.';
+        }
         if (err.response?.status === 500) return 'Panda had trouble thinking. Please try again.';
         return err.response?.data?.message || defaultMsg;
     };

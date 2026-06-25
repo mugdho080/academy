@@ -3,6 +3,7 @@ import { query, queryOne, withTransaction } from '../db.js';
 import { requireAuth } from '../middleware.js';
 import type { JwtPayload } from '../middleware.js';
 import { generateResumeDraft } from '../ai/resume.js';
+import { isResumeReady, mergeResumeDraft, normalizeResumeDraft, normalizeResumeStep } from '../ai/builderData.js';
 import { GamificationService } from '../services/GamificationService.js';
 
 const resumeBuilder = new Hono();
@@ -10,6 +11,15 @@ resumeBuilder.use('*', requireAuth);
 
 function userId(c: { get(k: string): unknown }): number {
   return Number((c.get('user') as JwtPayload).sub);
+}
+
+function parseJson(value: unknown) {
+  if (typeof value !== 'string') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
 }
 
 // Session helper functions (using jsonb columns in postgres)
@@ -51,15 +61,22 @@ resumeBuilder.post('/start', async (c) => {
       await upsertSession(uid, session);
     }
 
+    const draft = normalizeResumeDraft(parseJson(session.draft_resume));
+    const step = normalizeResumeStep(session.current_step);
+
     return c.json({
       success: true,
-      session,
+      session: {
+        ...session,
+        current_step: step,
+        draft_resume: draft,
+      },
       reply: "Hi! I'm Panda. I can help you build your resume.",
       next_question: "Would you like to start?",
       quickReplies: ["Yes, start", "What is a resume?"],
-      next_step: session.current_step,
-      draft: typeof session.draft_resume === 'string' ? JSON.parse(session.draft_resume) : session.draft_resume,
-      is_ready_to_preview: false
+      next_step: step,
+      draft,
+      is_ready_to_preview: isResumeReady(draft, step)
     });
   } catch (err) {
     console.error('[resume-builder /start]', err);
@@ -81,14 +98,10 @@ resumeBuilder.post('/message', async (c) => {
     return c.json({ error: 'No active session' }, 400);
   }
   
-  // postgres node driver parses jsonb automatically if column type is jsonb.
-  // but if it's text, we need JSON.parse
-  const parseJson = (val: any) => typeof val === 'string' ? JSON.parse(val) : val;
-
   const state = {
     answers: parseJson(session.answers) || {},
-    draft_resume: parseJson(session.draft_resume) || {},
-    current_step: session.current_step,
+    draft_resume: normalizeResumeDraft(parseJson(session.draft_resume)),
+    current_step: normalizeResumeStep(session.current_step),
   };
 
   const next = await generateResumeDraft(state.current_step, answer, state);
@@ -101,23 +114,24 @@ resumeBuilder.post('/message', async (c) => {
     }, (next.status as any) || 500);
   }
   
-  const newDraft = { ...state.draft_resume, ...next.draftPatch };
+  const nextStep = normalizeResumeStep(next.nextStep);
+  const newDraft = mergeResumeDraft(state.draft_resume, next.draftPatch);
   const newAnswers = { ...state.answers, [state.current_step]: answer };
 
   const updatedSession = {
     answers: newAnswers,
     draft_resume: newDraft,
-    current_step: next.nextStep,
+    current_step: nextStep,
   };
   await upsertSession(uid, updatedSession);
 
   return c.json({ 
     success: true,
     reply: next.reply, 
-    next_step: next.nextStep, 
+    next_step: nextStep, 
     quickReplies: next.quickReplies, 
     draft: newDraft,
-    is_ready_to_preview: next.isReady 
+    is_ready_to_preview: Boolean(next.isReady || isResumeReady(newDraft, nextStep))
   });
 });
 
@@ -127,11 +141,13 @@ resumeBuilder.get('/session', async (c) => {
   const session = await getSession(uid) as any;
   if (!session) return c.json({ error: 'No session' }, 404);
   
-  const parseJson = (val: any) => typeof val === 'string' ? JSON.parse(val) : val;
+  const draft = normalizeResumeDraft(parseJson(session.draft_resume));
+  const step = normalizeResumeStep(session.current_step);
   return c.json({ session: {
     answers: parseJson(session.answers) || {},
-    draft_resume: parseJson(session.draft_resume) || {},
-    current_step: session.current_step,
+    draft_resume: draft,
+    current_step: step,
+    is_ready_to_preview: isResumeReady(draft, step),
   }});
 });
 
@@ -140,15 +156,16 @@ resumeBuilder.post('/', async (c) => {
   const uid = userId(c);
   const body = await c.req.json().catch(() => ({})) as any;
   const { title, target_role, template_key, resume_data } = body;
+  const normalizedResume = normalizeResumeDraft(resume_data);
   
-  if (!title || !resume_data) {
+  if (!title || !isResumeReady(normalizedResume)) {
      return c.json({ error: 'title and resume_data required' }, 400);
   }
 
   try {
     const result = await withTransaction(async (client) => {
       const res = await client.query('INSERT INTO resumes (user_id, title, target_role, template_key, resume_data) VALUES ($1,$2,$3,$4,$5) RETURNING id', [
-        uid, title, target_role, template_key ?? 'simple', JSON.stringify(resume_data)
+        uid, title, target_role ?? normalizedResume.target_role ?? 'General', template_key ?? 'simple', JSON.stringify(normalizedResume)
       ]);
       return res.rows[0].id;
     });
